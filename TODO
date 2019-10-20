@@ -1,0 +1,15 @@
+
+Todo:
+  ✔ Heartbeat @done(19-10-18 15:04)
+  ✔ Receipt-Watcher @done(19-10-18 15:04)
+    We need a way to watch for receipts, namely the disconnect receipt. We should do this in a callback
+  ✔ Subscriptions @done(19-10-18 15:37)
+  ✔ Send @done(19-10-18 16:45)
+  ✔ Unit-Tests @done(19-10-20 00:51)
+    ☐ Handler
+      ☐ Test Heartbeat
+    ☐ Client
+      ☐ Already open or inactive connections
+    ✔ Parser @done(19-10-20 00:51)
+  ☐ Transactions
+  ☐ Ack/Nack

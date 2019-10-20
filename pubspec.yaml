@@ -1,0 +1,18 @@
+name: stomp_dart
+author: Tobias Kammerer <tobias@blackhorse-one.com>
+version: 0.1.0
+description: Dart STOMP client for easy messaging interoperability.
+environment:
+  sdk: '>=2.0.0 <3.0.0'
+
+dependencies:
+  meta: ^1.1.7
+  web_socket_channel:
+    git: https://github.com/KammererTob/web_socket_channel
+
+dev_dependencies:
+  test: ^1.9.2
+
+dependency_overrides:
+  web_socket_channel:
+    git: https://github.com/KammererTob/web_socket_channel
