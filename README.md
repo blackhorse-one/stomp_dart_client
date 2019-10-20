@@ -57,7 +57,9 @@ client.deactivate();
 ```
 
 ## StompConfig
-This table shows all available options in `the StompConfig`
+This table shows all available options in `StompConfig`
+
+
 | Option                                       | Description                                                                                                |
 |----------------------------------------------|------------------------------------------------------------------------------------------------------------|
 | url: String                                  | The url of the server you want connect to (required)                                                       |
