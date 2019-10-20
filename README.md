@@ -59,7 +59,7 @@ client.deactivate();
 ## StompConfig
 This table shows all available options in `the StompConfig`
 | Option                                       | Description                                                                                                |
-| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+|----------------------------------------------|------------------------------------------------------------------------------------------------------------|
 | url: String                                  | The url of the server you want connect to (required)                                                       |
 | reconnectDelay: int                          | The time in milliseconds between reconnect attempts. Set to 0 if you don't want to reconnect automatically |
 | heartbeatOutgoing: int                       | The time in milliseconds between outgoing heartbeat messages. Set to 0 to not send any heartbeats          |
