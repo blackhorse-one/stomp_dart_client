@@ -33,11 +33,13 @@ class StompClient {
     _handler?.dispose();
   }
 
-  void _connect() {
+  void _connect() async {
     if (this.connected) {
       this.config.onDebugMessage("[STOMP] Already connected. Nothing to do!");
       return;
     }
+
+    await config.beforeConnect();
 
     if (!this._isActive) {
       this.config.onDebugMessage('[STOMP] Client was marked as inactive. Skip!');

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 import 'package:stomp_dart/stomp.dart';
 import 'package:stomp_dart/stomp_frame.dart';
@@ -23,6 +25,11 @@ class StompConfig {
    * Headers to be passed when connecting to STOMP
    */
   final Map<String, dynamic> connectHeaders;
+  /**
+   * Asynchronous function to be executed before we connect 
+   * the socket
+   */
+  final Future<void> Function() beforeConnect;
   /**
    * Callback for when STOMP has successulfy connected
    */
@@ -60,12 +67,13 @@ class StompConfig {
    */
   final Function(String) onDebugMessage;
 
-  StompConfig({
+  const StompConfig({
     @required this.url,
     this.reconnectDelay = 5000,
     this.heartbeatIncoming = 5000,
     this.heartbeatOutgoing = 5000,
     this.connectHeaders = null,
+    this.beforeConnect = _noOpFuture,
     this.onConnect = _noOp, 
     this.onStompError = _noOp, 
     this.onDisconnect = _noOp, 
@@ -83,6 +91,7 @@ class StompConfig {
     int heartbeatIncoming,
     int heartbeatOutgoing,
     Map<String, dynamic> connectHeaders,
+    Future<void> Function() beforeConnect,
     Function(StompClient, StompFrame) onConnect,
     Function(StompFrame) onStompError,
     Function(StompFrame) onDisconnect,
@@ -108,4 +117,5 @@ class StompConfig {
   );
 
   static _noOp([_, __]) => null;
+  static Future<dynamic> _noOpFuture() => null;
 }

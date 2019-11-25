@@ -1,6 +1,6 @@
 name: stomp_dart
 author: Tobias Kammerer <tobias@blackhorse-one.com>
-version: 0.1.1
+version: 0.1.2
 description: Dart STOMP client for easy messaging interoperability.
 environment:
   sdk: '>=2.0.0 <3.0.0'
