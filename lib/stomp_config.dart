@@ -20,6 +20,10 @@ class StompConfig {
    */
   final int heartbeatIncoming;
   /**
+   * Headers to be passed when connecting to STOMP
+   */
+  final Map<String, dynamic> connectHeaders;
+  /**
    * Callback for when STOMP has successulfy connected
    */
   final Function(StompClient, StompFrame) onConnect;
@@ -58,6 +62,10 @@ class StompConfig {
 
   StompConfig({
     @required this.url,
+    this.reconnectDelay = 5000,
+    this.heartbeatIncoming = 5000,
+    this.heartbeatOutgoing = 5000,
+    this.connectHeaders = null,
     this.onConnect = _noOp, 
     this.onStompError = _noOp, 
     this.onDisconnect = _noOp, 
@@ -67,13 +75,14 @@ class StompConfig {
     this.onWebSocketError = _noOp, 
     this.onWebSocketDone = _noOp,
     this.onDebugMessage = _noOp,
-    this.reconnectDelay = 5000,
-    this.heartbeatIncoming = 5000,
-    this.heartbeatOutgoing = 5000
   });
 
   StompConfig copyWith({
     String url,
+    int reconnectDelay,
+    int heartbeatIncoming,
+    int heartbeatOutgoing,
+    Map<String, dynamic> connectHeaders,
     Function(StompClient, StompFrame) onConnect,
     Function(StompFrame) onStompError,
     Function(StompFrame) onDisconnect,
@@ -84,6 +93,10 @@ class StompConfig {
     Function() onWebSocketDone
   }) => StompConfig(
     url: url ?? this.url,
+    reconnectDelay: reconnectDelay ?? this.reconnectDelay,
+    heartbeatIncoming: heartbeatIncoming ?? this.heartbeatIncoming,
+    heartbeatOutgoing: heartbeatOutgoing ?? this.heartbeatOutgoing,
+    connectHeaders: connectHeaders ?? this.connectHeaders,
     onConnect: onConnect ?? this.onConnect,
     onStompError: onStompError ?? this.onStompError,
     onDisconnect: onDisconnect ?? this.onDisconnect,

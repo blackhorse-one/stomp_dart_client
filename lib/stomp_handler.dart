@@ -86,7 +86,7 @@ class StompHandler {
   }
 
   void _connectToStomp() {
-    Map<String, String> connectHeaders = {};
+    Map<String, String> connectHeaders = config.connectHeaders ?? {};
     connectHeaders['accept-version'] = ['1.0', '1.1', '1.2'].join(',');
     connectHeaders['heart-beat'] = [this.config.heartbeatOutgoing, this.config.heartbeatIncoming].join(',');
 
