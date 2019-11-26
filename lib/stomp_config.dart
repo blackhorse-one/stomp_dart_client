@@ -24,7 +24,7 @@ class StompConfig {
   /**
    * Headers to be passed when connecting to STOMP
    */
-  final Map<String, dynamic> connectHeaders;
+  final Map<String, String> connectHeaders;
   /**
    * Asynchronous function to be executed before we connect 
    * the socket
