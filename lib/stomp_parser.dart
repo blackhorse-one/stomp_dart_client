@@ -224,7 +224,7 @@ class StompParser {
         binaryList.setRange(0, serializedHeaders.codeUnits.length, serializedHeaders.codeUnits);
         binaryList.setRange(serializedHeaders.codeUnits.length, serializedHeaders.codeUnits.length + frame.binaryBody.length, frame.binaryBody);
         binaryList[serializedHeaders.codeUnits.length + frame.binaryBody.length] = NULL;
-        return binaryList.buffer;
+        return binaryList;
       } else {
         String serializedFrame = serializedHeaders;
         serializedFrame += frame.body ?? '';
