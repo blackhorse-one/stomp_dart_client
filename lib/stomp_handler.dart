@@ -116,7 +116,7 @@ class StompHandler {
 
     dynamic serializedFrame = _parser.serializeFrame(frame);
 
-    this.config.onDebugMessage(">>> " + serializedFrame);
+    this.config.onDebugMessage(">>> " + serializedFrame.toString());
 
     channel.sink.add(serializedFrame);
   }

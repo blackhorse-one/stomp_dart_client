@@ -129,14 +129,14 @@ void main() {
       final parser = StompParser(null);
       parser.escapeHeaders = true;
 
-      final serializedFrame = parser.serializeFrame(frame);
-      expect(serializedFrame, Uint8List.fromList(stringFrame.codeUnits));
+      final ByteBuffer serializedFrame = parser.serializeFrame(frame);
+      expect(serializedFrame.asUint8List(), Uint8List.fromList(stringFrame.codeUnits));
 
       final emptyStringFrame = 'SEND\ndesti\\nnation:/path/to/foo\n\n\x00';
       final emptyBodyFrame = StompFrame(command: 'SEND', binaryBody: Uint8List(0), headers: {'desti\nnation': '/path/to/foo'});
-      final emptySerializedFrame = parser.serializeFrame(emptyBodyFrame);
+      final ByteBuffer emptySerializedFrame = parser.serializeFrame(emptyBodyFrame);
 
-      expect(emptySerializedFrame, Uint8List.fromList(emptyStringFrame.codeUnits));
+      expect(emptySerializedFrame.asUint8List(), Uint8List.fromList(emptyStringFrame.codeUnits));
     });
 
     test('can parse frame with empty header', () {
