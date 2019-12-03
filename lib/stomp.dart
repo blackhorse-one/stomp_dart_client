@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:stomp_dart/stomp_config.dart';
@@ -68,11 +69,11 @@ class StompClient {
     return _handler.subscribe(destination: destination, callback: callback, headers: headers);
   }
 
-  void send({@required String destination, @required String body, Map<String, String> headers}) {
+  void send({@required String destination, String body, Uint8List binaryBody, Map<String, String> headers}) {
     if (!_isActive || !connected) {
       throw new BadStateException("Cannot send while not connected or inactive");
     }
-    _handler.send(destination: destination, body: body, headers: headers);
+    _handler.send(destination: destination, body: body, binaryBody: binaryBody, headers: headers);
   }
 
   void _scheduleReconnect() {
