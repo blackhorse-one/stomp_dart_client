@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:stomp_dart/stomp_frame.dart';
 import 'package:stomp_dart/stomp_parser.dart';
 import 'package:test/test.dart';
@@ -99,26 +101,42 @@ void main() {
     });
 
     test('correctly serializes a stomp frame unescaped', () {
-      final stringFrame = 'SEND\ndestination:/path/to/foo\ncontent-type:text/plain\n\nThis is a body\x00';
+      final stringFrame = 'SEND\ndestination:/path/to/foo\ncontent-type:text/plain\ncontent-length:14\n\nThis is a body\x00';
       final frame = StompFrame(command: 'SEND', body: 'This is a body', headers: {'destination': '/path/to/foo', 'content-type': 'text/plain'});
 
       final parser = StompParser(null);
 
-      final serializedFrame = parser.serializeFrameToString(frame);
+      final serializedFrame = parser.serializeFrame(frame);
 
       expect(serializedFrame, stringFrame);
     });
 
     test('correctly serializes a stomp frame escaped', () {
-      final stringFrame = 'SEND\ndesti\\nnation:/path/to/foo\ncontent-type:te\\nxt/plain\n\nThis is a body\x00';
+      final stringFrame = 'SEND\ndesti\\nnation:/path/to/foo\ncontent-type:te\\nxt/plain\ncontent-length:14\n\nThis is a body\x00';
       final frame = StompFrame(command: 'SEND', body: 'This is a body', headers: {'desti\nnation': '/path/to/foo', 'content-type': 'te\nxt/plain'});
 
       final parser = StompParser(null);
       parser.escapeHeaders = true;
 
-      final serializedFrame = parser.serializeFrameToString(frame);
+      final serializedFrame = parser.serializeFrame(frame);
 
       expect(serializedFrame, stringFrame);
+    });
+
+    test('correctly serializes binary frame', () {
+      final stringFrame = 'SEND\ndesti\\nnation:/path/to/foo\ncontent-length:14\n\nThis is a body\x00';
+      final frame = StompFrame(command: 'SEND', binaryBody: Uint8List.fromList("This is a body".codeUnits), headers: {'desti\nnation': '/path/to/foo'});
+      final parser = StompParser(null);
+      parser.escapeHeaders = true;
+
+      final serializedFrame = parser.serializeFrame(frame);
+      expect(serializedFrame, Uint8List.fromList(stringFrame.codeUnits));
+
+      final emptyStringFrame = 'SEND\ndesti\\nnation:/path/to/foo\n\n\x00';
+      final emptyBodyFrame = StompFrame(command: 'SEND', binaryBody: Uint8List(0), headers: {'desti\nnation': '/path/to/foo'});
+      final emptySerializedFrame = parser.serializeFrame(emptyBodyFrame);
+
+      expect(emptySerializedFrame, Uint8List.fromList(emptyStringFrame.codeUnits));
     });
 
     test('can parse frame with empty header', () {

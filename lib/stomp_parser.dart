@@ -216,19 +216,40 @@ class StompParser {
    * also fine with the spec
    * https://stomp.github.io/stomp-specification-1.2.html#Repeated_Header_Entries
    */
-  String serializeFrameToString(StompFrame frame) {
-      String serializedFrame = frame.command;
-      Map<String, String> headers = frame.headers ?? {};
-      if (escapeHeaders) {
-        headers = _escapeHeaders(headers);
+  dynamic serializeFrame(StompFrame frame) {
+      String serializedHeaders = serializeCmdAndHeaders(frame) ?? '';
+
+      if (frame.binaryBody != null) {
+        Uint8List binaryList = Uint8List(serializedHeaders.codeUnits.length + 1 + frame.binaryBody.length);
+        binaryList.setRange(0, serializedHeaders.codeUnits.length, serializedHeaders.codeUnits);
+        binaryList.setRange(serializedHeaders.codeUnits.length, serializedHeaders.codeUnits.length + frame.binaryBody.length, frame.binaryBody);
+        binaryList[serializedHeaders.codeUnits.length + frame.binaryBody.length] = NULL;
+        return binaryList;
+      } else {
+        String serializedFrame = serializedHeaders;
+        serializedFrame += frame.body ?? '';
+        serializedFrame += String.fromCharCode(NULL);
+        return serializedFrame;
       }
-      headers.forEach((key, value) {
-        serializedFrame += String.fromCharCode(LF) + key + ':' + value;
-      });
-      serializedFrame += String.fromCharCode(LF) + String.fromCharCode(LF);
-      serializedFrame += frame.body ?? '';
-      serializedFrame += String.fromCharCode(NULL);
-      return serializedFrame;
+  }
+
+  String serializeCmdAndHeaders(StompFrame frame) {
+    String serializedFrame = frame.command;
+    Map<String, String> headers = frame.headers ?? {};
+    int bodyLength = (frame.binaryBody?.length ?? frame.body?.codeUnits?.length ?? 0);
+    if (bodyLength > 0) {
+      headers['content-length'] = bodyLength.toString();
+    }
+    if (escapeHeaders) {
+      headers = _escapeHeaders(headers);
+    }
+    headers.forEach((key, value) {
+      serializedFrame += String.fromCharCode(LF) + key + ':' + value;
+    });
+
+    serializedFrame += String.fromCharCode(LF) + String.fromCharCode(LF);
+
+    return serializedFrame;
   }
 
   void _initState() {

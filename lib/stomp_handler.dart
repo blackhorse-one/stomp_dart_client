@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:stomp_dart/stomp_config.dart';
@@ -75,10 +76,10 @@ class StompHandler {
     };
   }
 
-  void send({@required String destination, @required String body, Map<String, String> headers}) {
+  void send({@required String destination, String body, Uint8List binaryBody, Map<String, String> headers}) {
     headers = headers ?? {};
     headers['destination'] = destination;
-    _transmit(command: 'SEND', body: body, headers: headers);
+    _transmit(command: 'SEND', body: body, binaryBody: binaryBody, headers: headers);
   }
 
   void watchForReceipt(String receiptId, Function(StompFrame) callback) {
@@ -105,14 +106,15 @@ class StompHandler {
     this._transmit(command: 'DISCONNECT', headers: disconnectHeaders);
   }
 
-  void _transmit({String command, Map<String, String> headers, String body}) {
+  void _transmit({String command, Map<String, String> headers, String body, Uint8List binaryBody}) {
     final StompFrame frame = StompFrame(
       command: command,
       headers: headers,
       body: body,
+      binaryBody: binaryBody
     );
 
-    String serializedFrame = _parser.serializeFrameToString(frame);
+    dynamic serializedFrame = _parser.serializeFrame(frame);
 
     this.config.onDebugMessage(">>> " + serializedFrame);
 
