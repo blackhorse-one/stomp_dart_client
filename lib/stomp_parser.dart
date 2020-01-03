@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:stomp_dart/stomp_frame.dart';
@@ -236,7 +237,12 @@ class StompParser {
   String serializeCmdAndHeaders(StompFrame frame) {
     String serializedFrame = frame.command;
     Map<String, String> headers = frame.headers ?? {};
-    int bodyLength = (frame.binaryBody?.length ?? frame.body?.codeUnits?.length ?? 0);
+    int bodyLength = 0;
+    if (frame.binaryBody != null) {
+      bodyLength = frame.binaryBody.length;
+    } else if (frame.body != null) {
+      bodyLength = utf8.encode(frame.body).length;
+    }
     if (bodyLength > 0) {
       headers['content-length'] = bodyLength.toString();
     }
