@@ -49,7 +49,11 @@ class StompClient {
 
     _handler = StompHandler(config: this.config.copyWith(
       onConnect: (_, frame) {
-        this.config.onConnect(this, frame); // Inject the client here.
+        if (!_isActive) {
+          this.config.onDebugMessage('[STOMP] Client connected while being deactivated. Will disconnected');
+          _handler?.dispose();
+        }
+        this.config.onConnect(this, frame);
       },
       onWebSocketDone: () {
         this.config.onWebSocketDone();
@@ -63,16 +67,10 @@ class StompClient {
   }
 
   Function({Map<String, String> unsubscribeHeaders}) subscribe({@required String destination, @required Function(StompFrame) callback, Map<String, String> headers}) {
-    if (!_isActive || !connected) {
-      throw new BadStateException("Cannot subscribe while not connected or inactive");
-    }
     return _handler.subscribe(destination: destination, callback: callback, headers: headers);
   }
 
   void send({@required String destination, String body, Uint8List binaryBody, Map<String, String> headers}) {
-    if (!_isActive || !connected) {
-      throw new BadStateException("Cannot send while not connected or inactive");
-    }
     _handler.send(destination: destination, body: body, binaryBody: binaryBody, headers: headers);
   }
 
