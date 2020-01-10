@@ -36,7 +36,7 @@ class StompParser {
   void parseData(dynamic data) {
     Uint8List byteList;
     if (data is String) {
-      byteList = Uint8List.fromList(data.codeUnits);
+      byteList = Uint8List.fromList(utf8.encode(data));
     } else if (data is List<int>) {
       byteList = Uint8List.fromList(data);
     } else {
@@ -159,7 +159,7 @@ class StompParser {
   }
 
   String _consumeTokenAsString() {
-    String result = String.fromCharCodes(_currentToken);
+    String result = utf8.decode(_currentToken);
     _currentToken = [];
     return result;
   }

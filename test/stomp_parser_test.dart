@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:stomp_dart/stomp_frame.dart';
@@ -129,14 +130,14 @@ void main() {
       final parser = StompParser(null);
       parser.escapeHeaders = true;
 
-      final ByteBuffer serializedFrame = parser.serializeFrame(frame);
-      expect(serializedFrame.asUint8List(), Uint8List.fromList(stringFrame.codeUnits));
+      final Uint8List serializedFrame = parser.serializeFrame(frame);
+      expect(serializedFrame, Uint8List.fromList(stringFrame.codeUnits));
 
       final emptyStringFrame = 'SEND\ndesti\\nnation:/path/to/foo\n\n\x00';
       final emptyBodyFrame = StompFrame(command: 'SEND', binaryBody: Uint8List(0), headers: {'desti\nnation': '/path/to/foo'});
-      final ByteBuffer emptySerializedFrame = parser.serializeFrame(emptyBodyFrame);
+      final Uint8List emptySerializedFrame = parser.serializeFrame(emptyBodyFrame);
 
-      expect(emptySerializedFrame.asUint8List(), Uint8List.fromList(emptyStringFrame.codeUnits));
+      expect(emptySerializedFrame, Uint8List.fromList(emptyStringFrame.codeUnits));
     });
 
     test('can parse frame with empty header', () {
@@ -276,6 +277,59 @@ void main() {
       final parser = StompParser(onFrame);
 
       parser.parseData(msg + msg2);
+    });
+
+    test("can serialize unicode special characters", () {
+      final stringFrame = 'SEND\ndesti\\nnation:/path/to/foo\ncontent-length:14\n\n´👌👻¡Â\x00';
+      final frame = StompFrame(command: 'SEND', body: "´👌👻¡Â", headers: {'desti\nnation': '/path/to/foo'});
+      final parser = StompParser(null);
+      parser.escapeHeaders = true;
+
+      String serializedFrame = parser.serializeFrame(frame);
+
+      expect(serializedFrame, stringFrame);
+      expect(utf8.encode(serializedFrame), utf8.encode(stringFrame));
+    });
+
+    test("can deserialize unicode special characters", () {
+      final msg = "MESSAGE\ncontent-length:23\n\n{\"a\": \"´👌👻¡Â\"}\x00";
+      final msg2 = "MESSAGE\ncontent-length:18\n\n{\"a\": \"Piaffe´s\"}\x00";
+
+      var n = 0;
+      var callback = expectAsync1((frame) {
+        if (n == 0) {
+          expect(frame.command, 'MESSAGE');
+          expect(frame.headers.length, 1);
+          expect(frame.headers.containsKey('content-length'), isTrue);
+          expect(frame.headers['content-length'], "23");
+          expect(frame.body, "{\"a\": \"´👌👻¡Â\"}");
+          expect(utf8.encode(frame.body), [123, 34, 97, 34, 58, 32, 34, 194, 180, 240, 
+            159, 145, 140 ,240, 159, 145, 187, 194, 161, 195, 130, 34, 125]);
+
+          Map<String, dynamic> jsonMap = json.decode(frame.body);
+          expect(jsonMap.length, 1);
+          expect(jsonMap["a"], "´👌👻¡Â");
+        } else {
+          expect(frame.command, 'MESSAGE');
+          expect(frame.headers.length, 1);
+          expect(frame.headers.containsKey('content-length'), isTrue);
+          expect(frame.headers['content-length'], "18");
+          expect(frame.body, "{\"a\": \"Piaffe´s\"}");
+          
+          expect(utf8.encode(frame.body), [123, 34, 97, 34, 58, 32, 34, 80, 105, 97, 102, 
+            102, 101, 194, 180, 115, 34, 125]);
+            
+          Map<String, dynamic> jsonMap = json.decode(frame.body);
+          expect(jsonMap.length, 1);
+          expect(jsonMap["a"], "Piaffe´s");
+        }
+        n++;
+      }, count: 2);
+
+      final parser = StompParser(callback);
+
+      parser.parseData(msg);
+      parser.parseData(msg2);
     });
   });
 }
