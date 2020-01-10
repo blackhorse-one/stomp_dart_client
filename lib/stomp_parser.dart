@@ -153,9 +153,12 @@ class StompParser {
     if (escapeHeaders) {
       _unescapeResultHeaders();
     }
-    onStompFrame(StompFrame(command: _resultCommand, headers: _resultHeaders, body: _resultBody));
 
-    _initState();
+    try {
+      onStompFrame(StompFrame(command: _resultCommand, headers: _resultHeaders, body: _resultBody));
+    } finally {
+      _initState();
+    }
   }
 
   String _consumeTokenAsString() {
