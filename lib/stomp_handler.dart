@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -37,9 +38,11 @@ class StompHandler {
   get connected => this._connected;
 
   void start() {
-    this.channel = IOWebSocketChannel.connect(config.url, timeout: Duration(milliseconds: 2000))
-                      ..stream.listen(_onData, onError: _onError, onDone: _onDone);
-    this.channel.ready.then((_) {
+    Future<WebSocket> websocket = WebSocket.connect(config.url);
+    websocket.timeout(Duration(milliseconds: 2000));
+    websocket.then((socket) {
+      this.channel = IOWebSocketChannel(socket)
+                  ..stream.listen(_onData, onError: _onError, onDone: _onDone);
       _connectToStomp();
     });
   }

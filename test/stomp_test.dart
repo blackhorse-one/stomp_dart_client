@@ -26,11 +26,9 @@ void main() {
       await server?.close();
     });
     test('should not be connected on creation', () {
-      StompClient client = StompClient(config: null);
 
+      StompClient client = StompClient(config: null);
       expect(client.connected, false);
-      expect(() => client.subscribe(destination: '', callback: (_) => {}), throwsA(TypeMatcher<BadStateException>()));
-      expect(() => client.send(destination: '', body: ''), throwsA(TypeMatcher<BadStateException>()));
     });
 
     test('schedules reconnect on unexpected disconnect', () async {
