@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:stomp_dart/stomp_frame.dart';
+import 'package:stomp_dart_client/stomp_frame.dart';
 
-/**
- * This Parser is heavily based on the excellent recursive descent parser found here
- * https://github.com/stomp-js/stompjs/blob/master/src/parser.ts
- * Credit: https://github.com/kum-deepak
- */
+///
+/// This Parser is heavily based on the excellent recursive descent parser found here
+/// https://github.com/stomp-js/stompjs/blob/master/src/parser.ts
+/// Credit: https://github.com/kum-deepak
+///
 class StompParser {
   String _resultCommand;
   Map<String, String> _resultHeaders;
@@ -30,7 +30,7 @@ class StompParser {
   bool escapeHeaders = false;
 
   StompParser(this.onStompFrame, [this.onPingFrame]) {
-    this._initState();
+    _initState();
   }
 
   void parseData(dynamic data) {
@@ -40,7 +40,7 @@ class StompParser {
     } else if (data is List<int>) {
       byteList = Uint8List.fromList(data);
     } else {
-      throw new UnsupportedError("Input data type unsupported");
+      throw UnsupportedError('Input data type unsupported');
     }
 
     for (var i = 0; i < byteList.length; i++) {
@@ -49,13 +49,16 @@ class StompParser {
   }
 
   void _collectFrame(int byte) {
-    if (byte == NULL) { // Ignore
+    if (byte == NULL) {
+      // Ignore
       return;
     }
-    if (byte == CR) { // Ignore CR
+    if (byte == CR) {
+      // Ignore CR
       return;
     }
-    if (byte == LF) { // Incoming Ping
+    if (byte == LF) {
+      // Incoming Ping
       this.onPingFrame != null ? this.onPingFrame() : null;
       return;
     }
@@ -65,7 +68,8 @@ class StompParser {
   }
 
   void _collectCommand(int byte) {
-    if (byte == CR) { // Ignore CR
+    if (byte == CR) {
+      // Ignore CR
       return;
     }
     if (byte == LF) {
@@ -78,7 +82,8 @@ class StompParser {
   }
 
   void _collectHeaders(int byte) {
-    if (byte == CR) { // Ignore CR
+    if (byte == CR) {
+      // Ignore CR
       return;
     }
     if (byte == LF) {
@@ -101,7 +106,8 @@ class StompParser {
   }
 
   void _collectHeaderValue(int byte) {
-    if (byte == CR) { // Ignore CR
+    if (byte == CR) {
+      // Ignore CR
       return;
     }
     if (byte == LF) {
@@ -136,7 +142,8 @@ class StompParser {
     if (_resultHeaders.containsKey('content-length')) {
       _bodyBytesRemaining = int.tryParse(_resultHeaders['content-length']);
       if (_bodyBytesRemaining == null) {
-        print('[STOMP] Unable to parse content-length although it was present. Using fallback');
+        print(
+            '[STOMP] Unable to parse content-length although it was present. Using fallback');
         _parseByte = _collectTerminatedBody;
       } else {
         _parseByte = _collectFixedSizeBody;
@@ -146,7 +153,6 @@ class StompParser {
     }
   }
 
-  
   void _consumeBody() {
     _resultBody = _consumeTokenAsString();
 
@@ -155,7 +161,8 @@ class StompParser {
     }
 
     try {
-      onStompFrame(StompFrame(command: _resultCommand, headers: _resultHeaders, body: _resultBody));
+      onStompFrame(StompFrame(
+          command: _resultCommand, headers: _resultHeaders, body: _resultBody));
     } finally {
       _initState();
     }
@@ -188,10 +195,10 @@ class StompParser {
 
   String _unescapeString(String input) {
     return input
-      .replaceAll(RegExp(r'\\n'), '\n')
-      .replaceAll(RegExp(r'\\r'), '\r')
-      .replaceAll(RegExp(r'\\c'), ':')
-      .replaceAll(RegExp(r'\\\\'), '\\');
+        .replaceAll(RegExp(r'\\n'), '\n')
+        .replaceAll(RegExp(r'\\r'), '\r')
+        .replaceAll(RegExp(r'\\c'), ':')
+        .replaceAll(RegExp(r'\\\\'), '\\');
   }
 
   /**
@@ -200,10 +207,10 @@ class StompParser {
    */
   String _escapeString(String input) {
     return input
-      .replaceAll(RegExp(r'\\'), '\\\\')
-      .replaceAll(RegExp(r'\n'), '\\n')
-      .replaceAll(RegExp(r':'), '\\c')
-      .replaceAll(RegExp(r'\r'), '\\r');
+        .replaceAll(RegExp(r'\\'), '\\\\')
+        .replaceAll(RegExp(r'\n'), '\\n')
+        .replaceAll(RegExp(r':'), '\\c')
+        .replaceAll(RegExp(r'\r'), '\\r');
   }
 
   Map<String, String> _escapeHeaders(Map<String, String> headers) {
@@ -221,20 +228,26 @@ class StompParser {
    * https://stomp.github.io/stomp-specification-1.2.html#Repeated_Header_Entries
    */
   dynamic serializeFrame(StompFrame frame) {
-      String serializedHeaders = serializeCmdAndHeaders(frame) ?? '';
+    String serializedHeaders = serializeCmdAndHeaders(frame) ?? '';
 
-      if (frame.binaryBody != null) {
-        Uint8List binaryList = Uint8List(serializedHeaders.codeUnits.length + 1 + frame.binaryBody.length);
-        binaryList.setRange(0, serializedHeaders.codeUnits.length, serializedHeaders.codeUnits);
-        binaryList.setRange(serializedHeaders.codeUnits.length, serializedHeaders.codeUnits.length + frame.binaryBody.length, frame.binaryBody);
-        binaryList[serializedHeaders.codeUnits.length + frame.binaryBody.length] = NULL;
-        return binaryList;
-      } else {
-        String serializedFrame = serializedHeaders;
-        serializedFrame += frame.body ?? '';
-        serializedFrame += String.fromCharCode(NULL);
-        return serializedFrame;
-      }
+    if (frame.binaryBody != null) {
+      Uint8List binaryList = Uint8List(
+          serializedHeaders.codeUnits.length + 1 + frame.binaryBody.length);
+      binaryList.setRange(
+          0, serializedHeaders.codeUnits.length, serializedHeaders.codeUnits);
+      binaryList.setRange(
+          serializedHeaders.codeUnits.length,
+          serializedHeaders.codeUnits.length + frame.binaryBody.length,
+          frame.binaryBody);
+      binaryList[serializedHeaders.codeUnits.length + frame.binaryBody.length] =
+          NULL;
+      return binaryList;
+    } else {
+      String serializedFrame = serializedHeaders;
+      serializedFrame += frame.body ?? '';
+      serializedFrame += String.fromCharCode(NULL);
+      return serializedFrame;
+    }
   }
 
   String serializeCmdAndHeaders(StompFrame frame) {

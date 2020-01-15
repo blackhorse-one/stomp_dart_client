@@ -8,5 +8,6 @@ class StompFrame {
   final String body;
   final Uint8List binaryBody;
 
-  StompFrame({@required this.command, this.headers, this.body, this.binaryBody});
+  StompFrame(
+      {@required this.command, this.headers, this.body, this.binaryBody});
 }

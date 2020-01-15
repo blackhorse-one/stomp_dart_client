@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
-import 'package:stomp_dart/stomp_config.dart';
-import 'package:stomp_dart/stomp_frame.dart';
-import 'package:stomp_dart/stomp_handler.dart';
+import 'package:stomp_dart_client/stomp_config.dart';
+import 'package:stomp_dart_client/stomp_frame.dart';
+import 'package:stomp_dart_client/stomp_handler.dart';
 
 class BadStateException implements Exception {
   final String cause;
@@ -12,7 +12,7 @@ class BadStateException implements Exception {
 }
 
 class StompClient {
-  final StompConfig config; 
+  final StompConfig config;
 
   StompHandler _handler;
   bool _isActive = false;
@@ -20,11 +20,11 @@ class StompClient {
 
   StompClient({@required this.config});
 
-  get connected => (_handler != null) && _handler.connected;
+  bool get connected => (_handler != null) && _handler.connected;
 
   void activate() {
     _isActive = true;
-    
+
     _connect();
   }
 
@@ -35,50 +35,62 @@ class StompClient {
   }
 
   void _connect() async {
-    if (this.connected) {
-      this.config.onDebugMessage("[STOMP] Already connected. Nothing to do!");
+    if (connected) {
+      config.onDebugMessage('[STOMP] Already connected. Nothing to do!');
       return;
     }
 
     await config.beforeConnect();
 
-    if (!this._isActive) {
-      this.config.onDebugMessage('[STOMP] Client was marked as inactive. Skip!');
+    if (!_isActive) {
+      config.onDebugMessage('[STOMP] Client was marked as inactive. Skip!');
       return;
     }
 
-    _handler = StompHandler(config: this.config.copyWith(
-      onConnect: (_, frame) {
-        if (!_isActive) {
-          this.config.onDebugMessage('[STOMP] Client connected while being deactivated. Will disconnected');
-          _handler?.dispose();
-        }
-        this.config.onConnect(this, frame);
-      },
-      onWebSocketDone: () {
-        this.config.onWebSocketDone();
-
-        if (this._isActive) {
-          _scheduleReconnect();
-        }
+    _handler = StompHandler(
+        config: config.copyWith(onConnect: (_, frame) {
+      if (!_isActive) {
+        config.onDebugMessage(
+            '[STOMP] Client connected while being deactivated. Will disconnected');
+        _handler?.dispose();
       }
-    ));
+      config.onConnect(this, frame);
+    }, onWebSocketDone: () {
+      config.onWebSocketDone();
+
+      if (_isActive) {
+        _scheduleReconnect();
+      }
+    }));
     _handler.start();
   }
 
-  Function({Map<String, String> unsubscribeHeaders}) subscribe({@required String destination, @required Function(StompFrame) callback, Map<String, String> headers}) {
-    return _handler.subscribe(destination: destination, callback: callback, headers: headers);
+  Function({Map<String, String> unsubscribeHeaders}) subscribe(
+      {@required String destination,
+      @required Function(StompFrame) callback,
+      Map<String, String> headers}) {
+    return _handler.subscribe(
+        destination: destination, callback: callback, headers: headers);
   }
 
-  void send({@required String destination, String body, Uint8List binaryBody, Map<String, String> headers}) {
-    _handler.send(destination: destination, body: body, binaryBody: binaryBody, headers: headers);
+  void send(
+      {@required String destination,
+      String body,
+      Uint8List binaryBody,
+      Map<String, String> headers}) {
+    _handler.send(
+        destination: destination,
+        body: body,
+        binaryBody: binaryBody,
+        headers: headers);
   }
 
   void _scheduleReconnect() {
     _reconnectTimer?.cancel();
 
-    if (this.config.reconnectDelay > 0) {
-      _reconnectTimer = Timer(Duration(milliseconds: this.config.reconnectDelay), () {
+    if (config.reconnectDelay > 0) {
+      _reconnectTimer =
+          Timer(Duration(milliseconds: config.reconnectDelay), () {
         _connect();
       });
     }

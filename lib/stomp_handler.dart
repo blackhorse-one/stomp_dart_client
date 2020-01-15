@@ -4,13 +4,13 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
-import 'package:stomp_dart/stomp_config.dart';
-import 'package:stomp_dart/stomp_frame.dart';
-import 'package:stomp_dart/stomp_parser.dart';
+import 'package:stomp_dart_client/stomp_config.dart';
+import 'package:stomp_dart_client/stomp_frame.dart';
+import 'package:stomp_dart_client/stomp_parser.dart';
 import 'package:web_socket_channel/io.dart';
 
 class StompHandler {
-  IOWebSocketChannel channel; 
+  IOWebSocketChannel channel;
   final StompConfig config;
 
   StompParser _parser;
@@ -18,14 +18,13 @@ class StompHandler {
   int _currentReceiptIndex = 0;
   int _currentSubscriptionIndex = 0;
 
-  Map<String, Function> _receiptWatchers = {};
-  Map<String, Function> _subscriptionWatcher = {};
+  final Map<String, Function> _receiptWatchers = {};
+  final Map<String, Function> _subscriptionWatcher = {};
 
   DateTime _lastServerActivity;
 
   Timer _heartbeatSender;
   Timer _heartbeatReceiver;
-  
 
   StompHandler({@required this.config}) {
     _parser = StompParser(_onFrame, _onPing);
@@ -35,14 +34,14 @@ class StompHandler {
     _currentSubscriptionIndex = 0;
   }
 
-  get connected => this._connected;
+  bool get connected => _connected;
 
   void start() {
     Future<WebSocket> websocket = WebSocket.connect(config.url);
     websocket.timeout(Duration(milliseconds: 2000));
     websocket.then((socket) {
       this.channel = IOWebSocketChannel(socket)
-                  ..stream.listen(_onData, onError: _onError, onDone: _onDone);
+        ..stream.listen(_onData, onError: _onError, onDone: _onDone);
       _connectToStomp();
     });
   }
@@ -56,7 +55,10 @@ class StompHandler {
     }
   }
 
-  Function({Map<String, String> unsubscribeHeaders}) subscribe({@required String destination, @required Function(StompFrame) callback, Map<String, String> headers}) {
+  Function({Map<String, String> unsubscribeHeaders}) subscribe(
+      {@required String destination,
+      @required Function(StompFrame) callback,
+      Map<String, String> headers}) {
     headers = headers ?? {};
 
     if (!headers.containsKey('id')) {
@@ -69,7 +71,7 @@ class StompHandler {
 
     return ({Map<String, String> unsubscribeHeaders}) {
       unsubscribeHeaders = unsubscribeHeaders ?? {};
-      
+
       if (!unsubscribeHeaders.containsKey('id')) {
         unsubscribeHeaders['id'] = headers['id'];
       }
@@ -79,10 +81,15 @@ class StompHandler {
     };
   }
 
-  void send({@required String destination, String body, Uint8List binaryBody, Map<String, String> headers}) {
+  void send(
+      {@required String destination,
+      String body,
+      Uint8List binaryBody,
+      Map<String, String> headers}) {
     headers = headers ?? {};
     headers['destination'] = destination;
-    _transmit(command: 'SEND', body: body, binaryBody: binaryBody, headers: headers);
+    _transmit(
+        command: 'SEND', body: body, binaryBody: binaryBody, headers: headers);
   }
 
   void watchForReceipt(String receiptId, Function(StompFrame) callback) {
@@ -92,7 +99,10 @@ class StompHandler {
   void _connectToStomp() {
     Map<String, String> connectHeaders = config.connectHeaders ?? {};
     connectHeaders['accept-version'] = ['1.0', '1.1', '1.2'].join(',');
-    connectHeaders['heart-beat'] = [this.config.heartbeatOutgoing, this.config.heartbeatIncoming].join(',');
+    connectHeaders['heart-beat'] = [
+      this.config.heartbeatOutgoing,
+      this.config.heartbeatIncoming
+    ].join(',');
 
     this._transmit(command: 'CONNECT', headers: connectHeaders);
   }
@@ -109,13 +119,13 @@ class StompHandler {
     this._transmit(command: 'DISCONNECT', headers: disconnectHeaders);
   }
 
-  void _transmit({String command, Map<String, String> headers, String body, Uint8List binaryBody}) {
+  void _transmit(
+      {String command,
+      Map<String, String> headers,
+      String body,
+      Uint8List binaryBody}) {
     final StompFrame frame = StompFrame(
-      command: command,
-      headers: headers,
-      body: body,
-      binaryBody: binaryBody
-    );
+        command: command, headers: headers, body: body, binaryBody: binaryBody);
 
     dynamic serializedFrame = _parser.serializeFrame(frame);
 
@@ -140,7 +150,7 @@ class StompHandler {
   }
 
   void _onFrame(StompFrame frame) {
-    switch(frame.command) {
+    switch (frame.command) {
       case 'CONNECTED':
         _onConnectFrame(frame);
         break;
@@ -171,7 +181,7 @@ class StompHandler {
       _parser.escapeHeaders = false;
     }
 
-    if (frame.headers['version'] != '1.0' && 
+    if (frame.headers['version'] != '1.0' &&
         frame.headers.containsKey('heart-beat')) {
       _setupHeartbeat(frame);
     }
@@ -224,7 +234,8 @@ class StompHandler {
       int ttl = max(this.config.heartbeatIncoming, serverOutgoing);
       _heartbeatReceiver?.cancel();
       _heartbeatReceiver = Timer.periodic(Duration(milliseconds: ttl), (_) {
-        int deltaMs = DateTime.now().millisecondsSinceEpoch - _lastServerActivity.millisecondsSinceEpoch;
+        int deltaMs = DateTime.now().millisecondsSinceEpoch -
+            _lastServerActivity.millisecondsSinceEpoch;
         // The connection might be dead. Clean up.
         if (deltaMs > (ttl * 2)) {
           _cleanUp();

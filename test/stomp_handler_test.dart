@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:stomp_dart/stomp_config.dart';
-import 'package:stomp_dart/stomp_handler.dart';
-import 'package:stomp_dart/stomp_parser.dart';
+import 'package:stomp_dart_client/stomp_config.dart';
+import 'package:stomp_dart_client/stomp_handler.dart';
+import 'package:stomp_dart_client/stomp_parser.dart';
 import 'package:test/test.dart';
 import 'package:web_socket_channel/io.dart';
 

@@ -1,4 +1,4 @@
-SF:D:\Dokumente\Arbeit\blackhorse-one\Repositories\SJ\stomp_dart\lib\stomp_parser.dart
+SF:D:\Dokumente\Arbeit\blackhorse-one\Repositories\SJ\stomp_dart_client\lib\stomp_parser.dart
 DA:31,1
 DA:32,1
 DA:35,1
@@ -108,12 +108,12 @@ DA:242,2
 LF:106
 LH:101
 end_of_record
-SF:D:\Dokumente\Arbeit\blackhorse-one\Repositories\SJ\stomp_dart\lib\stomp_frame.dart
+SF:D:\Dokumente\Arbeit\blackhorse-one\Repositories\SJ\stomp_dart_client\lib\stomp_frame.dart
 DA:8,1
 LF:1
 LH:1
 end_of_record
-SF:D:\Dokumente\Arbeit\blackhorse-one\Repositories\SJ\stomp_dart\lib\stomp_config.dart
+SF:D:\Dokumente\Arbeit\blackhorse-one\Repositories\SJ\stomp_dart_client\lib\stomp_config.dart
 DA:59,1
 DA:75,1
 DA:85,1
@@ -130,7 +130,7 @@ DA:97,1
 LF:13
 LH:12
 end_of_record
-SF:D:\Dokumente\Arbeit\blackhorse-one\Repositories\SJ\stomp_dart\lib\stomp.dart
+SF:D:\Dokumente\Arbeit\blackhorse-one\Repositories\SJ\stomp_dart_client\lib\stomp.dart
 DA:10,1
 DA:20,1
 DA:22,4
@@ -170,7 +170,7 @@ DA:81,1
 LF:36
 LH:32
 end_of_record
-SF:D:\Dokumente\Arbeit\blackhorse-one\Repositories\SJ\stomp_dart\lib\stomp_handler.dart
+SF:D:\Dokumente\Arbeit\blackhorse-one\Repositories\SJ\stomp_dart_client\lib\stomp_handler.dart
 DA:28,1
 DA:29,4
 DA:31,2

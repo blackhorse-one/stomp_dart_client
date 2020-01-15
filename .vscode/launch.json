@@ -6,13 +6,13 @@
     "configurations": [
         {
             "name": "Dart",
-            "program": "lib/test.dart",
+            "program": "lib/main.dart",
             "request": "launch",
             "type": "dart"
         },
         {
             "name": "Test",
-            "program": "test/stomp_handler_test.dart",
+            "program": "test/",
             "request": "launch",
             "type": "dart"
         }

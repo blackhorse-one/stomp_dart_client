@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:stomp_dart/stomp_frame.dart';
-import 'package:stomp_dart/stomp_parser.dart';
+import 'package:stomp_dart_client/stomp_frame.dart';
+import 'package:stomp_dart_client/stomp_parser.dart';
 import 'package:test/test.dart';
 
 void main() {
