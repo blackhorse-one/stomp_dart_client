@@ -182,9 +182,7 @@ class StompParser {
     _parseByte(byte);
   }
 
-  /**
-   * https://stomp.github.io/stomp-specification-1.2.html#Value_Encoding
-   */
+  /// https://stomp.github.io/stomp-specification-1.2.html#Value_Encoding
   void _unescapeResultHeaders() {
     Map<String, String> unescapedHeaders = {};
     _resultHeaders.forEach((key, value) {
@@ -201,10 +199,8 @@ class StompParser {
         .replaceAll(RegExp(r'\\\\'), '\\');
   }
 
-  /**
-   * Order of those replaceAll is important. The \\ replace should be first,
-   * otherwise it does also replace escaped \\n etc.
-   */
+  /// Order of those replaceAll is important. The \\ replace should be first,
+  /// otherwise it does also replace escaped \\n etc.
   String _escapeString(String input) {
     return input
         .replaceAll(RegExp(r'\\'), '\\\\')
@@ -221,12 +217,10 @@ class StompParser {
     return escapedHeaders;
   }
 
-  /**
-   * We don't need to worry about reversing the header since we use a map and
-   * the last value written would just be the most up to date value, which is
-   * also fine with the spec
-   * https://stomp.github.io/stomp-specification-1.2.html#Repeated_Header_Entries
-   */
+  /// We don't need to worry about reversing the header since we use a map and
+  /// the last value written would just be the most up to date value, which is
+  /// also fine with the spec
+  /// https://stomp.github.io/stomp-specification-1.2.html#Repeated_Header_Entries
   dynamic serializeFrame(StompFrame frame) {
     String serializedHeaders = serializeCmdAndHeaders(frame) ?? '';
 

@@ -57,7 +57,7 @@ class StompConfig {
     this.reconnectDelay = 5000,
     this.heartbeatIncoming = 5000,
     this.heartbeatOutgoing = 5000,
-    this.connectHeaders = null,
+    this.connectHeaders,
     this.beforeConnect = _noOpFuture,
     this.onConnect = _noOp,
     this.onStompError = _noOp,
