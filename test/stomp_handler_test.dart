@@ -25,16 +25,21 @@ void main() {
           if (frame.command == 'CONNECT') {
             channel.sink.add("CONNECTED\nversion:1.2\n\n\x00");
           } else if (frame.command == 'DISCONNECT') {
-            channel.sink.add("RECEIPT\nreceipt-id:${frame.headers['receipt']}\n\n\x00");
+            channel.sink
+                .add("RECEIPT\nreceipt-id:${frame.headers['receipt']}\n\n\x00");
           } else if (frame.command == 'SUBSCRIBE') {
-            channel.sink.add("MESSAGE\nsubscription:${frame.headers['id']}\nmessage-id:123\ndestination:/foo\n\nThis is the message body\x00");
-          } else if (frame.command == 'UNSUBSCRIBE' || frame.command == 'SEND') {
+            channel.sink.add(
+                "MESSAGE\nsubscription:${frame.headers['id']}\nmessage-id:123\ndestination:/foo\n\nThis is the message body\x00");
+          } else if (frame.command == 'UNSUBSCRIBE' ||
+              frame.command == 'SEND') {
             if (frame.headers?.containsKey('receipt') ?? false) {
-              channel.sink.add("RECEIPT\nreceipt-id:${frame.headers['receipt']}\n\n${frame.body}\x00");
+              channel.sink.add(
+                  "RECEIPT\nreceipt-id:${frame.headers['receipt']}\n\n${frame.body}\x00");
 
               if (frame.command == 'UNSUBSCRIBE') {
                 Timer(Duration(milliseconds: 500), () {
-                  channel.sink.add("MESSAGE\nsubscription:${frame.headers['id']}\nmessage-id:123\ndestination:/foo\n\nThis is the message body\x00");
+                  channel.sink.add(
+                      "MESSAGE\nsubscription:${frame.headers['id']}\nmessage-id:123\ndestination:/foo\n\nThis is the message body\x00");
                 });
               }
             }
@@ -59,9 +64,7 @@ void main() {
         handler.dispose();
       });
 
-      handler = StompHandler(config: config.copyWith(
-        onConnect: onConnect
-      ));
+      handler = StompHandler(config: config.copyWith(onConnect: onConnect));
 
       handler.start();
     });
@@ -84,13 +87,13 @@ void main() {
 
       dynamic onError = expectAsync1((_) {}, count: 0);
 
-      handler = StompHandler(config: config.copyWith(
-        onConnect: onConnect,
-        onDisconnect: onDisconnect,
-        onWebSocketDone: onWebSocketDone,
-        onStompError: onError,
-        onWebSocketError: onError
-      ));
+      handler = StompHandler(
+          config: config.copyWith(
+              onConnect: onConnect,
+              onDisconnect: onDisconnect,
+              onWebSocketDone: onWebSocketDone,
+              onStompError: onError,
+              onWebSocketError: onError));
 
       handler.start();
     });
@@ -108,16 +111,19 @@ void main() {
       // connection is closed to not affect other tests
       dynamic onDisconnect = expectAsync1((frame) {}, count: 1);
 
-      handler = StompHandler(config: config.copyWith(
-        onConnect: (_, frame) {
-          handler.subscribe(destination: '/foo', callback: onSubscriptionFrame, headers: {"id": "sub-0"});
-          Timer(Duration(milliseconds: 500), () {
-            handler.dispose();
-          });
-        },
-        onDisconnect: onDisconnect
-      ));
-      
+      handler = StompHandler(
+          config: config.copyWith(
+              onConnect: (_, frame) {
+                handler.subscribe(
+                    destination: '/foo',
+                    callback: onSubscriptionFrame,
+                    headers: {"id": "sub-0"});
+                Timer(Duration(milliseconds: 500), () {
+                  handler.dispose();
+                });
+              },
+              onDisconnect: onDisconnect));
+
       handler.start();
     });
 
@@ -140,26 +146,27 @@ void main() {
       dynamic onDisconnect = expectAsync1((frame) {}, count: 1);
 
       handler = StompHandler(
-        config: config.copyWith(
-          onConnect: (_, frame) {
-            var unsubscribe = handler.subscribe(destination: '/foo', callback: onSubscriptionFrame, headers: {"id": "sub-0"});
-            Timer(Duration(milliseconds: 500), () {
-              unsubscribe(unsubscribeHeaders: {"receipt": "unsub-0"});
-              // We wait an additional second because the server will send
-              // another frame for this subscription and we can make sure that
-              // the subscription on the client side was actually canceled
-              // immediatly
-              Timer(Duration(milliseconds: 1000), () {
-                handler.dispose();
-              });
-            });
-          },
-          onDisconnect: onDisconnect
-        )
-      );
+          config: config.copyWith(
+              onConnect: (_, frame) {
+                var unsubscribe = handler.subscribe(
+                    destination: '/foo',
+                    callback: onSubscriptionFrame,
+                    headers: {"id": "sub-0"});
+                Timer(Duration(milliseconds: 500), () {
+                  unsubscribe(unsubscribeHeaders: {"receipt": "unsub-0"});
+                  // We wait an additional second because the server will send
+                  // another frame for this subscription and we can make sure that
+                  // the subscription on the client side was actually canceled
+                  // immediatly
+                  Timer(Duration(milliseconds: 1000), () {
+                    handler.dispose();
+                  });
+                });
+              },
+              onDisconnect: onDisconnect));
 
       handler.watchForReceipt('unsub-0', onReceiptFrame);
-      
+
       handler.start();
     });
 
@@ -176,13 +183,14 @@ void main() {
       dynamic onDisconnect = expectAsync1((frame) {}, count: 1);
 
       handler = StompHandler(
-        config: config.copyWith(
-          onConnect: (_, frame) {
-            handler.send(destination: '/foo/bar', body: 'This is a body', headers: {"receipt": "send-0"});
-          },
-          onDisconnect: onDisconnect
-        )
-      );
+          config: config.copyWith(
+              onConnect: (_, frame) {
+                handler.send(
+                    destination: '/foo/bar',
+                    body: 'This is a body',
+                    headers: {"receipt": "send-0"});
+              },
+              onDisconnect: onDisconnect));
 
       handler.watchForReceipt('send-0', onReceiptFrame);
 

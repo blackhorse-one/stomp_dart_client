@@ -6,6 +6,7 @@ import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_parser.dart';
 import 'package:test/test.dart';
 import 'package:web_socket_channel/io.dart';
+
 /**
  * Since subscribe and send are just proxies for the handler we wont test them
  * here
@@ -26,7 +27,6 @@ void main() {
       await server?.close();
     });
     test('should not be connected on creation', () {
-
       StompClient client = StompClient(config: null);
       expect(client.connected, false);
     });
@@ -35,16 +35,16 @@ void main() {
       // Setup a server which lets connect and then drops the connection
       server = await HttpServer.bind('localhost', 1234);
       server.transform(WebSocketTransformer()).listen((webSocket) {
-          var channel = IOWebSocketChannel(webSocket);
-          var parser = StompParser((frame) {
-            if (frame.command == 'CONNECT') {
-              channel.sink.add("CONNECTED\nversion:1.2\n\n\x00");
-              channel.sink.close();
-            }
-          });
-          channel.stream.listen((request) {
-            parser.parseData(request);
-          });
+        var channel = IOWebSocketChannel(webSocket);
+        var parser = StompParser((frame) {
+          if (frame.command == 'CONNECT') {
+            channel.sink.add("CONNECTED\nversion:1.2\n\n\x00");
+            channel.sink.close();
+          }
+        });
+        channel.stream.listen((request) {
+          parser.parseData(request);
+        });
       });
 
       StompClient client;
@@ -57,10 +57,31 @@ void main() {
         n++;
       }, count: 2);
 
-      client = StompClient(config: config.copyWith(
-        onConnect: onConnect,
-        onWebSocketDone: onWebSocketDone
-      ));
+      client = StompClient(
+          config: config.copyWith(
+              onConnect: onConnect, onWebSocketDone: onWebSocketDone));
+
+      client.activate();
+    });
+
+    test('attempts to reconnect indefinitely when server is unavailable',
+        () async {
+      await server?.close(); // make sure the server is closed
+
+      StompClient client;
+      int n = 0;
+      dynamic onWebSocketDone = expectAsync0(() {
+        if (n == 3) client.deactivate();
+        n++;
+      }, count: 4);
+      dynamic onConnect = expectAsync2((_, frame) {}, count: 0);
+
+      client = StompClient(
+          config: config.copyWith(
+              onConnect: onConnect,
+              reconnectDelay: 1000,
+              onWebSocketDone: onWebSocketDone,
+              connectionTimeout: Duration(milliseconds: 2000)));
 
       client.activate();
     });
@@ -68,19 +89,19 @@ void main() {
     test('disconnects cleanly from stomp and websocket', () async {
       server = await HttpServer.bind('localhost', 1234);
       server.transform(WebSocketTransformer()).listen((webSocket) {
-          var channel = IOWebSocketChannel(webSocket);
-          int n = 0;
-          channel.stream.listen((request) {
-            if (n == 0) {
-              expect(request, startsWith("CONNECT"));
-              channel.sink.add("CONNECTED\nversion:1.2\n\n\x00");
-            } else {
-              expect(request, startsWith("DISCONNECT"));
-              channel.sink.add("RECEIPT\nreceipt-id:disconnect-0\n\n\x00");
-              channel.sink.close();
-            }
-            n++;
-          });
+        var channel = IOWebSocketChannel(webSocket);
+        int n = 0;
+        channel.stream.listen((request) {
+          if (n == 0) {
+            expect(request, startsWith("CONNECT"));
+            channel.sink.add("CONNECTED\nversion:1.2\n\n\x00");
+          } else {
+            expect(request, startsWith("DISCONNECT"));
+            channel.sink.add("RECEIPT\nreceipt-id:disconnect-0\n\n\x00");
+            channel.sink.close();
+          }
+          n++;
+        });
       });
       StompClient client;
       dynamic onWebSocketDone = expectAsync0(() {}, count: 1);
@@ -97,13 +118,13 @@ void main() {
       }, count: 1);
       dynamic onError = expectAsync1((_) {}, count: 0);
 
-      client = StompClient(config: config.copyWith(
-        onConnect: onConnect,
-        onWebSocketDone: onWebSocketDone,
-        onWebSocketError: onError,
-        onStompError: onError,
-        onDisconnect: onDisconnect
-      ));
+      client = StompClient(
+          config: config.copyWith(
+              onConnect: onConnect,
+              onWebSocketDone: onWebSocketDone,
+              onWebSocketError: onError,
+              onStompError: onError,
+              onDisconnect: onDisconnect));
 
       client.activate();
     });

@@ -18,6 +18,10 @@ class StompConfig {
   /// Set to 0 to not receive any heartbeats
   final int heartbeatIncoming;
 
+  /// Connection timeout. If specified the connection will will be dropped after
+  /// the timeout and depending on the [reconnectDelay] it will try again
+  final Duration connectionTimeout;
+
   /// Headers to be passed when connecting to STOMP
   final Map<String, String> connectHeaders;
 
@@ -57,6 +61,7 @@ class StompConfig {
     this.reconnectDelay = 5000,
     this.heartbeatIncoming = 5000,
     this.heartbeatOutgoing = 5000,
+    this.connectionTimeout,
     this.connectHeaders,
     this.beforeConnect = _noOpFuture,
     this.onConnect = _noOp,
@@ -75,6 +80,7 @@ class StompConfig {
           int reconnectDelay,
           int heartbeatIncoming,
           int heartbeatOutgoing,
+          Duration connectionTimeout,
           Map<String, dynamic> connectHeaders,
           Future<void> Function() beforeConnect,
           Function(StompClient, StompFrame) onConnect,
@@ -90,6 +96,7 @@ class StompConfig {
           reconnectDelay: reconnectDelay ?? this.reconnectDelay,
           heartbeatIncoming: heartbeatIncoming ?? this.heartbeatIncoming,
           heartbeatOutgoing: heartbeatOutgoing ?? this.heartbeatOutgoing,
+          connectionTimeout: connectionTimeout ?? this.connectionTimeout,
           connectHeaders: connectHeaders ?? this.connectHeaders,
           onConnect: onConnect ?? this.onConnect,
           onStompError: onStompError ?? this.onStompError,

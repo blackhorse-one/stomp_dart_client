@@ -38,12 +38,14 @@ class StompHandler {
 
   void start() {
     Future<WebSocket> websocket = WebSocket.connect(config.url);
-    websocket.timeout(Duration(milliseconds: 2000));
+    if (config.connectionTimeout != null) {
+      websocket = websocket.timeout(config.connectionTimeout);
+    }
     websocket.then((socket) {
       this.channel = IOWebSocketChannel(socket)
         ..stream.listen(_onData, onError: _onError, onDone: _onDone);
       _connectToStomp();
-    });
+    }).catchError((_) => _onDone());
   }
 
   void dispose() {

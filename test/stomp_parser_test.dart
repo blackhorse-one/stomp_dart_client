@@ -82,7 +82,8 @@ void main() {
     });
 
     test('supports escaped colons in headers (^v1.1)', () {
-      final msg = "MESSAGE\ndestination\\cbar:foo\\cbar\nmessage-id:456\n\n\x00";
+      final msg =
+          "MESSAGE\ndestination\\cbar:foo\\cbar\nmessage-id:456\n\n\x00";
 
       var callback = expectAsync1((frame) {
         expect(frame.command, 'MESSAGE');
@@ -102,8 +103,15 @@ void main() {
     });
 
     test('correctly serializes a stomp frame unescaped', () {
-      final stringFrame = 'SEND\ndestination:/path/to/foo\ncontent-type:text/plain\ncontent-length:14\n\nThis is a body\x00';
-      final frame = StompFrame(command: 'SEND', body: 'This is a body', headers: {'destination': '/path/to/foo', 'content-type': 'text/plain'});
+      final stringFrame =
+          'SEND\ndestination:/path/to/foo\ncontent-type:text/plain\ncontent-length:14\n\nThis is a body\x00';
+      final frame = StompFrame(
+          command: 'SEND',
+          body: 'This is a body',
+          headers: {
+            'destination': '/path/to/foo',
+            'content-type': 'text/plain'
+          });
 
       final parser = StompParser(null);
 
@@ -113,8 +121,15 @@ void main() {
     });
 
     test('correctly serializes a stomp frame escaped', () {
-      final stringFrame = 'SEND\ndesti\\nnation:/path/to/foo\ncontent-type:te\\nxt/plain\ncontent-length:14\n\nThis is a body\x00';
-      final frame = StompFrame(command: 'SEND', body: 'This is a body', headers: {'desti\nnation': '/path/to/foo', 'content-type': 'te\nxt/plain'});
+      final stringFrame =
+          'SEND\ndesti\\nnation:/path/to/foo\ncontent-type:te\\nxt/plain\ncontent-length:14\n\nThis is a body\x00';
+      final frame = StompFrame(
+          command: 'SEND',
+          body: 'This is a body',
+          headers: {
+            'desti\nnation': '/path/to/foo',
+            'content-type': 'te\nxt/plain'
+          });
 
       final parser = StompParser(null);
       parser.escapeHeaders = true;
@@ -125,8 +140,12 @@ void main() {
     });
 
     test('correctly serializes binary frame', () {
-      final stringFrame = 'SEND\ndesti\\nnation:/path/to/foo\ncontent-length:14\n\nThis is a body\x00';
-      final frame = StompFrame(command: 'SEND', binaryBody: Uint8List.fromList("This is a body".codeUnits), headers: {'desti\nnation': '/path/to/foo'});
+      final stringFrame =
+          'SEND\ndesti\\nnation:/path/to/foo\ncontent-length:14\n\nThis is a body\x00';
+      final frame = StompFrame(
+          command: 'SEND',
+          binaryBody: Uint8List.fromList("This is a body".codeUnits),
+          headers: {'desti\nnation': '/path/to/foo'});
       final parser = StompParser(null);
       parser.escapeHeaders = true;
 
@@ -134,10 +153,15 @@ void main() {
       expect(serializedFrame, Uint8List.fromList(stringFrame.codeUnits));
 
       final emptyStringFrame = 'SEND\ndesti\\nnation:/path/to/foo\n\n\x00';
-      final emptyBodyFrame = StompFrame(command: 'SEND', binaryBody: Uint8List(0), headers: {'desti\nnation': '/path/to/foo'});
-      final Uint8List emptySerializedFrame = parser.serializeFrame(emptyBodyFrame);
+      final emptyBodyFrame = StompFrame(
+          command: 'SEND',
+          binaryBody: Uint8List(0),
+          headers: {'desti\nnation': '/path/to/foo'});
+      final Uint8List emptySerializedFrame =
+          parser.serializeFrame(emptyBodyFrame);
 
-      expect(emptySerializedFrame, Uint8List.fromList(emptyStringFrame.codeUnits));
+      expect(
+          emptySerializedFrame, Uint8List.fromList(emptyStringFrame.codeUnits));
     });
 
     test('can parse frame with empty header', () {
@@ -173,7 +197,8 @@ void main() {
     });
 
     test('respects content-length when parsing', () {
-      final msg = "MESSAGE\ncontent-length:10\n\nThis is a body longer than 10 bytes\x00";
+      final msg =
+          "MESSAGE\ncontent-length:10\n\nThis is a body longer than 10 bytes\x00";
 
       var callback = expectAsync1((frame) {
         expect(frame.command, 'MESSAGE');
@@ -213,12 +238,14 @@ void main() {
       final parser = StompParser(onFrame, onPing);
 
       parser.parseData("\r\n");
-      parser.parseData("\r\nMESSAGE\r\ndestination:foo\r\nmessage-id:456\r\n\r\n\x00");
+      parser.parseData(
+          "\r\nMESSAGE\r\ndestination:foo\r\nmessage-id:456\r\n\r\n\x00");
     });
 
     test('can parse multiple messages seperatley', () {
       final msg = "MESSAGE\ndestination:foo\nmessage-id:456\n\n\x00";
-      final msg2 = "MESSAGE\ndestination:bar\nmessage-id:123\n\nThis is a body\x00";
+      final msg2 =
+          "MESSAGE\ndestination:bar\nmessage-id:123\n\nThis is a body\x00";
 
       int n = 0;
       dynamic onFrame = expectAsync1((frame) {
@@ -250,7 +277,8 @@ void main() {
 
     test('can parse multiple messages at once', () {
       final msg = "MESSAGE\ndestination:foo\nmessage-id:456\n\n\x00";
-      final msg2 = "MESSAGE\ndestination:bar\nmessage-id:123\n\nThis is a body\x00";
+      final msg2 =
+          "MESSAGE\ndestination:bar\nmessage-id:123\n\nThis is a body\x00";
 
       int n = 0;
       dynamic onFrame = expectAsync1((frame) {
@@ -280,8 +308,12 @@ void main() {
     });
 
     test("can serialize unicode special characters", () {
-      final stringFrame = 'SEND\ndesti\\nnation:/path/to/foo\ncontent-length:14\n\n´👌👻¡Â\x00';
-      final frame = StompFrame(command: 'SEND', body: "´👌👻¡Â", headers: {'desti\nnation': '/path/to/foo'});
+      final stringFrame =
+          'SEND\ndesti\\nnation:/path/to/foo\ncontent-length:14\n\n´👌👻¡Â\x00';
+      final frame = StompFrame(
+          command: 'SEND',
+          body: "´👌👻¡Â",
+          headers: {'desti\nnation': '/path/to/foo'});
       final parser = StompParser(null);
       parser.escapeHeaders = true;
 
@@ -303,8 +335,31 @@ void main() {
           expect(frame.headers.containsKey('content-length'), isTrue);
           expect(frame.headers['content-length'], "23");
           expect(frame.body, "{\"a\": \"´👌👻¡Â\"}");
-          expect(utf8.encode(frame.body), [123, 34, 97, 34, 58, 32, 34, 194, 180, 240, 
-            159, 145, 140 ,240, 159, 145, 187, 194, 161, 195, 130, 34, 125]);
+          expect(utf8.encode(frame.body), [
+            123,
+            34,
+            97,
+            34,
+            58,
+            32,
+            34,
+            194,
+            180,
+            240,
+            159,
+            145,
+            140,
+            240,
+            159,
+            145,
+            187,
+            194,
+            161,
+            195,
+            130,
+            34,
+            125
+          ]);
 
           Map<String, dynamic> jsonMap = json.decode(frame.body);
           expect(jsonMap.length, 1);
@@ -315,10 +370,28 @@ void main() {
           expect(frame.headers.containsKey('content-length'), isTrue);
           expect(frame.headers['content-length'], "18");
           expect(frame.body, "{\"a\": \"Piaffe´s\"}");
-          
-          expect(utf8.encode(frame.body), [123, 34, 97, 34, 58, 32, 34, 80, 105, 97, 102, 
-            102, 101, 194, 180, 115, 34, 125]);
-            
+
+          expect(utf8.encode(frame.body), [
+            123,
+            34,
+            97,
+            34,
+            58,
+            32,
+            34,
+            80,
+            105,
+            97,
+            102,
+            102,
+            101,
+            194,
+            180,
+            115,
+            34,
+            125
+          ]);
+
           Map<String, dynamic> jsonMap = json.decode(frame.body);
           expect(jsonMap.length, 1);
           expect(jsonMap["a"], "Piaffe´s");
