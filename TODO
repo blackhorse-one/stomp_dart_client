@@ -13,3 +13,4 @@ Todo:
     ✔ Parser @done(19-10-20 00:51)
   ☐ Transactions
   ☐ Ack/Nack
+  ☐ Change timeouts to Duration

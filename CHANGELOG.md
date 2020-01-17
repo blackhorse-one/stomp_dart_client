@@ -1,3 +1,7 @@
+## 0.1.6
+ - Fixed a bug where it would not try to reconnect when the WebSocket connection could not be established
+ - Added a `connectionTimeout` property to the config, to allow control over when a connection attempt is aborted
+
 ## 0.1.5
  - More formatting
 
