@@ -21,7 +21,10 @@ final stompClient = StompClient(config:
   StompConfig(
     url: 'ws://localhost:8080/messaging',
     onConnect: onConnect,
-    connectHeaders: {
+    stompConnectHeaders: {
+      "Authorization": "Bearer yourToken"
+    },
+    webSocketConnectHeaders: {
       "Authorization": "Bearer yourToken"
     }
   )
