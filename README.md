@@ -10,7 +10,7 @@ please see the Config section to see all available options
 ```dart
 StompClient client = StompClient(
     config: StompConfig(
-        url: 'wss://yourserver'
+        url: 'wss://yourserver',
         onConnect: onConnectCallback
     )
 );
