@@ -23,7 +23,10 @@ class StompConfig {
   final Duration connectionTimeout;
 
   /// Headers to be passed when connecting to STOMP
-  final Map<String, String> connectHeaders;
+  final Map<String, String> stompConnectHeaders;
+
+  /// Headers to be passed when connecting to WebSocket
+  final Map<String, String> webSocketConnectHeaders;
 
   /// Asynchronous function to be executed before we connect
   /// the socket
@@ -62,7 +65,8 @@ class StompConfig {
     this.heartbeatIncoming = 5000,
     this.heartbeatOutgoing = 5000,
     this.connectionTimeout,
-    this.connectHeaders,
+    this.stompConnectHeaders,
+    this.webSocketConnectHeaders,
     this.beforeConnect = _noOpFuture,
     this.onConnect = _noOp,
     this.onStompError = _noOp,
@@ -81,7 +85,8 @@ class StompConfig {
           int heartbeatIncoming,
           int heartbeatOutgoing,
           Duration connectionTimeout,
-          Map<String, dynamic> connectHeaders,
+          Map<String, dynamic> stompConnectHeaders,
+          Map<String, dynamic> webSocketConnectHeaders,
           Future<void> Function() beforeConnect,
           Function(StompClient, StompFrame) onConnect,
           Function(StompFrame) onStompError,
@@ -97,7 +102,8 @@ class StompConfig {
           heartbeatIncoming: heartbeatIncoming ?? this.heartbeatIncoming,
           heartbeatOutgoing: heartbeatOutgoing ?? this.heartbeatOutgoing,
           connectionTimeout: connectionTimeout ?? this.connectionTimeout,
-          connectHeaders: connectHeaders ?? this.connectHeaders,
+          webSocketConnectHeaders: webSocketConnectHeaders ?? this.webSocketConnectHeaders,
+          stompConnectHeaders: stompConnectHeaders ?? this.stompConnectHeaders,
           onConnect: onConnect ?? this.onConnect,
           onStompError: onStompError ?? this.onStompError,
           onDisconnect: onDisconnect ?? this.onDisconnect,
