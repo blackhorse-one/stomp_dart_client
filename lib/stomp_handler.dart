@@ -37,7 +37,7 @@ class StompHandler {
   bool get connected => _connected;
 
   void start() {
-    Future<WebSocket> websocket = WebSocket.connect(config.url);
+    Future<WebSocket> websocket = WebSocket.connect(config.url, headers: config.webSocketConnectHeaders);
     if (config.connectionTimeout != null) {
       websocket = websocket.timeout(config.connectionTimeout);
     }
@@ -99,7 +99,7 @@ class StompHandler {
   }
 
   void _connectToStomp() {
-    Map<String, String> connectHeaders = config.connectHeaders ?? {};
+    Map<String, String> connectHeaders = config.stompConnectHeaders ?? {};
     connectHeaders['accept-version'] = ['1.0', '1.1', '1.2'].join(',');
     connectHeaders['heart-beat'] = [
       this.config.heartbeatOutgoing,

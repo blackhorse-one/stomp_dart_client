@@ -10,7 +10,7 @@ please see the Config section to see all available options
 ```dart
 StompClient client = StompClient(
     config: StompConfig(
-        url: 'wss://yourserver'
+        url: 'wss://yourserver',
         onConnect: onConnectCallback
     )
 );
@@ -67,7 +67,8 @@ This table shows all available options in `StompConfig`
 | heartbeatOutgoing: int                       | The time in milliseconds between outgoing heartbeat messages. Set to 0 to not send any heartbeats          |
 | heartbeatIncoming: int                       | The time in milliseconds between incoming heartbeat messages. Set to 0 to not receive any heartbeats       |
 | connectionTimeout: Duration                  | Time duration it waits until a connection attempt is aborted                                               |
-| connectHeaders: Map<String, dynamic>         | The header values which will be used on the STOMP connect frame                                            |
+| stompConnectHeaders: Map<String, dynamic>    | The header values which will be used on the STOMP connect frame                                            |
+| webSocketConnectHeaders: Map<String, dynamic>| The header values which will be used when connecting to the underyling WebSocket                           |
 | beforeConnect: Future<void> Function()       | A async function which will be awaited before a connection is established.                                 |
 | onConnect: Function(StompClient, StompFrame) | Function to be called when the client successfully connected to the server.                                |
 | onDisconnect: Function(StompFrame)           | Function to be called when the client disconnects expectedly                                               |
