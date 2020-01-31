@@ -23,10 +23,10 @@ class StompConfig {
   final Duration connectionTimeout;
 
   /// Headers to be passed when connecting to STOMP
-  final Map<String, String> stompConnectHeaders;
+  final Map<String, dynamic> stompConnectHeaders;
 
   /// Headers to be passed when connecting to WebSocket
-  final Map<String, String> webSocketConnectHeaders;
+  final Map<String, dynamic> webSocketConnectHeaders;
 
   /// Asynchronous function to be executed before we connect
   /// the socket
