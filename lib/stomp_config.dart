@@ -23,7 +23,7 @@ class StompConfig {
   final Duration connectionTimeout;
 
   /// Headers to be passed when connecting to STOMP
-  final Map<String, dynamic> stompConnectHeaders;
+  final Map<String, String> stompConnectHeaders;
 
   /// Headers to be passed when connecting to WebSocket
   final Map<String, dynamic> webSocketConnectHeaders;
@@ -85,7 +85,7 @@ class StompConfig {
           int heartbeatIncoming,
           int heartbeatOutgoing,
           Duration connectionTimeout,
-          Map<String, dynamic> stompConnectHeaders,
+          Map<String, String> stompConnectHeaders,
           Map<String, dynamic> webSocketConnectHeaders,
           Future<void> Function() beforeConnect,
           Function(StompClient, StompFrame) onConnect,

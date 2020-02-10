@@ -1,3 +1,6 @@
+## 0.2.2
+ - Reverted type change on `stompConnectHeaders` because it caused issues on connect
+
 ## 0.2.1
  - Fixed a scenario where quick connect/disconnects could cause an exception
 
