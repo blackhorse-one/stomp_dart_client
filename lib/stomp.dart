@@ -32,6 +32,7 @@ class StompClient {
     _isActive = false;
     _reconnectTimer?.cancel();
     _handler?.dispose();
+    _handler = null;
   }
 
   void _connect() async {
@@ -51,7 +52,7 @@ class StompClient {
         config: config.copyWith(onConnect: (_, frame) {
       if (!_isActive) {
         config.onDebugMessage(
-            '[STOMP] Client connected while being deactivated. Will disconnected');
+            '[STOMP] Client connected while being deactivated. Will disconnect');
         _handler?.dispose();
       }
       config.onConnect(this, frame);

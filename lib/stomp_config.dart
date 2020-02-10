@@ -102,7 +102,8 @@ class StompConfig {
           heartbeatIncoming: heartbeatIncoming ?? this.heartbeatIncoming,
           heartbeatOutgoing: heartbeatOutgoing ?? this.heartbeatOutgoing,
           connectionTimeout: connectionTimeout ?? this.connectionTimeout,
-          webSocketConnectHeaders: webSocketConnectHeaders ?? this.webSocketConnectHeaders,
+          webSocketConnectHeaders:
+              webSocketConnectHeaders ?? this.webSocketConnectHeaders,
           stompConnectHeaders: stompConnectHeaders ?? this.stompConnectHeaders,
           onConnect: onConnect ?? this.onConnect,
           onStompError: onStompError ?? this.onStompError,

@@ -1,3 +1,6 @@
+## 0.2.1
+ - Fixed a scenario where quick connect/disconnects could cause an exception
+
 ## 0.2.0
  - Breaking Change: Renamed `connectHeaders` to `stompConnectHeaders`
  - Added `webSocketConnectHeaders` to `StompConfig` to be passed to the underyling WebSocket on connection
