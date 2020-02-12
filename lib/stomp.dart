@@ -54,6 +54,7 @@ class StompClient {
         config.onDebugMessage(
             '[STOMP] Client connected while being deactivated. Will disconnect');
         _handler?.dispose();
+        return;
       }
       config.onConnect(this, frame);
     }, onWebSocketDone: () {

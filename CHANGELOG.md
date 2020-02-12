@@ -1,3 +1,6 @@
+## 0.2.3
+ - Fixed `onConnect` being called on inactive StompClient
+
 ## 0.2.2
  - Reverted type change on `stompConnectHeaders` because it caused issues on connect
 
