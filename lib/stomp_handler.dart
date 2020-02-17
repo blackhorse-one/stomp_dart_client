@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -7,10 +6,14 @@ import 'package:meta/meta.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
 import 'package:stomp_dart_client/stomp_parser.dart';
-import 'package:web_socket_channel/io.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+
+import '_connect_api.dart'
+  if (dart.library.html) '_connect_html.dart'
+  if (dart.library.io) '_connect_io.dart' as platform;
 
 class StompHandler {
-  IOWebSocketChannel channel;
+  WebSocketChannel channel;
   final StompConfig config;
 
   StompParser _parser;
@@ -37,13 +40,8 @@ class StompHandler {
   bool get connected => _connected;
 
   void start() {
-    Future<WebSocket> websocket =
-        WebSocket.connect(config.url, headers: config.webSocketConnectHeaders);
-    if (config.connectionTimeout != null) {
-      websocket = websocket.timeout(config.connectionTimeout);
-    }
-    websocket.then((socket) {
-      this.channel = IOWebSocketChannel(socket)
+    platform.connect(config).then((webSocketChannel) {
+      this.channel = webSocketChannel
         ..stream.listen(_onData, onError: _onError, onDone: _onDone);
       _connectToStomp();
     }).catchError((_) => _onDone());
