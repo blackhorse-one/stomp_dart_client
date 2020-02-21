@@ -9,8 +9,8 @@ import 'package:stomp_dart_client/stomp_parser.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '_connect_api.dart'
-  if (dart.library.html) '_connect_html.dart'
-  if (dart.library.io) '_connect_io.dart' as platform;
+    if (dart.library.html) '_connect_html.dart'
+    if (dart.library.io) '_connect_io.dart' as platform;
 
 class StompHandler {
   WebSocketChannel channel;

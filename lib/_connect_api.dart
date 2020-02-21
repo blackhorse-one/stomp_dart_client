@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:stomp_dart_client/stomp_config.dart';

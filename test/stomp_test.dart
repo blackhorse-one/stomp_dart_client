@@ -55,13 +55,11 @@ void main() {
       }, count: 2);
 
       client = StompClient(
-        config: StompConfig(
-          url: 'ws://localhost:$port',
-          reconnectDelay: 5000,
-          onConnect: onConnect, 
-          onWebSocketDone: onWebSocketDone
-        )
-      );
+          config: StompConfig(
+              url: 'ws://localhost:$port',
+              reconnectDelay: 5000,
+              onConnect: onConnect,
+              onWebSocketDone: onWebSocketDone));
 
       client.activate();
     });
@@ -77,14 +75,12 @@ void main() {
       dynamic onConnect = expectAsync2((_, frame) {}, count: 0);
 
       client = StompClient(
-        config: StompConfig(
-          url: 'ws://localhost:1234',
-          onConnect: onConnect,
-          reconnectDelay: 1000,
-          onWebSocketDone: onWebSocketDone,
-          connectionTimeout: Duration(milliseconds: 2000)
-        )
-      );
+          config: StompConfig(
+              url: 'ws://localhost:1234',
+              onConnect: onConnect,
+              reconnectDelay: 1000,
+              onWebSocketDone: onWebSocketDone,
+              connectionTimeout: Duration(milliseconds: 2000)));
 
       client.activate();
     });
@@ -140,16 +136,14 @@ void main() {
       dynamic onError = expectAsync1((_) {}, count: 0);
 
       client = StompClient(
-        config: StompConfig(
-          url: 'ws://localhost:$port',
-          reconnectDelay: 5000,
-          onConnect: onConnect,
-          onWebSocketDone: onWebSocketDone,
-          onWebSocketError: onError,
-          onStompError: onError,
-          onDisconnect: onDisconnect
-        )
-      );
+          config: StompConfig(
+              url: 'ws://localhost:$port',
+              reconnectDelay: 5000,
+              onConnect: onConnect,
+              onWebSocketDone: onWebSocketDone,
+              onWebSocketError: onError,
+              onStompError: onError,
+              onDisconnect: onDisconnect));
 
       client.activate();
     });
