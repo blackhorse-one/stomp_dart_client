@@ -12,3 +12,4 @@ dependencies:
 dev_dependencies:
   test: ^1.9.2
   pedantic: ^1.0.0
+  stream_channel: ^2.0.0
