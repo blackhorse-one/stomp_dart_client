@@ -1,3 +1,7 @@
+## 0.3.0
+ - Replaced `IOWebSocketChannel` with `WebSocketChannel` to be platform agnostic. This means it now also should work for flutter_web.
+ - Made tests hybrid tests so that they cover all types of platforms
+
 ## 0.2.3
  - Fixed `onConnect` being called on inactive StompClient
 
