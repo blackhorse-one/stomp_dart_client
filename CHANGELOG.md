@@ -1,3 +1,6 @@
+## 0.3.1
+ - Changed folder structure to please pana.
+
 ## 0.3.0
  - Replaced `IOWebSocketChannel` with `WebSocketChannel` to be platform agnostic. This means it now also should work for flutter_web.
  - Made tests hybrid tests so that they cover all types of platforms
