@@ -1,58 +1,71 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_handler.dart';
-import 'package:stomp_dart_client/stomp_parser.dart';
+import 'package:stream_channel/stream_channel.dart';
 import 'package:test/test.dart';
-import 'package:web_socket_channel/io.dart';
 
 void main() {
   group('StompHandler', () {
-    HttpServer server;
     StompConfig config;
     StompHandler handler;
+    StreamChannel streamChannel;
+    int port;
 
-    setUp(() async {
-      config = StompConfig(
-        url: 'ws://localhost:1235',
-      );
+    setUpAll(() async {
       // Basic STOMP Server
-      server = await HttpServer.bind("localhost", 1235);
-      server.transform(WebSocketTransformer()).listen((webSocket) {
-        var channel = IOWebSocketChannel(webSocket);
-        var parser = StompParser((frame) {
-          if (frame.command == 'CONNECT') {
-            channel.sink.add("CONNECTED\nversion:1.2\n\n\x00");
-          } else if (frame.command == 'DISCONNECT') {
-            channel.sink
-                .add("RECEIPT\nreceipt-id:${frame.headers['receipt']}\n\n\x00");
-          } else if (frame.command == 'SUBSCRIBE') {
-            channel.sink.add(
-                "MESSAGE\nsubscription:${frame.headers['id']}\nmessage-id:123\ndestination:/foo\n\nThis is the message body\x00");
-          } else if (frame.command == 'UNSUBSCRIBE' ||
-              frame.command == 'SEND') {
-            if (frame.headers?.containsKey('receipt') ?? false) {
-              channel.sink.add(
-                  "RECEIPT\nreceipt-id:${frame.headers['receipt']}\n\n${frame.body}\x00");
+      streamChannel = spawnHybridCode(r'''
+        import 'dart:io';
+        import 'dart:async';
+        import 'package:web_socket_channel/io.dart';
+        import 'package:stomp_dart_client/stomp_parser.dart';
+        import 'package:stream_channel/stream_channel.dart';
+        
+        hybridMain(StreamChannel channel) async {
+          HttpServer server = await HttpServer.bind("localhost", 0);
+          server.transform(WebSocketTransformer()).listen((webSocket) {
+            var webSocketChannel = IOWebSocketChannel(webSocket);
+            var parser = StompParser((frame) {
+              if (frame.command == 'CONNECT') {
+                webSocketChannel.sink.add("CONNECTED\nversion:1.2\n\n\x00");
+              } else if (frame.command == 'DISCONNECT') {
+                webSocketChannel.sink
+                    .add("RECEIPT\nreceipt-id:${frame.headers['receipt']}\n\n\x00");
+              } else if (frame.command == 'SUBSCRIBE') {
+                webSocketChannel.sink.add(
+                    "MESSAGE\nsubscription:${frame.headers['id']}\nmessage-id:123\ndestination:/foo\n\nThis is the message body\x00");
+              } else if (frame.command == 'UNSUBSCRIBE' ||
+                  frame.command == 'SEND') {
+                if (frame.headers?.containsKey('receipt') ?? false) {
+                  webSocketChannel.sink.add(
+                      "RECEIPT\nreceipt-id:${frame.headers['receipt']}\n\n${frame.body}\x00");
 
-              if (frame.command == 'UNSUBSCRIBE') {
-                Timer(Duration(milliseconds: 500), () {
-                  channel.sink.add(
-                      "MESSAGE\nsubscription:${frame.headers['id']}\nmessage-id:123\ndestination:/foo\n\nThis is the message body\x00");
-                });
+                  if (frame.command == 'UNSUBSCRIBE') {
+                    Timer(Duration(milliseconds: 500), () {
+                      webSocketChannel.sink.add(
+                          "MESSAGE\nsubscription:${frame.headers['id']}\nmessage-id:123\ndestination:/foo\n\nThis is the message body\x00");
+                    });
+                  }
+                }
               }
-            }
-          }
-        });
-        channel.stream.listen((request) {
-          parser.parseData(request);
-        });
-      });
+            });
+            webSocketChannel.stream.listen((request) {
+              parser.parseData(request);
+            });
+          });
+
+          channel.sink.add(server.port);
+        }
+      ''', stayAlive: true);
+
+      port = await streamChannel.stream.first;
+      config = StompConfig(
+        url: 'ws://localhost:$port',
+      );
     });
 
     tearDown(() async {
-      await server?.close();
+      handler?.dispose();
     });
 
     test('connects correctly', () async {
