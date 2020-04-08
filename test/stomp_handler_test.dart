@@ -228,9 +228,7 @@ void main() {
       handler = StompHandler(
           config: config.copyWith(
               onConnect: (_, frame) {
-                handler.ack(
-                    id: "message-0",
-                    headers: {"receipt": "send-0"});
+                handler.ack(id: 'message-0', headers: {'receipt': 'send-0'});
               },
               onDisconnect: onDisconnect));
 
@@ -254,9 +252,7 @@ void main() {
       handler = StompHandler(
           config: config.copyWith(
               onConnect: (_, frame) {
-                handler.nack(
-                    id: "message-0",
-                    headers: {"receipt": "send-0"});
+                handler.nack(id: 'message-0', headers: {'receipt': 'send-0'});
               },
               onDisconnect: onDisconnect));
 
@@ -264,6 +260,5 @@ void main() {
 
       handler.start();
     });
-
   });
 }
