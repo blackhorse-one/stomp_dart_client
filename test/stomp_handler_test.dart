@@ -47,6 +47,9 @@ void main() {
                     });
                   }
                 }
+              } else if (frame.command == 'ACK' || frame.command == 'NACK') {
+                  webSocketChannel.sink.add(
+                      "RECEIPT\nreceipt-id:${frame.headers['receipt']}\n\n${frame.headers['id']}\x00");
               }
             });
             webSocketChannel.stream.listen((request) {
@@ -209,5 +212,58 @@ void main() {
 
       handler.start();
     });
+
+    test('acks message correctly', () {
+      dynamic onReceiptFrame = expectAsync1((frame) {
+        expect(frame.command, 'RECEIPT');
+        expect(frame.headers['receipt-id'], 'send-0');
+        expect(frame.body, 'message-0');
+        handler.dispose();
+      });
+
+      // We need this async waiter to make sure we actually wait until the
+      // connection is closed
+      dynamic onDisconnect = expectAsync1((frame) {}, count: 1);
+
+      handler = StompHandler(
+          config: config.copyWith(
+              onConnect: (_, frame) {
+                handler.ack(
+                    id: "message-0",
+                    headers: {"receipt": "send-0"});
+              },
+              onDisconnect: onDisconnect));
+
+      handler.watchForReceipt('send-0', onReceiptFrame);
+
+      handler.start();
+    });
+
+    test('nacks message correctly', () {
+      dynamic onReceiptFrame = expectAsync1((frame) {
+        expect(frame.command, 'RECEIPT');
+        expect(frame.headers['receipt-id'], 'send-0');
+        expect(frame.body, 'message-0');
+        handler.dispose();
+      });
+
+      // We need this async waiter to make sure we actually wait until the
+      // connection is closed
+      dynamic onDisconnect = expectAsync1((frame) {}, count: 1);
+
+      handler = StompHandler(
+          config: config.copyWith(
+              onConnect: (_, frame) {
+                handler.nack(
+                    id: "message-0",
+                    headers: {"receipt": "send-0"});
+              },
+              onDisconnect: onDisconnect));
+
+      handler.watchForReceipt('send-0', onReceiptFrame);
+
+      handler.start();
+    });
+
   });
 }

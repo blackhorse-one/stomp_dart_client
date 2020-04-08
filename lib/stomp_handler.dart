@@ -93,6 +93,18 @@ class StompHandler {
         command: 'SEND', body: body, binaryBody: binaryBody, headers: headers);
   }
 
+  void ack({@required id, Map<String, String> headers}) {
+    headers = headers ?? {};
+    headers['id'] = id;
+    _transmit(command: 'ACK', headers: headers);
+  }
+
+  void nack({@required id, Map<String, String> headers}) {
+    headers = headers ?? {};
+    headers['id'] = id;
+    _transmit(command: 'NACK', headers: headers);
+  }
+
   void watchForReceipt(String receiptId, Function(StompFrame) callback) {
     _receiptWatchers[receiptId] = callback;
   }
