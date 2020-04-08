@@ -10,7 +10,7 @@ void main() {
 
     tearDown(() async {});
     test('should not be connected on creation', () {
-      StompClient client = StompClient(config: null);
+      final client = StompClient(config: null);
       expect(client.connected, false);
     });
 
@@ -46,7 +46,7 @@ void main() {
 
       StompClient client;
       dynamic onWebSocketDone = expectAsync0(() {}, count: 2);
-      int n = 0;
+      var n = 0;
       dynamic onConnect = expectAsync2((_, frame) {
         if (n == 1) {
           client.deactivate();
@@ -67,7 +67,7 @@ void main() {
     test('attempts to reconnect indefinitely when server is unavailable',
         () async {
       StompClient client;
-      int n = 0;
+      var n = 0;
       dynamic onWebSocketDone = expectAsync0(() {
         if (n == 3) client.deactivate();
         n++;

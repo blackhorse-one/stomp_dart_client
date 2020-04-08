@@ -59,12 +59,12 @@ class StompParser {
     }
     if (byte == LF) {
       // Incoming Ping
-      this.onPingFrame != null ? this.onPingFrame() : null;
+      onPingFrame != null ? onPingFrame() : null;
       return;
     }
 
-    this._parseByte = this._collectCommand;
-    this._reinjectByte(byte);
+    _parseByte = _collectCommand;
+    _reinjectByte(byte);
   }
 
   void _collectCommand(int byte) {
@@ -169,7 +169,7 @@ class StompParser {
   }
 
   String _consumeTokenAsString() {
-    String result = utf8.decode(_currentToken);
+    final result = utf8.decode(_currentToken);
     _currentToken = [];
     return result;
   }
@@ -184,7 +184,7 @@ class StompParser {
 
   /// https://stomp.github.io/stomp-specification-1.2.html#Value_Encoding
   void _unescapeResultHeaders() {
-    Map<String, String> unescapedHeaders = {};
+    final unescapedHeaders = <String, String>{};
     _resultHeaders.forEach((key, value) {
       unescapedHeaders[_unescapeString(key)] = _unescapeString(value);
     });
@@ -210,7 +210,7 @@ class StompParser {
   }
 
   Map<String, String> _escapeHeaders(Map<String, String> headers) {
-    Map<String, String> escapedHeaders = {};
+    final escapedHeaders = <String, String>{};
     headers?.forEach((key, value) {
       escapedHeaders[_escapeString(key)] = _escapeString(value);
     });
@@ -222,10 +222,10 @@ class StompParser {
   /// also fine with the spec
   /// https://stomp.github.io/stomp-specification-1.2.html#Repeated_Header_Entries
   dynamic serializeFrame(StompFrame frame) {
-    String serializedHeaders = serializeCmdAndHeaders(frame) ?? '';
+    final serializedHeaders = serializeCmdAndHeaders(frame) ?? '';
 
     if (frame.binaryBody != null) {
-      Uint8List binaryList = Uint8List(
+      final binaryList = Uint8List(
           serializedHeaders.codeUnits.length + 1 + frame.binaryBody.length);
       binaryList.setRange(
           0, serializedHeaders.codeUnits.length, serializedHeaders.codeUnits);
@@ -237,7 +237,7 @@ class StompParser {
           NULL;
       return binaryList;
     } else {
-      String serializedFrame = serializedHeaders;
+      var serializedFrame = serializedHeaders;
       serializedFrame += frame.body ?? '';
       serializedFrame += String.fromCharCode(NULL);
       return serializedFrame;
@@ -245,9 +245,9 @@ class StompParser {
   }
 
   String serializeCmdAndHeaders(StompFrame frame) {
-    String serializedFrame = frame.command;
-    Map<String, String> headers = frame.headers ?? {};
-    int bodyLength = 0;
+    var serializedFrame = frame.command;
+    var headers = frame.headers ?? {};
+    var bodyLength = 0;
     if (frame.binaryBody != null) {
       bodyLength = frame.binaryBody.length;
     } else if (frame.body != null) {

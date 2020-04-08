@@ -41,7 +41,7 @@ class StompHandler {
 
   void start() {
     platform.connect(config).then((webSocketChannel) {
-      this.channel = webSocketChannel
+      channel = webSocketChannel
         ..stream.listen(_onData, onError: _onError, onDone: _onDone);
       _connectToStomp();
     }).catchError((_) => _onDone());
@@ -110,26 +110,24 @@ class StompHandler {
   }
 
   void _connectToStomp() {
-    Map<String, String> connectHeaders = config.stompConnectHeaders ?? {};
+    var connectHeaders = config.stompConnectHeaders ?? {};
     connectHeaders['accept-version'] = ['1.0', '1.1', '1.2'].join(',');
-    connectHeaders['heart-beat'] = [
-      this.config.heartbeatOutgoing,
-      this.config.heartbeatIncoming
-    ].join(',');
+    connectHeaders['heart-beat'] =
+        [config.heartbeatOutgoing, config.heartbeatIncoming].join(',');
 
-    this._transmit(command: 'CONNECT', headers: connectHeaders);
+    _transmit(command: 'CONNECT', headers: connectHeaders);
   }
 
   void _disconnectFromStomp() {
-    Map<String, String> disconnectHeaders = {};
+    final disconnectHeaders = <String, String>{};
     disconnectHeaders['receipt'] = 'disconnect-${_currentReceiptIndex++}';
 
     watchForReceipt(disconnectHeaders['receipt'], (StompFrame frame) {
       _cleanUp();
-      this.config.onDisconnect(frame);
+      config.onDisconnect(frame);
     });
 
-    this._transmit(command: 'DISCONNECT', headers: disconnectHeaders);
+    _transmit(command: 'DISCONNECT', headers: disconnectHeaders);
   }
 
   void _transmit(
@@ -137,28 +135,28 @@ class StompHandler {
       Map<String, String> headers,
       String body,
       Uint8List binaryBody}) {
-    final StompFrame frame = StompFrame(
+    final frame = StompFrame(
         command: command, headers: headers, body: body, binaryBody: binaryBody);
 
     dynamic serializedFrame = _parser.serializeFrame(frame);
 
-    this.config.onDebugMessage(">>> " + serializedFrame.toString());
+    config.onDebugMessage('>>> ' + serializedFrame.toString());
 
     channel.sink.add(serializedFrame);
   }
 
   void _onError(error) {
-    this.config.onWebSocketError(error);
+    config.onWebSocketError(error);
   }
 
   void _onDone() {
-    this.config.onWebSocketDone();
+    config.onWebSocketDone();
     _cleanUp();
   }
 
   void _onData(dynamic data) {
     _lastServerActivity = DateTime.now();
-    this.config.onDebugMessage("<<< " + data);
+    config.onDebugMessage('<<< ' + data);
     _parser.parseData(data);
   }
 
@@ -182,11 +180,11 @@ class StompHandler {
   }
 
   void _onPing() {
-    this.config.onDebugMessage("<<< PONG");
+    config.onDebugMessage('<<< PONG');
   }
 
   void _onConnectFrame(StompFrame frame) {
-    this._connected = true;
+    _connected = true;
 
     if (frame.headers['version'] != '1.0') {
       _parser.escapeHeaders = true;
@@ -199,55 +197,55 @@ class StompHandler {
       _setupHeartbeat(frame);
     }
 
-    this.config.onConnect(null, frame);
+    config.onConnect(null, frame);
   }
 
   void _onMessageFrame(StompFrame frame) {
-    String subscriptionId = frame.headers['subscription'];
+    final subscriptionId = frame.headers['subscription'];
 
     if (_subscriptionWatcher.containsKey(subscriptionId)) {
       _subscriptionWatcher[subscriptionId](frame);
     } else {
-      this.config.onUnhandledMessage(frame);
+      config.onUnhandledMessage(frame);
     }
   }
 
   void _onReceiptFrame(StompFrame frame) {
-    String receiptId = frame.headers['receipt-id'];
+    final receiptId = frame.headers['receipt-id'];
     if (_receiptWatchers.containsKey(receiptId)) {
       _receiptWatchers[receiptId](frame);
       _receiptWatchers.remove(receiptId);
     } else {
-      this.config.onUnhandledReceipt(frame);
+      config.onUnhandledReceipt(frame);
     }
   }
 
   void _onErrorFrame(StompFrame frame) {
-    this.config.onStompError(frame);
+    config.onStompError(frame);
   }
 
   void _onUnhandledFrame(StompFrame frame) {
-    this.config.onUnhandledFrame(frame);
+    config.onUnhandledFrame(frame);
   }
 
   void _setupHeartbeat(StompFrame frame) {
-    List<String> serverHeartbeats = frame.headers['heart-beat'].split(',');
-    int serverOutgoing = int.parse(serverHeartbeats[0]);
-    int serverIncoming = int.parse(serverHeartbeats[1]);
-    if (this.config.heartbeatOutgoing > 0 && serverIncoming > 0) {
-      int ttl = max(this.config.heartbeatOutgoing, serverIncoming);
+    final serverHeartbeats = frame.headers['heart-beat'].split(',');
+    final serverOutgoing = int.parse(serverHeartbeats[0]);
+    final serverIncoming = int.parse(serverHeartbeats[1]);
+    if (config.heartbeatOutgoing > 0 && serverIncoming > 0) {
+      final ttl = max(config.heartbeatOutgoing, serverIncoming);
       _heartbeatSender?.cancel();
       _heartbeatSender = Timer.periodic(Duration(milliseconds: ttl), (_) {
-        this.config.onDebugMessage(">>> PING");
-        this.channel.sink.add('\n');
+        config.onDebugMessage('>>> PING');
+        channel.sink.add('\n');
       });
     }
 
-    if (this.config.heartbeatIncoming > 0 && serverOutgoing > 0) {
-      int ttl = max(this.config.heartbeatIncoming, serverOutgoing);
+    if (config.heartbeatIncoming > 0 && serverOutgoing > 0) {
+      final ttl = max(config.heartbeatIncoming, serverOutgoing);
       _heartbeatReceiver?.cancel();
       _heartbeatReceiver = Timer.periodic(Duration(milliseconds: ttl), (_) {
-        int deltaMs = DateTime.now().millisecondsSinceEpoch -
+        final deltaMs = DateTime.now().millisecondsSinceEpoch -
             _lastServerActivity.millisecondsSinceEpoch;
         // The connection might be dead. Clean up.
         if (deltaMs > (ttl * 2)) {
@@ -261,6 +259,6 @@ class StompHandler {
     _connected = false;
     _heartbeatSender?.cancel();
     _heartbeatReceiver?.cancel();
-    this.channel?.sink?.close();
+    channel?.sink?.close();
   }
 }

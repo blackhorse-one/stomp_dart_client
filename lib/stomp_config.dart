@@ -115,6 +115,6 @@ class StompConfig {
           onWebSocketError: onWebSocketError ?? this.onWebSocketError,
           onWebSocketDone: onWebSocketDone ?? this.onWebSocketDone);
 
-  static _noOp([_, __]) => null;
+  static void _noOp([_, __]) => null;
   static Future<dynamic> _noOpFuture() => null;
 }

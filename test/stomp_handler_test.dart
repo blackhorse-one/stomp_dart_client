@@ -133,7 +133,7 @@ void main() {
                 handler.subscribe(
                     destination: '/foo',
                     callback: onSubscriptionFrame,
-                    headers: {"id": "sub-0"});
+                    headers: {'id': 'sub-0'});
                 Timer(Duration(milliseconds: 500), () {
                   handler.dispose();
                 });
@@ -167,9 +167,9 @@ void main() {
                 var unsubscribe = handler.subscribe(
                     destination: '/foo',
                     callback: onSubscriptionFrame,
-                    headers: {"id": "sub-0"});
+                    headers: {'id': 'sub-0'});
                 Timer(Duration(milliseconds: 500), () {
-                  unsubscribe(unsubscribeHeaders: {"receipt": "unsub-0"});
+                  unsubscribe(unsubscribeHeaders: {'receipt': 'unsub-0'});
                   // We wait an additional second because the server will send
                   // another frame for this subscription and we can make sure that
                   // the subscription on the client side was actually canceled
@@ -204,7 +204,7 @@ void main() {
                 handler.send(
                     destination: '/foo/bar',
                     body: 'This is a body',
-                    headers: {"receipt": "send-0"});
+                    headers: {'receipt': 'send-0'});
               },
               onDisconnect: onDisconnect));
 
@@ -228,9 +228,7 @@ void main() {
       handler = StompHandler(
           config: config.copyWith(
               onConnect: (_, frame) {
-                handler.ack(
-                    id: "message-0",
-                    headers: {"receipt": "send-0"});
+                handler.ack(id: 'message-0', headers: {'receipt': 'send-0'});
               },
               onDisconnect: onDisconnect));
 
@@ -254,9 +252,7 @@ void main() {
       handler = StompHandler(
           config: config.copyWith(
               onConnect: (_, frame) {
-                handler.nack(
-                    id: "message-0",
-                    headers: {"receipt": "send-0"});
+                handler.nack(id: 'message-0', headers: {'receipt': 'send-0'});
               },
               onDisconnect: onDisconnect));
 
@@ -264,6 +260,5 @@ void main() {
 
       handler.start();
     });
-
   });
 }

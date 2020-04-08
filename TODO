@@ -12,5 +12,7 @@ Todo:
       ☐ Already open or inactive connections
     ✔ Parser @done(19-10-20 00:51)
   ☐ Transactions
-  ☐ Ack/Nack
+  ✔ Ack/Nack @done(20-04-08 23:59)
+  ☐ Make Ack/Nack compliant with 1.0 and 1.1
+  ☐ Add .ack and .nack methods to the StompFrame for convenience
   ☐ Change timeouts to Duration

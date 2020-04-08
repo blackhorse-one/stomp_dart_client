@@ -35,6 +35,13 @@ client.subscribe(destination: '/foo/bar', headers: {}, callback: (frame) {
 })
 ```
 
+#### Ack/Nack
+```dart
+client.ack(id: message-id, headers: headers);
+
+client.nack(id: message-id, headers: headers);
+```
+
 #### Unsubscribe
 `client.subscribe(...)` returns a function which can be called with an optional map of headers
 ```dart
@@ -85,7 +92,7 @@ This table shows all available options in `StompConfig`
 
 #### Running unit tests
 ```dart
-pub run test test/
+pub run -p "chrome,vm" test test/
 ```
 
 #### Generating coverage data

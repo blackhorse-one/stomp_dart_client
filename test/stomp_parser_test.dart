@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 void main() {
   group('StompParser', () {
     test('can parse basic message', () {
-      final msg = "MESSAGE\ndestination:foo\nmessage-id:456\n\n\x00";
+      final msg = 'MESSAGE\ndestination:foo\nmessage-id:456\n\n\x00';
 
       var callback = expectAsync1((frame) {
         expect(frame.command, 'MESSAGE');
@@ -26,7 +26,7 @@ void main() {
     });
 
     test('does not unescape headers (v1.0)', () {
-      final msg = "MESSAGE\ndesti\\nnation:f\\noo\nmessage-id:456\n\n\x00";
+      final msg = 'MESSAGE\ndesti\\nnation:f\\noo\nmessage-id:456\n\n\x00';
 
       var callback = expectAsync1((frame) {
         expect(frame.command, 'MESSAGE');
@@ -44,7 +44,7 @@ void main() {
     });
 
     test('fails on unescaped header values (v1.0)', () {
-      final msg = "MESSAGE\ndesti\\nnation:f\noo\nmessage-id:456\n\n\x00";
+      final msg = 'MESSAGE\ndesti\\nnation:f\noo\nmessage-id:456\n\n\x00';
 
       var callback = expectAsync1((frame) {
         expect(frame.command, 'MESSAGE');
@@ -62,7 +62,7 @@ void main() {
     });
 
     test('does unescape header keys and values (^v1.1)', () {
-      final msg = "MESSAGE\ndesti\\nnation:f\\noo\nmessage-id:456\n\n\x00";
+      final msg = 'MESSAGE\ndesti\\nnation:f\\noo\nmessage-id:456\n\n\x00';
 
       var callback = expectAsync1((frame) {
         expect(frame.command, 'MESSAGE');
@@ -83,7 +83,7 @@ void main() {
 
     test('supports escaped colons in headers (^v1.1)', () {
       final msg =
-          "MESSAGE\ndestination\\cbar:foo\\cbar\nmessage-id:456\n\n\x00";
+          'MESSAGE\ndestination\\cbar:foo\\cbar\nmessage-id:456\n\n\x00';
 
       var callback = expectAsync1((frame) {
         expect(frame.command, 'MESSAGE');
@@ -144,7 +144,7 @@ void main() {
           'SEND\ndesti\\nnation:/path/to/foo\ncontent-length:14\n\nThis is a body\x00';
       final frame = StompFrame(
           command: 'SEND',
-          binaryBody: Uint8List.fromList("This is a body".codeUnits),
+          binaryBody: Uint8List.fromList('This is a body'.codeUnits),
           headers: {'desti\nnation': '/path/to/foo'});
       final parser = StompParser(null);
       parser.escapeHeaders = true;
@@ -165,7 +165,7 @@ void main() {
     });
 
     test('can parse frame with empty header', () {
-      final msg = "MESSAGE\n\nThis is a body\x00";
+      final msg = 'MESSAGE\n\nThis is a body\x00';
 
       var callback = expectAsync1((frame) {
         expect(frame.command, 'MESSAGE');
@@ -181,7 +181,7 @@ void main() {
     });
 
     test('can parse frame with empty header and body', () {
-      final msg = "MESSAGE\n\n\x00";
+      final msg = 'MESSAGE\n\n\x00';
 
       var callback = expectAsync1((frame) {
         expect(frame.command, 'MESSAGE');
@@ -198,7 +198,7 @@ void main() {
 
     test('respects content-length when parsing', () {
       final msg =
-          "MESSAGE\ncontent-length:10\n\nThis is a body longer than 10 bytes\x00";
+          'MESSAGE\ncontent-length:10\n\nThis is a body longer than 10 bytes\x00';
 
       var callback = expectAsync1((frame) {
         expect(frame.command, 'MESSAGE');
@@ -213,7 +213,7 @@ void main() {
     });
 
     test('fails silently on wrong content-length', () {
-      final msg = "MESSAGE\ncontent-length:10\n\nThis is\x00";
+      final msg = 'MESSAGE\ncontent-length:10\n\nThis is\x00';
 
       var callback = expectAsync1((frame) {}, count: 0);
 
@@ -228,7 +228,7 @@ void main() {
 
       final parser = StompParser(onFrame, onPing);
 
-      parser.parseData("\n");
+      parser.parseData('\n');
     });
 
     test('accepts ping/frames with carriage return', () {
@@ -237,17 +237,17 @@ void main() {
 
       final parser = StompParser(onFrame, onPing);
 
-      parser.parseData("\r\n");
+      parser.parseData('\r\n');
       parser.parseData(
-          "\r\nMESSAGE\r\ndestination:foo\r\nmessage-id:456\r\n\r\n\x00");
+          '\r\nMESSAGE\r\ndestination:foo\r\nmessage-id:456\r\n\r\n\x00');
     });
 
     test('can parse multiple messages seperatley', () {
-      final msg = "MESSAGE\ndestination:foo\nmessage-id:456\n\n\x00";
+      final msg = 'MESSAGE\ndestination:foo\nmessage-id:456\n\n\x00';
       final msg2 =
-          "MESSAGE\ndestination:bar\nmessage-id:123\n\nThis is a body\x00";
+          'MESSAGE\ndestination:bar\nmessage-id:123\n\nThis is a body\x00';
 
-      int n = 0;
+      var n = 0;
       dynamic onFrame = expectAsync1((frame) {
         if (n == 0) {
           expect(frame.command, 'MESSAGE');
@@ -276,11 +276,11 @@ void main() {
     });
 
     test('can parse multiple messages at once', () {
-      final msg = "MESSAGE\ndestination:foo\nmessage-id:456\n\n\x00";
+      final msg = 'MESSAGE\ndestination:foo\nmessage-id:456\n\n\x00';
       final msg2 =
-          "MESSAGE\ndestination:bar\nmessage-id:123\n\nThis is a body\x00";
+          'MESSAGE\ndestination:bar\nmessage-id:123\n\nThis is a body\x00';
 
-      int n = 0;
+      var n = 0;
       dynamic onFrame = expectAsync1((frame) {
         if (n == 0) {
           expect(frame.command, 'MESSAGE');
@@ -307,12 +307,12 @@ void main() {
       parser.parseData(msg + msg2);
     });
 
-    test("can serialize unicode special characters", () {
+    test('can serialize unicode special characters', () {
       final stringFrame =
           'SEND\ndesti\\nnation:/path/to/foo\ncontent-length:14\n\n´👌👻¡Â\x00';
       final frame = StompFrame(
           command: 'SEND',
-          body: "´👌👻¡Â",
+          body: '´👌👻¡Â',
           headers: {'desti\nnation': '/path/to/foo'});
       final parser = StompParser(null);
       parser.escapeHeaders = true;
@@ -323,9 +323,9 @@ void main() {
       expect(utf8.encode(serializedFrame), utf8.encode(stringFrame));
     });
 
-    test("can deserialize unicode special characters", () {
-      final msg = "MESSAGE\ncontent-length:23\n\n{\"a\": \"´👌👻¡Â\"}\x00";
-      final msg2 = "MESSAGE\ncontent-length:18\n\n{\"a\": \"Piaffe´s\"}\x00";
+    test('can deserialize unicode special characters', () {
+      final msg = 'MESSAGE\ncontent-length:23\n\n{"a": "´👌👻¡Â"}\x00';
+      final msg2 = 'MESSAGE\ncontent-length:18\n\n{"a": "Piaffe´s"}\x00';
 
       var n = 0;
       var callback = expectAsync1((frame) {
@@ -333,8 +333,8 @@ void main() {
           expect(frame.command, 'MESSAGE');
           expect(frame.headers.length, 1);
           expect(frame.headers.containsKey('content-length'), isTrue);
-          expect(frame.headers['content-length'], "23");
-          expect(frame.body, "{\"a\": \"´👌👻¡Â\"}");
+          expect(frame.headers['content-length'], '23');
+          expect(frame.body, '{"a": "´👌👻¡Â"}');
           expect(utf8.encode(frame.body), [
             123,
             34,
@@ -363,13 +363,13 @@ void main() {
 
           Map<String, dynamic> jsonMap = json.decode(frame.body);
           expect(jsonMap.length, 1);
-          expect(jsonMap["a"], "´👌👻¡Â");
+          expect(jsonMap['a'], '´👌👻¡Â');
         } else {
           expect(frame.command, 'MESSAGE');
           expect(frame.headers.length, 1);
           expect(frame.headers.containsKey('content-length'), isTrue);
-          expect(frame.headers['content-length'], "18");
-          expect(frame.body, "{\"a\": \"Piaffe´s\"}");
+          expect(frame.headers['content-length'], '18');
+          expect(frame.body, '{"a": "Piaffe´s"}');
 
           expect(utf8.encode(frame.body), [
             123,
@@ -394,7 +394,7 @@ void main() {
 
           Map<String, dynamic> jsonMap = json.decode(frame.body);
           expect(jsonMap.length, 1);
-          expect(jsonMap["a"], "Piaffe´s");
+          expect(jsonMap['a'], 'Piaffe´s');
         }
         n++;
       }, count: 2);

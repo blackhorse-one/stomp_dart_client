@@ -1,3 +1,7 @@
+## 0.3.2
+ - Added Ack/Nack methods (Thanks @justacid). Note: This does not yet work for 1.0 & 1.1
+ - (Minor: Reformatted code according to dartanalyze)
+
 ## 0.3.1
  - Changed folder structure to please pana.
 

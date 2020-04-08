@@ -7,7 +7,7 @@ import 'package:stomp_dart_client/stomp_frame.dart';
 
 dynamic onConnect(StompClient client, StompFrame frame) {
   client.subscribe(
-      destination: "/topic/test/subscription",
+      destination: '/topic/test/subscription',
       callback: (StompFrame frame) {
         List<dynamic> result = json.decode(frame.body);
         print(result);
@@ -15,7 +15,7 @@ dynamic onConnect(StompClient client, StompFrame frame) {
 
   Timer.periodic(Duration(seconds: 10), (_) {
     client.send(
-        destination: "/app/test/endpoints", body: json.encode({"a": 123}));
+        destination: '/app/test/endpoints', body: json.encode({'a': 123}));
   });
 }
 
@@ -23,8 +23,8 @@ final stompClient = StompClient(
     config: StompConfig(
         url: 'ws://localhost:8080/messaging',
         onConnect: onConnect,
-        stompConnectHeaders: {"Authorization": "Bearer yourToken"},
-        webSocketConnectHeaders: {"Authorization": "Bearer yourToken"}));
+        stompConnectHeaders: {'Authorization': 'Bearer yourToken'},
+        webSocketConnectHeaders: {'Authorization': 'Bearer yourToken'}));
 
 void main() {
   stompClient.activate();
