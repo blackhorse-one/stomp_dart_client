@@ -105,6 +105,7 @@ class StompConfig {
           webSocketConnectHeaders:
               webSocketConnectHeaders ?? this.webSocketConnectHeaders,
           stompConnectHeaders: stompConnectHeaders ?? this.stompConnectHeaders,
+          beforeConnect: beforeConnect ?? this.beforeConnect,
           onConnect: onConnect ?? this.onConnect,
           onStompError: onStompError ?? this.onStompError,
           onDisconnect: onDisconnect ?? this.onDisconnect,
