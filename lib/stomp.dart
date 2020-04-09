@@ -87,11 +87,11 @@ class StompClient {
         headers: headers);
   }
 
-  void ack({@required id, Map<String, String> headers}) {
+  void ack({@required String id, Map<String, String> headers}) {
     _handler.ack(id: id, headers: headers);
   }
 
-  void nack({@required id, Map<String, String> headers}) {
+  void nack({@required String id, Map<String, String> headers}) {
     _handler.nack(id: id, headers: headers);
   }
 
