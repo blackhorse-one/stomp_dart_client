@@ -32,7 +32,7 @@ class StompConfig {
   ///
   /// Allows overwriting the config before a connection attempt is made.
   /// Return null to not overwrite the config
-  final Future<StompConfig> Function() beforeConnect;
+  final FutureOr<StompConfig> Function() beforeConnect;
 
   /// Callback for when STOMP has successulfy connected
   final Function(StompClient, StompFrame) onConnect;
@@ -89,7 +89,7 @@ class StompConfig {
           Duration connectionTimeout,
           Map<String, String> stompConnectHeaders,
           Map<String, dynamic> webSocketConnectHeaders,
-          Future<StompConfig> Function() beforeConnect,
+          FutureOr<StompConfig> Function() beforeConnect,
           Function(StompClient, StompFrame) onConnect,
           Function(StompFrame) onStompError,
           Function(StompFrame) onDisconnect,
@@ -118,5 +118,5 @@ class StompConfig {
           onWebSocketDone: onWebSocketDone ?? this.onWebSocketDone);
 
   static void _noOp([_, __]) => null;
-  static Future<StompConfig> _noOpFuture() => null;
+  static FutureOr<StompConfig> _noOpFuture() => null;
 }
