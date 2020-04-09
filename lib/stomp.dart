@@ -8,17 +8,21 @@ import 'package:stomp_dart_client/stomp_handler.dart';
 
 class BadStateException implements Exception {
   final String cause;
+
   BadStateException(this.cause);
 }
 
 class StompClient {
-  final StompConfig config;
+  StompConfig get config => _config;
 
   StompHandler _handler;
   bool _isActive = false;
   Timer _reconnectTimer;
+  StompConfig _config;
 
-  StompClient({@required this.config});
+  StompClient({@required StompConfig config})
+      : _config = config,
+        assert(config != null);
 
   bool get connected => (_handler != null) && _handler.connected;
 
@@ -37,28 +41,31 @@ class StompClient {
 
   void _connect() async {
     if (connected) {
-      config.onDebugMessage('[STOMP] Already connected. Nothing to do!');
+      _config.onDebugMessage('[STOMP] Already connected. Nothing to do!');
       return;
     }
 
-    await config.beforeConnect();
+    final updatedConfig = await _config.beforeConnect();
+    if (updatedConfig != null) {
+      _config = updatedConfig;
+    }
 
     if (!_isActive) {
-      config.onDebugMessage('[STOMP] Client was marked as inactive. Skip!');
+      _config.onDebugMessage('[STOMP] Client was marked as inactive. Skip!');
       return;
     }
 
     _handler = StompHandler(
-        config: config.copyWith(onConnect: (_, frame) {
+        config: _config.copyWith(onConnect: (_, frame) {
       if (!_isActive) {
-        config.onDebugMessage(
+        _config.onDebugMessage(
             '[STOMP] Client connected while being deactivated. Will disconnect');
         _handler?.dispose();
         return;
       }
-      config.onConnect(this, frame);
+      _config.onConnect(this, frame);
     }, onWebSocketDone: () {
-      config.onWebSocketDone();
+      _config.onWebSocketDone();
 
       if (_isActive) {
         _scheduleReconnect();
@@ -98,9 +105,9 @@ class StompClient {
   void _scheduleReconnect() {
     _reconnectTimer?.cancel();
 
-    if (config.reconnectDelay > 0) {
+    if (_config.reconnectDelay > 0) {
       _reconnectTimer =
-          Timer(Duration(milliseconds: config.reconnectDelay), () {
+          Timer(Duration(milliseconds: _config.reconnectDelay), () {
         _connect();
       });
     }
