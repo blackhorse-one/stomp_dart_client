@@ -11,6 +11,13 @@ Future<WebSocketChannel> connect(StompConfig config) async {
   if (config.connectionTimeout != null) {
     websocket = websocket.timeout(config.connectionTimeout);
   }
-  final webSocket = await websocket;
-  return IOWebSocketChannel(webSocket);
+
+  try {
+    final webSocket = await websocket;
+    return IOWebSocketChannel(webSocket);
+  } on Exception catch (e) {
+    config.onWebSocketError(e);
+  }
+
+  return null;
 }
