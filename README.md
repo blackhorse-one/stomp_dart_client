@@ -92,7 +92,7 @@ This table shows all available options in `StompConfig`
 
 #### Running unit tests
 ```dart
-pub run -p "chrome,vm" test test/
+pub run test -p "chrome,vm" test/
 ```
 
 #### Generating coverage data

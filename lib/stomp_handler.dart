@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -39,12 +40,16 @@ class StompHandler {
 
   bool get connected => _connected;
 
-  void start() {
-    platform.connect(config).then((webSocketChannel) {
-      channel = webSocketChannel
-        ..stream.listen(_onData, onError: _onError, onDone: _onDone);
+  void start() async {
+    try {
+      channel = await platform.connect(config);
+      channel.stream.listen(_onData, onError: _onError, onDone: _onDone);
       _connectToStomp();
-    }).catchError((_) => _onDone());
+    } on WebSocketException catch (err) {
+      _onError(err);
+    } catch (_) {
+      _onDone();
+    }
   }
 
   void dispose() {
