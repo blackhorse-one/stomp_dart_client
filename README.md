@@ -55,7 +55,7 @@ unsubscribeFn(unsubscribeHeaders: {});
 
 #### Send
 ```dart
-client.send(desintation: '/foo/bar', body: 'Your message body', headers: {});
+client.send(destination: '/foo/bar', body: 'Your message body', headers: {});
 ```
 
 #### Disconnect
