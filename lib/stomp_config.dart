@@ -8,6 +8,7 @@ class StompConfig {
   final String url;
 
   /// Time between reconnect attempts
+  /// Set to 0 if you don't want to reconnect automatically
   final int reconnectDelay;
 
   /// Time between outgoing heartbeats

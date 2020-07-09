@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -45,9 +44,15 @@ class StompHandler {
       channel = await platform.connect(config);
       channel.stream.listen(_onData, onError: _onError, onDone: _onDone);
       _connectToStomp();
-    } on WebSocketException catch (err) {
+    } on WebSocketChannelException catch (err) {
       _onError(err);
-    } catch (_) {
+    } on TimeoutException catch (err) {
+      if (config.reconnectDelay == 0) {
+        _onError(err);
+      } else {
+        config.onDebugMessage('Connection timed out...reconnecting');
+      }
+    } catch (err) {
       _onDone();
     }
   }

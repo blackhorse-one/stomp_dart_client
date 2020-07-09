@@ -84,7 +84,7 @@ void main() {
 
       handler.start();
     });
-
+    
     test('disconnects correctly', () async {
       dynamic onWebSocketDone = expectAsync0(() {}, count: 1);
 
