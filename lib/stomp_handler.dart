@@ -51,6 +51,7 @@ class StompHandler {
         _onError(err);
       } else {
         config.onDebugMessage('Connection timed out...reconnecting');
+        _onDone();
       }
     } catch (err) {
       _onDone();
