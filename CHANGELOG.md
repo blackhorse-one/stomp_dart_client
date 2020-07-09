@@ -1,3 +1,7 @@
+## 0.3.4
+ - Catch `WebSocketChannelException` to be platform agnostic (Note: this does not work for HTML yet)
+ - Fixed minor typo in README
+
 ## 0.3.3
  - Properly catch `WebSocketException` on connect
  - Fixed minor typo in README
