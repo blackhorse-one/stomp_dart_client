@@ -1,3 +1,6 @@
+## 0.3.5
+ - Prevent `StompConfig` from losing `onDebugMessage` callback on `copyWith` #22
+
 ## 0.3.4
  - Catch `WebSocketChannelException` to be platform agnostic (Note: this does not work for HTML yet)
  - Fixed minor typo in README

@@ -96,7 +96,8 @@ class StompConfig {
           Function(StompFrame) onUnhandledMessage,
           Function(StompFrame) onUnhandledReceipt,
           Function(dynamic) onWebSocketError,
-          Function() onWebSocketDone}) =>
+          Function() onWebSocketDone,
+          Function(String) onDebugMessage}) =>
       StompConfig(
           url: url ?? this.url,
           reconnectDelay: reconnectDelay ?? this.reconnectDelay,
@@ -114,7 +115,8 @@ class StompConfig {
           onUnhandledMessage: onUnhandledMessage ?? this.onUnhandledMessage,
           onUnhandledReceipt: onUnhandledReceipt ?? this.onUnhandledReceipt,
           onWebSocketError: onWebSocketError ?? this.onWebSocketError,
-          onWebSocketDone: onWebSocketDone ?? this.onWebSocketDone);
+          onWebSocketDone: onWebSocketDone ?? this.onWebSocketDone,
+          onDebugMessage: onDebugMessage ?? this.onDebugMessage);
 
   static void _noOp([_, __]) => null;
   static Future<dynamic> _noOpFuture() => null;
