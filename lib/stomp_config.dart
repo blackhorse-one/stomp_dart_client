@@ -7,6 +7,9 @@ import 'package:stomp_dart_client/stomp_frame.dart';
 class StompConfig {
   final String url;
 
+  /// activate SockJS encapsulation
+  final bool useSockJSEncapsulation;
+
   /// Time between reconnect attempts
   /// Set to 0 if you don't want to reconnect automatically
   final int reconnectDelay;
@@ -62,6 +65,7 @@ class StompConfig {
 
   const StompConfig({
     @required this.url,
+    this.useSockJSEncapsulation = false,
     this.reconnectDelay = 5000,
     this.heartbeatIncoming = 5000,
     this.heartbeatOutgoing = 5000,
@@ -82,6 +86,7 @@ class StompConfig {
 
   StompConfig copyWith(
           {String url,
+          bool useSockJSEncapsulation,
           int reconnectDelay,
           int heartbeatIncoming,
           int heartbeatOutgoing,
@@ -96,9 +101,11 @@ class StompConfig {
           Function(StompFrame) onUnhandledMessage,
           Function(StompFrame) onUnhandledReceipt,
           Function(dynamic) onWebSocketError,
-          Function() onWebSocketDone}) =>
+          Function() onWebSocketDone,
+          Function() onDebugMessage}) =>
       StompConfig(
           url: url ?? this.url,
+          useSockJSEncapsulation: useSockJSEncapsulation ?? this.useSockJSEncapsulation,
           reconnectDelay: reconnectDelay ?? this.reconnectDelay,
           heartbeatIncoming: heartbeatIncoming ?? this.heartbeatIncoming,
           heartbeatOutgoing: heartbeatOutgoing ?? this.heartbeatOutgoing,
@@ -114,7 +121,8 @@ class StompConfig {
           onUnhandledMessage: onUnhandledMessage ?? this.onUnhandledMessage,
           onUnhandledReceipt: onUnhandledReceipt ?? this.onUnhandledReceipt,
           onWebSocketError: onWebSocketError ?? this.onWebSocketError,
-          onWebSocketDone: onWebSocketDone ?? this.onWebSocketDone);
+          onWebSocketDone: onWebSocketDone ?? this.onWebSocketDone,
+          onDebugMessage: onDebugMessage ?? this.onDebugMessage);
 
   static void _noOp([_, __]) => null;
   static Future<dynamic> _noOpFuture() => null;

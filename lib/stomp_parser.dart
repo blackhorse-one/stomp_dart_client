@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:stomp_dart_client/parser.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
 
 ///
@@ -8,7 +9,7 @@ import 'package:stomp_dart_client/stomp_frame.dart';
 /// https://github.com/stomp-js/stompjs/blob/master/src/parser.ts
 /// Credit: https://github.com/kum-deepak
 ///
-class StompParser {
+class StompParser implements Parser {
   String _resultCommand;
   Map<String, String> _resultHeaders;
   String _resultBody;
@@ -27,12 +28,14 @@ class StompParser {
 
   Function(int) _parseByte;
 
+  @override
   bool escapeHeaders = false;
 
   StompParser(this.onStompFrame, [this.onPingFrame]) {
     _initState();
   }
 
+  @override
   void parseData(dynamic data) {
     Uint8List byteList;
     if (data is String) {
@@ -221,8 +224,9 @@ class StompParser {
   /// the last value written would just be the most up to date value, which is
   /// also fine with the spec
   /// https://stomp.github.io/stomp-specification-1.2.html#Repeated_Header_Entries
+  @override
   dynamic serializeFrame(StompFrame frame) {
-    final serializedHeaders = serializeCmdAndHeaders(frame) ?? '';
+    final serializedHeaders = _serializeCmdAndHeaders(frame) ?? '';
 
     if (frame.binaryBody != null) {
       final binaryList = Uint8List(
@@ -244,7 +248,7 @@ class StompParser {
     }
   }
 
-  String serializeCmdAndHeaders(StompFrame frame) {
+  String _serializeCmdAndHeaders(StompFrame frame) {
     var serializedFrame = frame.command;
     var headers = frame.headers ?? {};
     var bodyLength = 0;

@@ -3,6 +3,8 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
+import 'package:stomp_dart_client/parser.dart';
+import 'package:stomp_dart_client/sock_js/sock_js_parser.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
 import 'package:stomp_dart_client/stomp_parser.dart';
@@ -16,7 +18,7 @@ class StompHandler {
   WebSocketChannel channel;
   final StompConfig config;
 
-  StompParser _parser;
+  Parser _parser;
   bool _connected = false;
   int _currentReceiptIndex = 0;
   int _currentSubscriptionIndex = 0;
@@ -30,7 +32,7 @@ class StompHandler {
   Timer _heartbeatReceiver;
 
   StompHandler({@required this.config}) {
-    _parser = StompParser(_onFrame, _onPing);
+    _parser = config.useSockJSEncapsulation ? SockJSParser(_onFrame, _onPing) : StompParser(_onFrame, _onPing);
 
     _lastServerActivity = DateTime.now();
     _currentReceiptIndex = 0;
