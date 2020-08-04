@@ -1,5 +1,8 @@
+## 0.3.6
+ - Add SockJS support
+
 ## 0.3.5
- - Prevent `StompConfig` from losing `onDebugMessage` callback on `copyWith` #22
+ - Prevent `StompConfig` from losing `onDebugMessage` callback on `copyWith` #221
 
 ## 0.3.4
  - Catch `WebSocketChannelException` to be platform agnostic (Note: this does not work for HTML yet)
