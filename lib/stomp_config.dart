@@ -124,7 +124,7 @@ class StompConfig {
           Function(StompFrame) onUnhandledReceipt,
           Function(dynamic) onWebSocketError,
           Function() onWebSocketDone,
-          Function() onDebugMessage}) =>
+          Function(String) onDebugMessage}) =>
       StompConfig(
           url: url ?? this.url,
           reconnectDelay: reconnectDelay ?? this.reconnectDelay,
