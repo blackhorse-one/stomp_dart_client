@@ -38,9 +38,8 @@ class SockJSParser implements Parser {
     // first check for messages that don't need a payload
     switch (type)
     {
-      case 'o':
-          return;
-      case 'h':
+      case 'o': // Open frame
+      case 'h': // Heartbeat frame
           return;
       default:
         break;
@@ -56,28 +55,27 @@ class SockJSParser implements Parser {
       payload = json.decode(content);
     }
     catch(exception){
-      print('sockjs payload bad json:${exception.message}');
       return;
     }
 
     switch (type)
     {
-      case 'a'://array message
+      case 'a'://Array of messages
         if (payload is List)
         {
           for (var item in payload)
           {
-            print('message:' + item.toString());
             _stompParser.parseData(item);
           };
         }
         break;
       case 'm'://message
-        print('message' + payload.toString());
         _stompParser.parseData(payload);
         break;
-      case 'c'://close  
-        // TODO close event
+      case 'c'://Close frame
+        if(_stompParser.onStompFrame != null){
+          _stompParser.onStompFrame(StompFrame(command: 'ERROR'));
+        }
         break;
     }
   }

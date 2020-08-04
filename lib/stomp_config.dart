@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:stomp_dart_client/sock_js/sock_js_utils.dart';
 import 'package:stomp_dart_client/stomp.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
 
 class StompConfig {
   final String url;
 
-  /// activate SockJS encapsulation
-  final bool useSockJSEncapsulation;
+  final bool useSockJS;
 
   /// Time between reconnect attempts
   /// Set to 0 if you don't want to reconnect automatically
@@ -65,7 +65,6 @@ class StompConfig {
 
   const StompConfig({
     @required this.url,
-    this.useSockJSEncapsulation = false,
     this.reconnectDelay = 5000,
     this.heartbeatIncoming = 5000,
     this.heartbeatOutgoing = 5000,
@@ -82,15 +81,38 @@ class StompConfig {
     this.onWebSocketError = _noOp,
     this.onWebSocketDone = _noOp,
     this.onDebugMessage = _noOp,
+    this.useSockJS = false
   });
+
+  StompConfig.SockJS({
+    @required String url,
+    this.reconnectDelay = 5000,
+    this.heartbeatIncoming = 5000,
+    this.heartbeatOutgoing = 5000,
+    this.connectionTimeout,
+    this.stompConnectHeaders,
+    this.webSocketConnectHeaders,
+    this.beforeConnect = _noOpFuture,
+    this.onConnect = _noOp,
+    this.onStompError = _noOp,
+    this.onDisconnect = _noOp,
+    this.onUnhandledFrame = _noOp,
+    this.onUnhandledMessage = _noOp,
+    this.onUnhandledReceipt = _noOp,
+    this.onWebSocketError = _noOp,
+    this.onWebSocketDone = _noOp,
+    this.onDebugMessage = _noOp,
+  })
+  : useSockJS = true,
+    url = SocketJsUtils().generateTransportUrl(url);
 
   StompConfig copyWith(
           {String url,
-          bool useSockJSEncapsulation,
           int reconnectDelay,
           int heartbeatIncoming,
           int heartbeatOutgoing,
           Duration connectionTimeout,
+          bool useSockJS,
           Map<String, String> stompConnectHeaders,
           Map<String, dynamic> webSocketConnectHeaders,
           Future<void> Function() beforeConnect,
@@ -105,11 +127,11 @@ class StompConfig {
           Function() onDebugMessage}) =>
       StompConfig(
           url: url ?? this.url,
-          useSockJSEncapsulation: useSockJSEncapsulation ?? this.useSockJSEncapsulation,
           reconnectDelay: reconnectDelay ?? this.reconnectDelay,
           heartbeatIncoming: heartbeatIncoming ?? this.heartbeatIncoming,
           heartbeatOutgoing: heartbeatOutgoing ?? this.heartbeatOutgoing,
           connectionTimeout: connectionTimeout ?? this.connectionTimeout,
+          useSockJS: useSockJS ?? this.useSockJS,
           webSocketConnectHeaders:
               webSocketConnectHeaders ?? this.webSocketConnectHeaders,
           stompConnectHeaders: stompConnectHeaders ?? this.stompConnectHeaders,

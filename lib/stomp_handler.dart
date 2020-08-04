@@ -31,9 +31,14 @@ class StompHandler {
   Timer _heartbeatSender;
   Timer _heartbeatReceiver;
 
-  StompHandler({@required this.config}) {
-    _parser = config.useSockJSEncapsulation ? SockJSParser(_onFrame, _onPing) : StompParser(_onFrame, _onPing);
-
+  StompHandler({@required this.config})
+  {
+    if(config.useSockJS){ // use SockJS parser
+      _parser = SockJSParser(_onFrame, _onPing);
+    }
+    else{
+      _parser = StompParser(_onFrame, _onPing);
+    }
     _lastServerActivity = DateTime.now();
     _currentReceiptIndex = 0;
     _currentSubscriptionIndex = 0;
@@ -46,8 +51,13 @@ class StompHandler {
       channel = await platform.connect(config);
       channel.stream.listen(_onData, onError: _onError, onDone: _onDone);
       _connectToStomp();
-    } on WebSocketChannelException catch (err) {
-      _onError(err);
+    } on WebSocketChannelException catch (err) {      
+      if (config.reconnectDelay == 0) {
+        _onError(err);
+      } else {
+        config.onDebugMessage('Connection web socket error...reconnecting');
+        _onDone();
+      }
     } on TimeoutException catch (err) {
       if (config.reconnectDelay == 0) {
         _onError(err);
