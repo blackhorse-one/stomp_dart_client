@@ -104,7 +104,7 @@ class StompConfig {
     this.onDebugMessage = _noOp,
   })
   : useSockJS = true,
-    url = SocketJsUtils().generateTransportUrl(url);
+    url = SockJsUtils().generateTransportUrl(url);
 
   StompConfig copyWith(
           {String url,

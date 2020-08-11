@@ -34,7 +34,7 @@ class StompHandler {
   StompHandler({@required this.config})
   {
     if(config.useSockJS){ // use SockJS parser
-      _parser = SockJSParser(_onFrame, _onPing);
+      _parser = SockJSParser(onStompFrame: _onFrame, onPingFrame: _onPing, onDone: _onDone);
     }
     else{
       _parser = StompParser(_onFrame, _onPing);

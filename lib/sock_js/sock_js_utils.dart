@@ -1,12 +1,12 @@
 import 'dart:math';
 
-class SocketJsUtils
+class SockJsUtils
 {
-  static final SocketJsUtils _instance = SocketJsUtils._internal();
+  static final SockJsUtils _instance = SockJsUtils._internal();
 
-  factory SocketJsUtils() => _instance;
+  factory SockJsUtils() => _instance;
 
-  SocketJsUtils._internal(); // private constructor
+  SockJsUtils._internal(); // private constructor
   
   final Random _random = Random();
 
@@ -37,6 +37,9 @@ class SocketJsUtils
     else if (transportUrl.startsWith('http'))
     {
         transportUrl = 'ws' + transportUrl.substring(4);
+    }
+    else{
+      throw ArgumentError('The url has to start with http/https');
     }
     return transportUrl;
   }

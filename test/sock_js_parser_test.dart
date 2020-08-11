@@ -19,7 +19,9 @@ void main() {
         expect(frame.body, isEmpty);
       }, count: 1);
 
-      final parser = SockJSParser(callback);
+      var onDoneCallback = expectAsync1((_){}, count: 0);
+
+      final parser = SockJSParser(onStompFrame: callback, onDone: onDoneCallback);
 
       parser.parseData(sockjsMsg);
     });
@@ -38,7 +40,9 @@ void main() {
         expect(frame.body, isEmpty);
       }, count: 1);
 
-      final parser = SockJSParser(callback);
+      var onDoneCallback = expectAsync1((_){}, count: 0);
+
+      final parser = SockJSParser(onStompFrame: callback, onDone: onDoneCallback);
 
       parser.parseData(sockjsMsg);
     });
@@ -60,7 +64,9 @@ void main() {
         ++count;
       }, count: 2);
 
-      final parser = SockJSParser(callback);
+      var onDoneCallback = expectAsync1((_){}, count: 0);
+
+      final parser = SockJSParser(onStompFrame: callback, onDone: onDoneCallback);
 
       parser.parseData(sockjsMsg);
     });
@@ -68,10 +74,11 @@ void main() {
     test('don\'t parse open frame', () {
       final sockjsMsg = 'o';
 
-      var callback = expectAsync1((frame) {
-      }, count: 0);
+      var callback = expectAsync1((frame) {}, count: 0);
 
-      final parser = SockJSParser(callback);
+      var onDoneCallback = expectAsync1((_){}, count: 0);
+
+      final parser = SockJSParser(onStompFrame: callback, onDone: onDoneCallback);
 
       parser.parseData(sockjsMsg);
     });
@@ -82,7 +89,9 @@ void main() {
       var callback = expectAsync1((frame) {
       }, count: 0);
 
-      final parser = SockJSParser(callback);
+      var onDoneCallback = expectAsync1((_){}, count: 0);
+
+      final parser = SockJSParser(onStompFrame: callback, onDone: onDoneCallback);
 
       parser.parseData(sockjsMsg);
     });
@@ -93,7 +102,9 @@ void main() {
       var callback = expectAsync1((frame) {
       }, count: 0);
 
-      final parser = SockJSParser(callback);
+      var onDoneCallback = expectAsync1((_){}, count: 0);
+
+      final parser = SockJSParser(onStompFrame: callback, onDone: onDoneCallback);
 
       parser.parseData(sockjsMsg);
     });
@@ -104,8 +115,10 @@ void main() {
 
       var callback = expectAsync1((frame) {
       }, count: 0);
+      
+      var onDoneCallback = expectAsync1((_){}, count: 0);
 
-      final parser = SockJSParser(callback);
+      final parser = SockJSParser(onStompFrame: callback, onDone: onDoneCallback);
 
       parser.parseData(sockjsMsg);
     });
@@ -114,10 +127,11 @@ void main() {
       final sockjsMsg = 'c[1007,"null"]';
 
       var callback = expectAsync1((frame) {
-        expect(frame.command, 'ERROR');
-      }, count: 1);
+      }, count: 0);
 
-      final parser = SockJSParser(callback);
+      var onDoneCallback = expectAsync0((){}, count: 1);
+
+      final parser = SockJSParser(onStompFrame: callback, onDone: onDoneCallback);
 
       parser.parseData(sockjsMsg);
     });

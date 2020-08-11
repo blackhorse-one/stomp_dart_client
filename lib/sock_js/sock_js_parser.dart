@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:meta/meta.dart';
 import 'package:stomp_dart_client/parser.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
 import 'package:stomp_dart_client/stomp_parser.dart';
@@ -8,7 +9,10 @@ class SockJSParser implements Parser {
 
   StompParser _stompParser;
 
-  SockJSParser(Function(StompFrame) onStompFrame, [Function onPingFrame]){
+  final Function onDone;
+
+  SockJSParser({@required Function(StompFrame) onStompFrame,
+    Function onPingFrame, @required this.onDone}){
     _stompParser = StompParser(onStompFrame, onPingFrame);
   }
 
@@ -73,8 +77,8 @@ class SockJSParser implements Parser {
         _stompParser.parseData(payload);
         break;
       case 'c'://Close frame
-        if(_stompParser.onStompFrame != null){
-          _stompParser.onStompFrame(StompFrame(command: 'ERROR'));
+        if(onDone != null){
+          onDone();
         }
         break;
     }

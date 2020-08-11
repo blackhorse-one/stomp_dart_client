@@ -91,10 +91,6 @@ This table shows all available options in `StompConfig`
 ## Use Stomp with SockJS
 Use StompConfig.SockJS constructor instead of default StompConfig constructor.
 
-The url must be start with http/https instead of ws/wss.
-
-The StompClient url become automatically a ws url with SOCKJs pattern url like wss://host:port/path/xxxx/yyyy/websocket
-
 ```dart
 StompClient client = StompClient(
     config: StompConfig.SockJS(
