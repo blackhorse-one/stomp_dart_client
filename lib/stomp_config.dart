@@ -63,26 +63,25 @@ class StompConfig {
   /// Callback for debug messages
   final Function(String) onDebugMessage;
 
-  const StompConfig({
-    @required this.url,
-    this.reconnectDelay = 5000,
-    this.heartbeatIncoming = 5000,
-    this.heartbeatOutgoing = 5000,
-    this.connectionTimeout,
-    this.stompConnectHeaders,
-    this.webSocketConnectHeaders,
-    this.beforeConnect = _noOpFuture,
-    this.onConnect = _noOp,
-    this.onStompError = _noOp,
-    this.onDisconnect = _noOp,
-    this.onUnhandledFrame = _noOp,
-    this.onUnhandledMessage = _noOp,
-    this.onUnhandledReceipt = _noOp,
-    this.onWebSocketError = _noOp,
-    this.onWebSocketDone = _noOp,
-    this.onDebugMessage = _noOp,
-    this.useSockJS = false
-  });
+  const StompConfig(
+      {@required this.url,
+      this.reconnectDelay = 5000,
+      this.heartbeatIncoming = 5000,
+      this.heartbeatOutgoing = 5000,
+      this.connectionTimeout,
+      this.stompConnectHeaders,
+      this.webSocketConnectHeaders,
+      this.beforeConnect = _noOpFuture,
+      this.onConnect = _noOp,
+      this.onStompError = _noOp,
+      this.onDisconnect = _noOp,
+      this.onUnhandledFrame = _noOp,
+      this.onUnhandledMessage = _noOp,
+      this.onUnhandledReceipt = _noOp,
+      this.onWebSocketError = _noOp,
+      this.onWebSocketDone = _noOp,
+      this.onDebugMessage = _noOp,
+      this.useSockJS = false});
 
   StompConfig.SockJS({
     @required String url,
@@ -102,9 +101,8 @@ class StompConfig {
     this.onWebSocketError = _noOp,
     this.onWebSocketDone = _noOp,
     this.onDebugMessage = _noOp,
-  })
-  : useSockJS = true,
-    url = SockJsUtils().generateTransportUrl(url);
+  })  : useSockJS = true,
+        url = SockJsUtils().generateTransportUrl(url);
 
   StompConfig copyWith(
           {String url,

@@ -90,7 +90,7 @@ void main() {
 
       handler.start();
     });
-    
+
     test('disconnects correctly', () async {
       dynamic onWebSocketDone = expectAsync0(() {}, count: 1);
 
@@ -275,7 +275,7 @@ void main() {
         expect(frame.headers['destination'], '/bar');
         expect(frame.body, 'This is the message body');
       });
-      
+
       dynamic onDebugMessage = expectAsync1((mgs) {}, count: 1, max: -1);
       // We need this async waiter to make sure we actually wait until the
       // connection is closed to not affect other tests
@@ -295,7 +295,7 @@ void main() {
               onDebugMessage: onDebugMessage,
               onDisconnect: onDisconnect));
 
-      handler.start();  
+      handler.start();
     });
   });
 }

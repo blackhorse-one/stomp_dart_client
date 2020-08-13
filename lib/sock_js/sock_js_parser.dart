@@ -6,13 +6,14 @@ import 'package:stomp_dart_client/stomp_frame.dart';
 import 'package:stomp_dart_client/stomp_parser.dart';
 
 class SockJSParser implements Parser {
-
   StompParser _stompParser;
 
   final Function onDone;
 
-  SockJSParser({@required Function(StompFrame) onStompFrame,
-    Function onPingFrame, @required this.onDone}){
+  SockJSParser(
+      {@required Function(StompFrame) onStompFrame,
+      Function onPingFrame,
+      @required this.onDone}) {
     _stompParser = StompParser(onStompFrame, onPingFrame);
   }
 
@@ -40,44 +41,38 @@ class SockJSParser implements Parser {
     var content = msg.substring(1);
 
     // first check for messages that don't need a payload
-    switch (type)
-    {
+    switch (type) {
       case 'o': // Open frame
       case 'h': // Heartbeat frame
-          return;
+        return;
       default:
         break;
     }
 
-    if (content.isEmpty){
+    if (content.isEmpty) {
       return;
     }
 
     dynamic payload;
-    try
-    {
+    try {
       payload = json.decode(content);
-    }
-    catch(exception){
+    } catch (exception) {
       return;
     }
 
-    switch (type)
-    {
-      case 'a'://Array of messages
-        if (payload is List)
-        {
-          for (var item in payload)
-          {
+    switch (type) {
+      case 'a': //Array of messages
+        if (payload is List) {
+          for (var item in payload) {
             _stompParser.parseData(item);
-          };
+          }
         }
         break;
-      case 'm'://message
+      case 'm': //message
         _stompParser.parseData(payload);
         break;
-      case 'c'://Close frame
-        if(onDone != null){
+      case 'c': //Close frame
+        if (onDone != null) {
           onDone();
         }
         break;
@@ -89,15 +84,14 @@ class SockJSParser implements Parser {
 
   @override
   dynamic serializeFrame(StompFrame frame) {
-
     dynamic serializedFrame = _stompParser.serializeFrame(frame);
-    
+
     serializedFrame = _encapsulateFrame(serializedFrame);
 
     return serializedFrame;
   }
 
-  String _encapsulateFrame(String frame){
+  String _encapsulateFrame(String frame) {
     var result = json.encode(frame);
     return '[$result]';
   }

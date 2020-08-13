@@ -43,7 +43,8 @@ class StompParser implements Parser {
     } else if (data is List<int>) {
       byteList = Uint8List.fromList(data);
     } else {
-      throw UnsupportedError('Input data type unsupported ' + data.runtimeType.toString());
+      throw UnsupportedError(
+          'Input data type unsupported ' + data.runtimeType.toString());
     }
 
     for (var i = 0; i < byteList.length; i++) {

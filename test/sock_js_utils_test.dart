@@ -26,7 +26,8 @@ void main() {
     test('generate websocket url with bad url', () {
       final url = 'wss://localhost:5000/test';
 
-      expect(() => SockJsUtils().generateTransportUrl(url), throwsArgumentError);
+      expect(
+          () => SockJsUtils().generateTransportUrl(url), throwsArgumentError);
     });
   });
 }

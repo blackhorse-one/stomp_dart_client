@@ -1,8 +1,6 @@
-
 import 'package:stomp_dart_client/stomp_frame.dart';
 
-abstract class Parser{
-
+abstract class Parser {
   bool escapeHeaders;
 
   void parseData(dynamic data);

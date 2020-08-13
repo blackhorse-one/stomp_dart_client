@@ -1,5 +1,6 @@
 ## 0.3.6
  - Add SockJS support
+ - Fixed bug with binary messages
 
 ## 0.3.5
  - Prevent `StompConfig` from losing `onDebugMessage` callback on `copyWith` #22
