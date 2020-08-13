@@ -167,7 +167,7 @@ class StompHandler {
 
   void _onData(dynamic data) {
     _lastServerActivity = DateTime.now();
-    config.onDebugMessage('<<< ' + data);
+    config.onDebugMessage('<<< ' + data.toString());
     _parser.parseData(data);
   }
 

@@ -17,6 +17,7 @@ void main() {
       streamChannel = spawnHybridCode(r'''
         import 'dart:io';
         import 'dart:async';
+        import 'dart:convert';
         import 'package:web_socket_channel/io.dart';
         import 'package:stomp_dart_client/stomp_parser.dart';
         import 'package:stream_channel/stream_channel.dart';
@@ -32,8 +33,13 @@ void main() {
                 webSocketChannel.sink
                     .add("RECEIPT\nreceipt-id:${frame.headers['receipt']}\n\n\x00");
               } else if (frame.command == 'SUBSCRIBE') {
-                webSocketChannel.sink.add(
-                    "MESSAGE\nsubscription:${frame.headers['id']}\nmessage-id:123\ndestination:/foo\n\nThis is the message body\x00");
+                if (frame.headers['destination'] == '/foo') {
+                  webSocketChannel.sink.add(
+                      "MESSAGE\nsubscription:${frame.headers['id']}\nmessage-id:123\ndestination:/foo\n\nThis is the message body\x00");
+                } else if (frame.headers['destination'] == '/bar') {
+                  webSocketChannel.sink.add(utf8.encode(
+                      "MESSAGE\nsubscription:${frame.headers['id']}\nmessage-id:123\ndestination:/bar\n\nThis is the message body\x00"));     
+                }
               } else if (frame.command == 'UNSUBSCRIBE' ||
                   frame.command == 'SEND') {
                 if (frame.headers?.containsKey('receipt') ?? false) {
@@ -259,6 +265,37 @@ void main() {
       handler.watchForReceipt('send-0', onReceiptFrame);
 
       handler.start();
+    });
+
+    test('correctly logs data not subtype of String', () {
+      dynamic onSubscriptionFrame = expectAsync1((frame) {
+        expect(frame.command, 'MESSAGE');
+        expect(frame.headers.length, 3);
+        expect(frame.headers['subscription'], 'sub-0');
+        expect(frame.headers['destination'], '/bar');
+        expect(frame.body, 'This is the message body');
+      });
+      
+      dynamic onDebugMessage = expectAsync1((mgs) {}, count: 1, max: -1);
+      // We need this async waiter to make sure we actually wait until the
+      // connection is closed to not affect other tests
+      dynamic onDisconnect = expectAsync1((frame) {}, count: 1);
+
+      handler = StompHandler(
+          config: config.copyWith(
+              onConnect: (_, frame) {
+                handler.subscribe(
+                    destination: '/bar',
+                    callback: onSubscriptionFrame,
+                    headers: {'id': 'sub-0'});
+                Timer(Duration(milliseconds: 500), () {
+                  handler.dispose();
+                });
+              },
+              onDebugMessage: onDebugMessage,
+              onDisconnect: onDisconnect));
+
+      handler.start();  
     });
   });
 }
