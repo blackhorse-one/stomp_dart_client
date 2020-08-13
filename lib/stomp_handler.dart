@@ -3,6 +3,8 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
+import 'package:stomp_dart_client/parser.dart';
+import 'package:stomp_dart_client/sock_js/sock_js_parser.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
 import 'package:stomp_dart_client/stomp_parser.dart';
@@ -16,7 +18,7 @@ class StompHandler {
   WebSocketChannel channel;
   final StompConfig config;
 
-  StompParser _parser;
+  Parser _parser;
   bool _connected = false;
   int _currentReceiptIndex = 0;
   int _currentSubscriptionIndex = 0;
@@ -29,9 +31,14 @@ class StompHandler {
   Timer _heartbeatSender;
   Timer _heartbeatReceiver;
 
-  StompHandler({@required this.config}) {
-    _parser = StompParser(_onFrame, _onPing);
-
+  StompHandler({@required this.config})
+  {
+    if(config.useSockJS){ // use SockJS parser
+      _parser = SockJSParser(onStompFrame: _onFrame, onPingFrame: _onPing, onDone: _onDone);
+    }
+    else{
+      _parser = StompParser(_onFrame, _onPing);
+    }
     _lastServerActivity = DateTime.now();
     _currentReceiptIndex = 0;
     _currentSubscriptionIndex = 0;
@@ -44,7 +51,7 @@ class StompHandler {
       channel = await platform.connect(config);
       channel.stream.listen(_onData, onError: _onError, onDone: _onDone);
       _connectToStomp();
-    } on WebSocketChannelException catch (err) {
+    } on WebSocketChannelException catch (err) {      
       _onError(err);
     } on TimeoutException catch (err) {
       if (config.reconnectDelay == 0) {

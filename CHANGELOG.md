@@ -1,3 +1,6 @@
+## 0.3.6
+ - Add SockJS support
+
 ## 0.3.5
  - Prevent `StompConfig` from losing `onDebugMessage` callback on `copyWith` #22
 
