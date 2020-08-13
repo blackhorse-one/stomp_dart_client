@@ -52,7 +52,12 @@ class StompHandler {
       channel.stream.listen(_onData, onError: _onError, onDone: _onDone);
       _connectToStomp();
     } on WebSocketChannelException catch (err) {
-      _onError(err);
+      if (config.reconnectDelay == 0) {
+        _onError(err);
+      } else {
+        config.onDebugMessage('Connection error...reconnecting');
+        _onDone();
+      }
     } on TimeoutException catch (err) {
       if (config.reconnectDelay == 0) {
         _onError(err);
