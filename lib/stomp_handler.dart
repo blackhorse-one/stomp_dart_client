@@ -261,7 +261,7 @@ class StompHandler {
       _heartbeatSender = Timer.periodic(Duration(milliseconds: ttl), (_) {
         config.onDebugMessage('>>> PING');
         if (config.useSockJS) {
-          channel.sink.add('[\\n]');
+          channel.sink.add('["\\n"]');
         } else {
           channel.sink.add('\n');
         }
