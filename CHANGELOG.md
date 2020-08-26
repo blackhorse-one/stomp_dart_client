@@ -1,3 +1,6 @@
+## 0.3.7
+ - Fixed heartbeat for SockJS
+
 ## 0.3.6
  - Add SockJS support 
  - Reconnect websocket when `WebSocketException` occurs and reconnectDelay != 0
