@@ -23,11 +23,20 @@ void main() {
       expect(webSocketUrl.startsWith('wss://'), isTrue);
     });
 
+    test('generate websocket url with no empty fragment', () {
+      final url = 'https://localhost:5000/test';
+
+      final webSocketUrl = SockJsUtils().generateTransportUrl(url);
+
+      expect(webSocketUrl, isNotNull);
+      expect(webSocketUrl, isNotEmpty);
+      expect(webSocketUrl.endsWith('#'), isFalse);
+    });
+
     test('generate websocket url with bad url', () {
       final url = 'wss://localhost:5000/test';
 
-      expect(
-          () => SockJsUtils().generateTransportUrl(url), throwsArgumentError);
+      expect(() => SockJsUtils().generateTransportUrl(url), throwsArgumentError);
     });
   });
 }
