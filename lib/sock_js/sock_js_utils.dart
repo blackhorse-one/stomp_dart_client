@@ -21,11 +21,12 @@ class SockJsUtils {
     pathSegments.add('websocket');
 
     uri = Uri(
-        scheme: uri.scheme,
-        host: uri.host,
-        port: uri.port,
-        fragment: uri.fragment,
-        pathSegments: pathSegments);
+      scheme: uri.scheme,
+      host: uri.host,
+      port: uri.port,
+      fragment: null,
+      pathSegments: pathSegments,
+    );
 
     var transportUrl = uri.toString();
     if (transportUrl.startsWith('https')) {
