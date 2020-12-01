@@ -1,3 +1,6 @@
+## 0.3.8
+ - Fix for SockJS in web environment
+
 ## 0.3.7
  - Fixed heartbeat for SockJS
 
