@@ -24,6 +24,7 @@ class SockJsUtils {
       scheme: uri.scheme,
       host: uri.host,
       port: uri.port,
+      query: uri.query,
       fragment: null,
       pathSegments: pathSegments,
     );
