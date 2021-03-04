@@ -5,12 +5,6 @@ import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
 import 'package:stomp_dart_client/stomp_handler.dart';
 
-class BadStateException implements Exception {
-  final String cause;
-
-  BadStateException(this.cause);
-}
-
 class StompClient {
   final StompConfig config;
 
