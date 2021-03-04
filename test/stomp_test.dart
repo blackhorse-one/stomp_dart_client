@@ -60,7 +60,7 @@ void main() {
       client = StompClient(
         config: StompConfig(
           url: 'ws://localhost:$port',
-          reconnectDelay: 5000,
+          reconnectDelay: Duration(seconds: 5),
           onConnect: onConnect,
           onWebSocketDone: onWebSocketDone,
         ),
@@ -89,9 +89,9 @@ void main() {
         config: StompConfig(
           url: 'ws://localhost:1234',
           onConnect: onConnect,
-          reconnectDelay: 1000,
+          reconnectDelay: Duration(seconds: 1),
           onWebSocketDone: onWebSocketDone,
-          connectionTimeout: Duration(milliseconds: 2000),
+          connectionTimeout: Duration(seconds: 2),
         ),
       )..activate();
     });
@@ -157,7 +157,7 @@ void main() {
       client = StompClient(
         config: StompConfig(
           url: 'ws://localhost:$port',
-          reconnectDelay: 5000,
+          reconnectDelay: Duration(seconds: 5),
           onConnect: onConnect,
           onWebSocketDone: onWebSocketDone,
           onWebSocketError: onError,

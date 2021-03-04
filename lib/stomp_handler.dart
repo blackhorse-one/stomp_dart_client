@@ -54,14 +54,14 @@ class StompHandler {
       channel!.stream.listen(_onData, onError: _onError, onDone: _onDone);
       _connectToStomp();
     } on WebSocketChannelException catch (err) {
-      if (config.reconnectDelay == 0) {
+      if (config.reconnectDelay.inMilliseconds == 0) {
         _onError(err);
       } else {
         config.onDebugMessage('Connection error...reconnecting');
         _onDone();
       }
     } on TimeoutException catch (err) {
-      if (config.reconnectDelay == 0) {
+      if (config.reconnectDelay.inMilliseconds == 0) {
         _onError(err);
       } else {
         config.onDebugMessage('Connection timed out...reconnecting');
@@ -271,8 +271,8 @@ class StompHandler {
     final serverHeartbeats = frame.headers['heart-beat']!.split(',');
     final serverOutgoing = int.parse(serverHeartbeats[0]);
     final serverIncoming = int.parse(serverHeartbeats[1]);
-    if (config.heartbeatOutgoing > 0 && serverIncoming > 0) {
-      final ttl = max(config.heartbeatOutgoing, serverIncoming);
+    if (config.heartbeatOutgoing.inMilliseconds > 0 && serverIncoming > 0) {
+      final ttl = max(config.heartbeatOutgoing.inMilliseconds, serverIncoming);
       _heartbeatSender?.cancel();
       _heartbeatSender = Timer.periodic(Duration(milliseconds: ttl), (_) {
         if (channel != null) {
@@ -286,8 +286,8 @@ class StompHandler {
       });
     }
 
-    if (config.heartbeatIncoming > 0 && serverOutgoing > 0) {
-      final ttl = max(config.heartbeatIncoming, serverOutgoing);
+    if (config.heartbeatIncoming.inMilliseconds > 0 && serverOutgoing > 0) {
+      final ttl = max(config.heartbeatIncoming.inMilliseconds, serverOutgoing);
       _heartbeatReceiver?.cancel();
       _heartbeatReceiver = Timer.periodic(Duration(milliseconds: ttl), (_) {
         final deltaMs = DateTime.now().millisecondsSinceEpoch -

@@ -19,16 +19,17 @@ class StompConfig {
   final bool useSockJS;
 
   /// Time between reconnect attempts
-  /// Set to 0 if you don't want to reconnect automatically
-  final int reconnectDelay;
+  /// Set to a duration with 0 milliseconds if you don't want to reconnect
+  /// automatically
+  final Duration reconnectDelay;
 
   /// Time between outgoing heartbeats
-  /// Set to 0 to not send any heartbeats
-  final int heartbeatOutgoing;
+  /// Set to a duration with 0 milliseconds to not send any heartbeats
+  final Duration heartbeatOutgoing;
 
   /// Time between incoming heartbeats
-  /// Set to 0 to not receive any heartbeats
-  final int heartbeatIncoming;
+  /// Set to a duration with 0 milliseconds to not receive any heartbeats
+  final Duration heartbeatIncoming;
 
   /// Connection timeout. If specified the connection will will be dropped after
   /// the timeout and depending on the [reconnectDelay] it will try again
@@ -73,9 +74,9 @@ class StompConfig {
 
   const StompConfig({
     required this.url,
-    this.reconnectDelay = 5000,
-    this.heartbeatIncoming = 5000,
-    this.heartbeatOutgoing = 5000,
+    this.reconnectDelay = const Duration(seconds: 5),
+    this.heartbeatIncoming = const Duration(seconds: 5),
+    this.heartbeatOutgoing = const Duration(seconds: 5),
     this.connectionTimeout = const Duration(),
     this.stompConnectHeaders = const {},
     this.webSocketConnectHeaders = const {},
@@ -94,9 +95,9 @@ class StompConfig {
 
   StompConfig.SockJS({
     required String url,
-    this.reconnectDelay = 5000,
-    this.heartbeatIncoming = 5000,
-    this.heartbeatOutgoing = 5000,
+    this.reconnectDelay = const Duration(seconds: 5),
+    this.heartbeatIncoming = const Duration(seconds: 5),
+    this.heartbeatOutgoing = const Duration(seconds: 5),
     this.connectionTimeout = const Duration(),
     this.stompConnectHeaders = const {},
     this.webSocketConnectHeaders = const {},
@@ -115,9 +116,9 @@ class StompConfig {
 
   StompConfig copyWith({
     String? url,
-    int? reconnectDelay,
-    int? heartbeatIncoming,
-    int? heartbeatOutgoing,
+    Duration? reconnectDelay,
+    Duration? heartbeatIncoming,
+    Duration? heartbeatOutgoing,
     Duration? connectionTimeout,
     bool? useSockJS,
     Map<String, String>? stompConnectHeaders,

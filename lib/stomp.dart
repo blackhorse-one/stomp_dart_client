@@ -107,9 +107,9 @@ class StompClient {
 
   void _scheduleReconnect() {
     _reconnectTimer?.cancel();
-    if (config.reconnectDelay > 0) {
+    if (config.reconnectDelay.inMilliseconds > 0) {
       _reconnectTimer = Timer(
-        Duration(milliseconds: config.reconnectDelay),
+        config.reconnectDelay,
         () => _connect(),
       );
     }
