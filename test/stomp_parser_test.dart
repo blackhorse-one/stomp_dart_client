@@ -113,7 +113,7 @@ void main() {
             'content-type': 'text/plain'
           });
 
-      final parser = StompParser(null);
+      final parser = StompParser((_) {});
 
       final serializedFrame = parser.serializeFrame(frame);
 
@@ -131,7 +131,7 @@ void main() {
             'content-type': 'te\nxt/plain'
           });
 
-      final parser = StompParser(null);
+      final parser = StompParser((_) {});
       parser.escapeHeaders = true;
 
       final serializedFrame = parser.serializeFrame(frame);
@@ -146,7 +146,7 @@ void main() {
           command: 'SEND',
           binaryBody: Uint8List.fromList('This is a body'.codeUnits),
           headers: {'desti\nnation': '/path/to/foo'});
-      final parser = StompParser(null);
+      final parser = StompParser((_) {});
       parser.escapeHeaders = true;
 
       final Uint8List serializedFrame = parser.serializeFrame(frame);
@@ -314,7 +314,7 @@ void main() {
           command: 'SEND',
           body: '´👌👻¡Â',
           headers: {'desti\nnation': '/path/to/foo'});
-      final parser = StompParser(null);
+      final parser = StompParser((_) {});
       parser.escapeHeaders = true;
 
       String serializedFrame = parser.serializeFrame(frame);

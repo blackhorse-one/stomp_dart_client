@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:stomp_dart_client/parser.dart';
+import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
 
 ///
@@ -10,6 +11,10 @@ import 'package:stomp_dart_client/stomp_frame.dart';
 /// Credit: https://github.com/kum-deepak
 ///
 class StompParser implements Parser {
+  StompParser(this.onStompFrame, [this.onPingFrame]) {
+    _initState();
+  }
+
   String? _resultCommand;
   Map<String, String>? _resultHeaders;
   String? _resultBody;
@@ -18,7 +23,7 @@ class StompParser implements Parser {
   String? _currentHeaderKey;
   int _bodyBytesRemaining = 0;
 
-  final Function(StompFrame)? onStompFrame;
+  final StompFrameCallback onStompFrame;
   final Function? onPingFrame;
 
   final NULL = 0;
@@ -30,10 +35,6 @@ class StompParser implements Parser {
 
   @override
   bool? escapeHeaders = false;
-
-  StompParser(this.onStompFrame, [this.onPingFrame]) {
-    _initState();
-  }
 
   @override
   void parseData(dynamic data) {
@@ -50,6 +51,17 @@ class StompParser implements Parser {
     for (var i = 0; i < byteList.length; i++) {
       _parseByte(byteList[i]);
     }
+  }
+
+  void _initState() {
+    _resultCommand = null;
+    _resultHeaders = {};
+    _resultBody = null;
+
+    _currentToken = [];
+    _currentHeaderKey = null;
+
+    _parseByte = _collectFrame;
   }
 
   void _collectFrame(int byte) {
@@ -166,7 +178,7 @@ class StompParser implements Parser {
     }
 
     try {
-      onStompFrame!(StompFrame(
+      onStompFrame(StompFrame(
           command: _resultCommand!,
           headers: _resultHeaders!,
           body: _resultBody));
@@ -274,16 +286,5 @@ class StompParser implements Parser {
     serializedFrame += String.fromCharCode(LF) + String.fromCharCode(LF);
 
     return serializedFrame;
-  }
-
-  void _initState() {
-    _resultCommand = null;
-    _resultHeaders = {};
-    _resultBody = null;
-
-    _currentToken = [];
-    _currentHeaderKey = null;
-
-    _parseByte = _collectFrame;
   }
 }
