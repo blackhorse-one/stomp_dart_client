@@ -25,13 +25,13 @@ class StompConfig {
 
   /// Connection timeout. If specified the connection will will be dropped after
   /// the timeout and depending on the [reconnectDelay] it will try again
-  final Duration? connectionTimeout;
+  final Duration connectionTimeout;
 
   /// Headers to be passed when connecting to STOMP
-  final Map<String, String>? stompConnectHeaders;
+  final Map<String, String> stompConnectHeaders;
 
   /// Headers to be passed when connecting to WebSocket
-  final Map<String, dynamic>? webSocketConnectHeaders;
+  final Map<String, dynamic> webSocketConnectHeaders;
 
   /// Asynchronous function to be executed before we connect
   /// the socket
@@ -69,9 +69,9 @@ class StompConfig {
     this.reconnectDelay = 5000,
     this.heartbeatIncoming = 5000,
     this.heartbeatOutgoing = 5000,
-    this.connectionTimeout,
-    this.stompConnectHeaders,
-    this.webSocketConnectHeaders,
+    this.connectionTimeout = const Duration(),
+    this.stompConnectHeaders = const {},
+    this.webSocketConnectHeaders = const {},
     this.beforeConnect = _noOpFuture,
     this.onConnect = _noOp,
     this.onStompError = _noOp,
@@ -90,9 +90,9 @@ class StompConfig {
     this.reconnectDelay = 5000,
     this.heartbeatIncoming = 5000,
     this.heartbeatOutgoing = 5000,
-    this.connectionTimeout,
-    this.stompConnectHeaders,
-    this.webSocketConnectHeaders,
+    this.connectionTimeout = const Duration(),
+    this.stompConnectHeaders = const {},
+    this.webSocketConnectHeaders = const {},
     this.beforeConnect = _noOpFuture,
     this.onConnect = _noOp,
     this.onStompError = _noOp,

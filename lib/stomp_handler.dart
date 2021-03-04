@@ -132,7 +132,7 @@ class StompHandler {
   }
 
   void _connectToStomp() {
-    var connectHeaders = config.stompConnectHeaders ?? {};
+    final connectHeaders = {...config.stompConnectHeaders};
     connectHeaders['accept-version'] = ['1.0', '1.1', '1.2'].join(',');
     connectHeaders['heart-beat'] =
         [config.heartbeatOutgoing, config.heartbeatIncoming].join(',');
