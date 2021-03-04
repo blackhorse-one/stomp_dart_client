@@ -78,53 +78,56 @@ class StompHandler {
     }
   }
 
-  Function({Map<String, String>? unsubscribeHeaders}) subscribe(
-      {required String destination,
-      required Function(StompFrame) callback,
-      Map<String, String>? headers}) {
-    headers = headers ?? {};
-
-    if (!headers.containsKey('id')) {
-      headers['id'] = 'sub-${_currentSubscriptionIndex++}';
+  Function({Map<String, String>? unsubscribeHeaders}) subscribe({
+    required String destination,
+    required Function(StompFrame) callback,
+    Map<String, String>? headers,
+  }) {
+    final subscriptionHeaders = {
+      ...?headers,
+      'destination': destination,
+    };
+    if (!subscriptionHeaders.containsKey('id')) {
+      subscriptionHeaders['id'] = 'sub-${_currentSubscriptionIndex++}';
     }
-    headers['destination'] = destination;
-    _subscriptionWatcher[headers['id']] = callback;
 
-    _transmit(command: 'SUBSCRIBE', headers: headers);
+    _subscriptionWatcher[subscriptionHeaders['id']] = callback;
+    _transmit(command: 'SUBSCRIBE', headers: subscriptionHeaders);
 
     return ({Map<String, String>? unsubscribeHeaders}) {
-      unsubscribeHeaders = unsubscribeHeaders ?? {};
-
-      if (!unsubscribeHeaders.containsKey('id')) {
-        unsubscribeHeaders['id'] = headers!['id']!;
+      final headers = {...?unsubscribeHeaders};
+      if (!headers.containsKey('id')) {
+        headers['id'] = subscriptionHeaders['id']!;
       }
-      _subscriptionWatcher.remove(unsubscribeHeaders['id']);
+      _subscriptionWatcher.remove(headers['id']);
 
-      _transmit(command: 'UNSUBSCRIBE', headers: unsubscribeHeaders);
+      _transmit(command: 'UNSUBSCRIBE', headers: headers);
     };
   }
 
-  void send(
-      {required String destination,
-      String? body,
-      Uint8List? binaryBody,
-      Map<String, String>? headers}) {
-    headers = headers ?? {};
-    headers['destination'] = destination;
+  void send({
+    required String destination,
+    String? body,
+    Uint8List? binaryBody,
+    Map<String, String>? headers,
+  }) {
     _transmit(
-        command: 'SEND', body: body, binaryBody: binaryBody, headers: headers);
+      command: 'SEND',
+      body: body,
+      binaryBody: binaryBody,
+      headers: {
+        ...?headers,
+        'destination': destination,
+      },
+    );
   }
 
   void ack({required String id, Map<String, String>? headers}) {
-    headers = headers ?? {};
-    headers['id'] = id;
-    _transmit(command: 'ACK', headers: headers);
+    _transmit(command: 'ACK', headers: {...?headers, 'id': id});
   }
 
   void nack({required String id, Map<String, String>? headers}) {
-    headers = headers ?? {};
-    headers['id'] = id;
-    _transmit(command: 'NACK', headers: headers);
+    _transmit(command: 'NACK', headers: {...?headers, 'id': id});
   }
 
   void watchForReceipt(String? receiptId, Function(StompFrame) callback) {
@@ -132,19 +135,24 @@ class StompHandler {
   }
 
   void _connectToStomp() {
-    final connectHeaders = {...config.stompConnectHeaders};
-    connectHeaders['accept-version'] = ['1.0', '1.1', '1.2'].join(',');
-    connectHeaders['heart-beat'] =
-        [config.heartbeatOutgoing, config.heartbeatIncoming].join(',');
+    final connectHeaders = {
+      ...config.stompConnectHeaders,
+      'accept-version': ['1.0', '1.1', '1.2'].join(','),
+      'heart-beat': [
+        config.heartbeatOutgoing,
+        config.heartbeatIncoming,
+      ].join(','),
+    };
 
     _transmit(command: 'CONNECT', headers: connectHeaders);
   }
 
   void _disconnectFromStomp() {
-    final disconnectHeaders = <String, String>{};
-    disconnectHeaders['receipt'] = 'disconnect-${_currentReceiptIndex++}';
+    final disconnectHeaders = {
+      'receipt': 'disconnect-${_currentReceiptIndex++}',
+    };
 
-    watchForReceipt(disconnectHeaders['receipt'], (StompFrame frame) {
+    watchForReceipt(disconnectHeaders['receipt'], (frame) {
       _cleanUp();
       config.onDisconnect(frame);
     });
@@ -159,7 +167,11 @@ class StompHandler {
     Uint8List? binaryBody,
   }) {
     final frame = StompFrame(
-        command: command, headers: headers, body: body, binaryBody: binaryBody);
+      command: command,
+      headers: headers,
+      body: body,
+      binaryBody: binaryBody,
+    );
 
     dynamic serializedFrame = _parser.serializeFrame(frame);
 
