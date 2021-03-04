@@ -7,13 +7,14 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 Future<WebSocketChannel> connect(StompConfig config) async {
   try {
-    var websocket =
-        WebSocket.connect(config.url, headers: config.webSocketConnectHeaders);
+    var webSocket = WebSocket.connect(
+      config.url,
+      headers: config.webSocketConnectHeaders,
+    );
     if (config.connectionTimeout.inMilliseconds > 0) {
-      websocket = websocket.timeout(config.connectionTimeout);
+      webSocket = webSocket.timeout(config.connectionTimeout);
     }
-    final webSocket = await websocket;
-    return IOWebSocketChannel(webSocket);
+    return IOWebSocketChannel(await webSocket);
   } on SocketException catch (err) {
     throw WebSocketChannelException.from(err);
   }

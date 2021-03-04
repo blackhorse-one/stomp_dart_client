@@ -1,20 +1,22 @@
 import 'dart:convert';
 import 'dart:typed_data';
+
 import 'package:stomp_dart_client/parser.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
 import 'package:stomp_dart_client/stomp_parser.dart';
 
 class SockJSParser implements Parser {
+  SockJSParser({
+    required Function(StompFrame) onStompFrame,
+    Function? onPingFrame,
+    required this.onDone,
+  }) {
+    _stompParser = StompParser(onStompFrame, onPingFrame);
+  }
+
   late StompParser _stompParser;
 
   final Function onDone;
-
-  SockJSParser(
-      {required Function(StompFrame) onStompFrame,
-      Function? onPingFrame,
-      required this.onDone}) {
-    _stompParser = StompParser(onStompFrame, onPingFrame);
-  }
 
   @override
   void parseData(dynamic data) {
