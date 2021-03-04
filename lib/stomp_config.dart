@@ -62,25 +62,26 @@ class StompConfig {
   /// Callback for debug messages
   final Function(String) onDebugMessage;
 
-  const StompConfig(
-      {required this.url,
-      this.reconnectDelay = 5000,
-      this.heartbeatIncoming = 5000,
-      this.heartbeatOutgoing = 5000,
-      this.connectionTimeout,
-      this.stompConnectHeaders,
-      this.webSocketConnectHeaders,
-      this.beforeConnect = _noOpFuture,
-      this.onConnect = _noOp,
-      this.onStompError = _noOp,
-      this.onDisconnect = _noOp,
-      this.onUnhandledFrame = _noOp,
-      this.onUnhandledMessage = _noOp,
-      this.onUnhandledReceipt = _noOp,
-      this.onWebSocketError = _noOp,
-      this.onWebSocketDone = _noOp,
-      this.onDebugMessage = _noOp,
-      this.useSockJS = false});
+  const StompConfig({
+    required this.url,
+    this.reconnectDelay = 5000,
+    this.heartbeatIncoming = 5000,
+    this.heartbeatOutgoing = 5000,
+    this.connectionTimeout,
+    this.stompConnectHeaders,
+    this.webSocketConnectHeaders,
+    this.beforeConnect = _noOpFuture,
+    this.onConnect = _noOp,
+    this.onStompError = _noOp,
+    this.onDisconnect = _noOp,
+    this.onUnhandledFrame = _noOp,
+    this.onUnhandledMessage = _noOp,
+    this.onUnhandledReceipt = _noOp,
+    this.onWebSocketError = _noOp,
+    this.onWebSocketDone = _noOp,
+    this.onDebugMessage = _noOp,
+    this.useSockJS = false,
+  });
 
   StompConfig.SockJS({
     required String url,
@@ -103,46 +104,50 @@ class StompConfig {
   })  : useSockJS = true,
         url = SockJsUtils().generateTransportUrl(url);
 
-  StompConfig copyWith(
-          {String? url,
-          int? reconnectDelay,
-          int? heartbeatIncoming,
-          int? heartbeatOutgoing,
-          Duration? connectionTimeout,
-          bool? useSockJS,
-          Map<String, String>? stompConnectHeaders,
-          Map<String, dynamic>? webSocketConnectHeaders,
-          Future<void> Function()? beforeConnect,
-          Function(StompClient?, StompFrame)? onConnect,
-          Function(StompFrame)? onStompError,
-          Function(StompFrame)? onDisconnect,
-          Function(StompFrame)? onUnhandledFrame,
-          Function(StompFrame)? onUnhandledMessage,
-          Function(StompFrame)? onUnhandledReceipt,
-          Function(dynamic)? onWebSocketError,
-          Function()? onWebSocketDone,
-          Function(String)? onDebugMessage}) =>
-      StompConfig(
-          url: url ?? this.url,
-          reconnectDelay: reconnectDelay ?? this.reconnectDelay,
-          heartbeatIncoming: heartbeatIncoming ?? this.heartbeatIncoming,
-          heartbeatOutgoing: heartbeatOutgoing ?? this.heartbeatOutgoing,
-          connectionTimeout: connectionTimeout ?? this.connectionTimeout,
-          useSockJS: useSockJS ?? this.useSockJS,
-          webSocketConnectHeaders:
-              webSocketConnectHeaders ?? this.webSocketConnectHeaders,
-          stompConnectHeaders: stompConnectHeaders ?? this.stompConnectHeaders,
-          beforeConnect: beforeConnect ?? this.beforeConnect,
-          onConnect: onConnect ?? this.onConnect,
-          onStompError: onStompError ?? this.onStompError,
-          onDisconnect: onDisconnect ?? this.onDisconnect,
-          onUnhandledFrame: onUnhandledFrame ?? this.onUnhandledFrame,
-          onUnhandledMessage: onUnhandledMessage ?? this.onUnhandledMessage,
-          onUnhandledReceipt: onUnhandledReceipt ?? this.onUnhandledReceipt,
-          onWebSocketError: onWebSocketError ?? this.onWebSocketError,
-          onWebSocketDone: onWebSocketDone ?? this.onWebSocketDone,
-          onDebugMessage: onDebugMessage ?? this.onDebugMessage);
+  StompConfig copyWith({
+    String? url,
+    int? reconnectDelay,
+    int? heartbeatIncoming,
+    int? heartbeatOutgoing,
+    Duration? connectionTimeout,
+    bool? useSockJS,
+    Map<String, String>? stompConnectHeaders,
+    Map<String, dynamic>? webSocketConnectHeaders,
+    Future<void> Function()? beforeConnect,
+    Function(StompClient?, StompFrame)? onConnect,
+    Function(StompFrame)? onStompError,
+    Function(StompFrame)? onDisconnect,
+    Function(StompFrame)? onUnhandledFrame,
+    Function(StompFrame)? onUnhandledMessage,
+    Function(StompFrame)? onUnhandledReceipt,
+    Function(dynamic)? onWebSocketError,
+    Function()? onWebSocketDone,
+    Function(String)? onDebugMessage,
+  }) {
+    return StompConfig(
+      url: url ?? this.url,
+      reconnectDelay: reconnectDelay ?? this.reconnectDelay,
+      heartbeatIncoming: heartbeatIncoming ?? this.heartbeatIncoming,
+      heartbeatOutgoing: heartbeatOutgoing ?? this.heartbeatOutgoing,
+      connectionTimeout: connectionTimeout ?? this.connectionTimeout,
+      useSockJS: useSockJS ?? this.useSockJS,
+      webSocketConnectHeaders:
+          webSocketConnectHeaders ?? this.webSocketConnectHeaders,
+      stompConnectHeaders: stompConnectHeaders ?? this.stompConnectHeaders,
+      beforeConnect: beforeConnect ?? this.beforeConnect,
+      onConnect: onConnect ?? this.onConnect,
+      onStompError: onStompError ?? this.onStompError,
+      onDisconnect: onDisconnect ?? this.onDisconnect,
+      onUnhandledFrame: onUnhandledFrame ?? this.onUnhandledFrame,
+      onUnhandledMessage: onUnhandledMessage ?? this.onUnhandledMessage,
+      onUnhandledReceipt: onUnhandledReceipt ?? this.onUnhandledReceipt,
+      onWebSocketError: onWebSocketError ?? this.onWebSocketError,
+      onWebSocketDone: onWebSocketDone ?? this.onWebSocketDone,
+      onDebugMessage: onDebugMessage ?? this.onDebugMessage,
+    );
+  }
 
   static void _noOp([_, __]) => null;
+
   static Future<dynamic>? _noOpFuture() => null;
 }

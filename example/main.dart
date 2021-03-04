@@ -20,12 +20,14 @@ dynamic onConnect(StompClient? client, StompFrame frame) {
 }
 
 final stompClient = StompClient(
-    config: StompConfig(
-        url: 'ws://localhost:8080',
-        onConnect: onConnect,
-        onWebSocketError: (dynamic error) => print(error.toString()),
-        stompConnectHeaders: {'Authorization': 'Bearer yourToken'},
-        webSocketConnectHeaders: {'Authorization': 'Bearer yourToken'}));
+  config: StompConfig(
+    url: 'ws://localhost:8080',
+    onConnect: onConnect,
+    onWebSocketError: (dynamic error) => print(error.toString()),
+    stompConnectHeaders: {'Authorization': 'Bearer yourToken'},
+    webSocketConnectHeaders: {'Authorization': 'Bearer yourToken'},
+  ),
+);
 
 void main() {
   stompClient.activate();
