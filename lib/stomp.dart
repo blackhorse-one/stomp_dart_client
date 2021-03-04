@@ -6,15 +6,15 @@ import 'package:stomp_dart_client/stomp_frame.dart';
 import 'package:stomp_dart_client/stomp_handler.dart';
 
 class StompClient {
-  final StompConfig config;
-
-  StompHandler? _handler;
-  bool _isActive = false;
-  Timer? _reconnectTimer;
-
   StompClient({required this.config});
 
-  bool get connected => (_handler != null) && _handler!.connected;
+  final StompConfig config;
+
+  bool get connected => _handler?.connected ?? false;
+
+  StompHandler? _handler;
+  Timer? _reconnectTimer;
+  bool _isActive = false;
 
   void activate() {
     _isActive = true;
@@ -59,8 +59,7 @@ class StompClient {
           }
         },
       ),
-    );
-    _handler!.start();
+    )..start();
   }
 
   Function({Map<String, String>? unsubscribeHeaders}) subscribe({
@@ -68,8 +67,15 @@ class StompClient {
     required Function(StompFrame) callback,
     Map<String, String>? headers,
   }) {
-    return _handler!.subscribe(
-        destination: destination, callback: callback, headers: headers);
+    if (_handler != null) {
+      return _handler!.subscribe(
+        destination: destination,
+        callback: callback,
+        headers: headers,
+      );
+    }
+
+    return ({Map<String, String>? unsubscribeHeaders}) {};
   }
 
   void send({
@@ -78,29 +84,35 @@ class StompClient {
     Uint8List? binaryBody,
     Map<String, String>? headers,
   }) {
-    _handler!.send(
+    if (_handler != null) {
+      _handler!.send(
         destination: destination,
         body: body,
         binaryBody: binaryBody,
-        headers: headers);
+        headers: headers,
+      );
+    }
   }
 
   void ack({required String id, Map<String, String>? headers}) {
-    _handler!.ack(id: id, headers: headers);
+    if (_handler != null) {
+      _handler!.ack(id: id, headers: headers);
+    }
   }
 
   void nack({required String id, Map<String, String>? headers}) {
-    _handler!.nack(id: id, headers: headers);
+    if (_handler != null) {
+      _handler!.nack(id: id, headers: headers);
+    }
   }
 
   void _scheduleReconnect() {
     _reconnectTimer?.cancel();
-
     if (config.reconnectDelay > 0) {
-      _reconnectTimer =
-          Timer(Duration(milliseconds: config.reconnectDelay), () {
-        _connect();
-      });
+      _reconnectTimer = Timer(
+        Duration(milliseconds: config.reconnectDelay),
+        () => _connect(),
+      );
     }
   }
 }
