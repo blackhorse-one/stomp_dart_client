@@ -24,7 +24,6 @@ class StompClient {
 
   void activate() {
     _isActive = true;
-
     _connect();
   }
 
@@ -49,37 +48,42 @@ class StompClient {
     }
 
     _handler = StompHandler(
-        config: config.copyWith(onConnect: (_, frame) {
-      if (!_isActive) {
-        config.onDebugMessage(
-            '[STOMP] Client connected while being deactivated. Will disconnect');
-        _handler?.dispose();
-        return;
-      }
-      config.onConnect(this, frame);
-    }, onWebSocketDone: () {
-      config.onWebSocketDone();
-
-      if (_isActive) {
-        _scheduleReconnect();
-      }
-    }));
+      config: config.copyWith(
+        onConnect: (_, frame) {
+          if (!_isActive) {
+            config.onDebugMessage(
+                '[STOMP] Client connected while being deactivated. Will disconnect.');
+            _handler?.dispose();
+            return;
+          }
+          config.onConnect(this, frame);
+        },
+        onWebSocketDone: () {
+          config.onWebSocketDone();
+          if (_isActive) {
+            _scheduleReconnect();
+          }
+        },
+      ),
+    );
     _handler!.start();
   }
 
-  Function({Map<String, String>? unsubscribeHeaders}) subscribe(
-      {required String destination,
-      required Function(StompFrame) callback,
-      Map<String, String>? headers}) {
+  Function({Map<String, String>? unsubscribeHeaders}) subscribe({
+    required String destination,
+    required Function(StompFrame) callback,
+    Map<String, String>? headers,
+  }) {
     return _handler!.subscribe(
         destination: destination, callback: callback, headers: headers);
   }
 
-  void send(
-      {required String destination,
-      String? body,
-      Uint8List? binaryBody,
-      Map<String, String>? headers}) {
+  void send({
+    required String destination,
+    String? body,
+    Uint8List? binaryBody,
+    Map<String, String>? headers,
+  }) {
     _handler!.send(
         destination: destination,
         body: body,
