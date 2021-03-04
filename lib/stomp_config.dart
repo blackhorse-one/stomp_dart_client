@@ -4,6 +4,13 @@ import 'package:stomp_dart_client/sock_js/sock_js_utils.dart';
 import 'package:stomp_dart_client/stomp.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
 
+typedef StompFrameCallback = void Function(StompFrame);
+typedef StompBeforeConnectCallback = Future<void> Function();
+typedef StompConnectCallback = void Function(StompClient?, StompFrame);
+typedef StompDebugCallback = void Function(String);
+typedef StompWebSocketErrorCallback = void Function(dynamic);
+typedef StompWebSocketDoneCallback = void Function();
+
 class StompConfig {
   /// The url of the WebSocket to connect to
   final String url;
@@ -35,34 +42,34 @@ class StompConfig {
 
   /// Asynchronous function to be executed before we connect
   /// the socket
-  final Future<void>? Function() beforeConnect;
+  final StompBeforeConnectCallback beforeConnect;
 
   /// Callback for when STOMP has successfully connected
-  final Function(StompClient?, StompFrame) onConnect;
+  final StompConnectCallback onConnect;
 
   /// Callback for when STOMP has disconnected
-  final Function(StompFrame) onDisconnect;
+  final StompFrameCallback onDisconnect;
 
   /// Callback for any errors encountered with STOMP
-  final Function(StompFrame) onStompError;
+  final StompFrameCallback onStompError;
 
   /// Error callback for unhandled STOMP frames
-  final Function(StompFrame) onUnhandledFrame;
+  final StompFrameCallback onUnhandledFrame;
 
   /// Error callback for unhandled messages inside a frame
-  final Function(StompFrame) onUnhandledMessage;
+  final StompFrameCallback onUnhandledMessage;
 
   /// Error callback for unhandled message receipts
-  final Function(StompFrame) onUnhandledReceipt;
+  final StompFrameCallback onUnhandledReceipt;
 
   /// Error callback for any errors with the underlying WebSocket
-  final Function(dynamic) onWebSocketError;
+  final StompWebSocketErrorCallback onWebSocketError;
 
   /// Callback when the underlying WebSocket connection is done/closed
-  final Function() onWebSocketDone;
+  final StompWebSocketDoneCallback onWebSocketDone;
 
   /// Callback for debug messages
-  final Function(String) onDebugMessage;
+  final StompDebugCallback onDebugMessage;
 
   const StompConfig({
     required this.url,
@@ -115,16 +122,16 @@ class StompConfig {
     bool? useSockJS,
     Map<String, String>? stompConnectHeaders,
     Map<String, dynamic>? webSocketConnectHeaders,
-    Future<void> Function()? beforeConnect,
-    Function(StompClient?, StompFrame)? onConnect,
-    Function(StompFrame)? onStompError,
-    Function(StompFrame)? onDisconnect,
-    Function(StompFrame)? onUnhandledFrame,
-    Function(StompFrame)? onUnhandledMessage,
-    Function(StompFrame)? onUnhandledReceipt,
-    Function(dynamic)? onWebSocketError,
-    Function()? onWebSocketDone,
-    Function(String)? onDebugMessage,
+    StompBeforeConnectCallback? beforeConnect,
+    StompConnectCallback? onConnect,
+    StompFrameCallback? onStompError,
+    StompFrameCallback? onDisconnect,
+    StompFrameCallback? onUnhandledFrame,
+    StompFrameCallback? onUnhandledMessage,
+    StompFrameCallback? onUnhandledReceipt,
+    StompWebSocketErrorCallback? onWebSocketError,
+    StompWebSocketDoneCallback? onWebSocketDone,
+    StompDebugCallback? onDebugMessage,
   }) {
     return StompConfig(
       url: url ?? this.url,
@@ -151,5 +158,5 @@ class StompConfig {
 
   static void _noOp([_, __]) => null;
 
-  static Future<dynamic>? _noOpFuture() => null;
+  static Future<void> _noOpFuture() => Future.value();
 }

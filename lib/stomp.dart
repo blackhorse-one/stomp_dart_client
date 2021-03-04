@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:stomp_dart_client/stomp_config.dart';
-import 'package:stomp_dart_client/stomp_frame.dart';
 import 'package:stomp_dart_client/stomp_handler.dart';
 
 class StompClient {
@@ -62,9 +61,9 @@ class StompClient {
     )..start();
   }
 
-  Function({Map<String, String>? unsubscribeHeaders}) subscribe({
+  StompUnsubscribe subscribe({
     required String destination,
-    required Function(StompFrame) callback,
+    required StompFrameCallback callback,
     Map<String, String>? headers,
   }) {
     if (_handler != null) {
@@ -80,16 +79,16 @@ class StompClient {
 
   void send({
     required String destination,
+    Map<String, String>? headers,
     String? body,
     Uint8List? binaryBody,
-    Map<String, String>? headers,
   }) {
     if (_handler != null) {
       _handler!.send(
         destination: destination,
+        headers: headers,
         body: body,
         binaryBody: binaryBody,
-        headers: headers,
       );
     }
   }
