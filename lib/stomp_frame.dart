@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+typedef StompPingFrameCallback = void Function();
+
 class StompFrame {
   final String command;
   final Map<String, String> headers;

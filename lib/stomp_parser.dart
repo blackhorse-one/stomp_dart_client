@@ -24,17 +24,17 @@ class StompParser implements Parser {
   int _bodyBytesRemaining = 0;
 
   final StompFrameCallback onStompFrame;
-  final Function? onPingFrame;
+  final StompPingFrameCallback? onPingFrame;
 
-  final NULL = 0;
-  final LF = 10;
-  final CR = 13;
-  final COLON = 58;
+  static const NULL = 0;
+  static const LF = 10;
+  static const CR = 13;
+  static const COLON = 58;
 
-  late Function(int) _parseByte;
+  late void Function(int) _parseByte;
 
   @override
-  bool? escapeHeaders = false;
+  bool escapeHeaders = false;
 
   @override
   void parseData(dynamic data) {
@@ -75,12 +75,12 @@ class StompParser implements Parser {
     }
     if (byte == LF) {
       // Incoming Ping
-      onPingFrame != null ? onPingFrame!() : null;
+      onPingFrame?.call();
       return;
     }
 
     _parseByte = _collectCommand;
-    _reinjectByte(byte);
+    _reInjectByte(byte);
   }
 
   void _collectCommand(int byte) {
@@ -108,7 +108,7 @@ class StompParser implements Parser {
     }
 
     _parseByte = _collectHeaderKey;
-    _reinjectByte(byte);
+    _reInjectByte(byte);
   }
 
   void _collectHeaderKey(int byte) {
@@ -172,16 +172,16 @@ class StompParser implements Parser {
 
   void _consumeBody() {
     _resultBody = _consumeTokenAsString();
-
-    if (escapeHeaders!) {
+    if (escapeHeaders) {
       _unescapeResultHeaders();
     }
 
     try {
       onStompFrame(StompFrame(
-          command: _resultCommand!,
-          headers: _resultHeaders!,
-          body: _resultBody));
+        command: _resultCommand!,
+        headers: _resultHeaders!,
+        body: _resultBody,
+      ));
     } finally {
       _initState();
     }
@@ -197,7 +197,7 @@ class StompParser implements Parser {
     _currentToken.add(byte);
   }
 
-  void _reinjectByte(int byte) {
+  void _reInjectByte(int byte) {
     _parseByte(byte);
   }
 
@@ -276,7 +276,7 @@ class StompParser implements Parser {
     if (bodyLength > 0) {
       headers['content-length'] = bodyLength.toString();
     }
-    if (escapeHeaders!) {
+    if (escapeHeaders) {
       headers = _escapeHeaders(headers);
     }
     headers.forEach((key, value) {
