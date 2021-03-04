@@ -166,5 +166,69 @@ void main() {
         ),
       )..activate();
     });
+
+    test('can modify headers before connecting', () async {
+      // Setup a server which lets connect and then drops the connection
+      final streamChannel = spawnHybridCode(
+        r'''
+        import 'dart:io';
+        import 'package:web_socket_channel/io.dart';
+        import 'package:stomp_dart_client/stomp_parser.dart';
+        import 'package:stream_channel/stream_channel.dart';
+
+        Future<void> hybridMain(StreamChannel channel) async {
+         final server = await HttpServer.bind('localhost', 0);
+          server.transform(WebSocketTransformer()).listen((webSocket) {
+            var webSocketChannel = IOWebSocketChannel(webSocket);
+            var parser = StompParser((frame) {
+              if (frame.command == 'CONNECT') {
+                webSocketChannel.sink.add('CONNECTED\nversion:1.2\n\n\x00');
+                webSocketChannel.sink.close();
+              }
+            });
+            webSocketChannel.stream.listen((request) {
+              parser.parseData(request);
+            });
+          });
+
+          channel.sink.add(server.port);
+        }
+      ''',
+        stayAlive: true,
+      );
+
+      int port = await streamChannel.stream.first;
+      late StompClient client;
+      late StompConfig config;
+
+      final beforeConnect = expectAsync0<Future<void>>(
+        () async {
+          config.webSocketConnectHeaders?['TEST'] = 'DUMMY';
+          config.stompConnectHeaders?['TEST'] = 'DUMMY';
+        },
+        count: 1,
+      );
+
+      final onConnect = expectAsync2(
+        (StompClient? _, StompFrame frame) {
+          expect(config.webSocketConnectHeaders?['TEST'], 'DUMMY');
+          expect(config.stompConnectHeaders?['TEST'], 'DUMMY');
+          Timer(Duration(milliseconds: 500), () => client.deactivate());
+        },
+      );
+
+      config = StompConfig(
+        url: 'ws://localhost:$port',
+        beforeConnect: beforeConnect,
+        onConnect: onConnect,
+        stompConnectHeaders: {},
+        webSocketConnectHeaders: {},
+        reconnectDelay: Duration(seconds: 0),
+        onWebSocketDone: expectAsync0(() {}, count: 1),
+        connectionTimeout: Duration(seconds: 2),
+      );
+
+      client = StompClient(config: config)..activate();
+    });
   });
 }
