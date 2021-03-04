@@ -10,7 +10,7 @@ void main() {
 
     tearDown(() async {});
     test('should not be connected on creation', () {
-      final client = StompClient(config: null);
+      final client = StompClient(config: StompConfig(url: ''));
       expect(client.connected, false);
     });
 

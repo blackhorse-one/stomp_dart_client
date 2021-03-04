@@ -7,11 +7,12 @@ import 'package:stomp_dart_client/stomp_handler.dart';
 
 class BadStateException implements Exception {
   final String cause;
+
   BadStateException(this.cause);
 }
 
 class StompClient {
-  final StompConfig? config;
+  final StompConfig config;
 
   StompHandler? _handler;
   bool _isActive = false;
@@ -36,28 +37,28 @@ class StompClient {
 
   void _connect() async {
     if (connected) {
-      config!.onDebugMessage('[STOMP] Already connected. Nothing to do!');
+      config.onDebugMessage('[STOMP] Already connected. Nothing to do!');
       return;
     }
 
-    await config!.beforeConnect();
+    await config.beforeConnect();
 
     if (!_isActive) {
-      config!.onDebugMessage('[STOMP] Client was marked as inactive. Skip!');
+      config.onDebugMessage('[STOMP] Client was marked as inactive. Skip!');
       return;
     }
 
     _handler = StompHandler(
-        config: config!.copyWith(onConnect: (_, frame) {
+        config: config.copyWith(onConnect: (_, frame) {
       if (!_isActive) {
-        config!.onDebugMessage(
+        config.onDebugMessage(
             '[STOMP] Client connected while being deactivated. Will disconnect');
         _handler?.dispose();
         return;
       }
-      config!.onConnect(this, frame);
+      config.onConnect(this, frame);
     }, onWebSocketDone: () {
-      config!.onWebSocketDone();
+      config.onWebSocketDone();
 
       if (_isActive) {
         _scheduleReconnect();
@@ -97,9 +98,9 @@ class StompClient {
   void _scheduleReconnect() {
     _reconnectTimer?.cancel();
 
-    if (config!.reconnectDelay > 0) {
+    if (config.reconnectDelay > 0) {
       _reconnectTimer =
-          Timer(Duration(milliseconds: config!.reconnectDelay), () {
+          Timer(Duration(milliseconds: config.reconnectDelay), () {
         _connect();
       });
     }
