@@ -5,8 +5,10 @@ import 'package:stomp_dart_client/stomp.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
 
 class StompConfig {
+  /// The url of the WebSocket to connect to
   final String url;
 
+  /// Whether to use SockJS
   final bool useSockJS;
 
   /// Time between reconnect attempts
@@ -35,7 +37,7 @@ class StompConfig {
   /// the socket
   final Future<void>? Function() beforeConnect;
 
-  /// Callback for when STOMP has successulfy connected
+  /// Callback for when STOMP has successfully connected
   final Function(StompClient?, StompFrame) onConnect;
 
   /// Callback for when STOMP has disconnected
@@ -53,10 +55,10 @@ class StompConfig {
   /// Error callback for unhandled message receipts
   final Function(StompFrame) onUnhandledReceipt;
 
-  /// Error callback for any errors with the underyling WebSocket
+  /// Error callback for any errors with the underlying WebSocket
   final Function(dynamic) onWebSocketError;
 
-  /// Callback when the underyling WebSocket connection is done/closed
+  /// Callback when the underlying WebSocket connection is done/closed
   final Function() onWebSocketDone;
 
   /// Callback for debug messages
