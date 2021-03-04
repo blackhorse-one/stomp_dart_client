@@ -5,6 +5,8 @@ import 'package:stomp_dart_client/parser.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
 
+typedef _ParseByteFunction = void Function(int);
+
 ///
 /// This Parser is heavily based on the excellent recursive descent parser found here
 /// https://github.com/stomp-js/stompjs/blob/master/src/parser.ts
@@ -15,23 +17,22 @@ class StompParser implements Parser {
     _initState();
   }
 
-  String? _resultCommand;
-  Map<String, String>? _resultHeaders;
-  String? _resultBody;
-
-  late List<int> _currentToken;
-  String? _currentHeaderKey;
-  int _bodyBytesRemaining = 0;
-
   final StompFrameCallback onStompFrame;
   final StompPingFrameCallback? onPingFrame;
 
-  static const NULL = 0;
-  static const LF = 10;
-  static const CR = 13;
-  static const COLON = 58;
+  var _resultHeaders = <String, String>{};
+  String? _resultCommand;
+  String? _resultBody;
 
-  late void Function(int) _parseByte;
+  var _currentToken = <int>[];
+  String? _currentHeaderKey;
+  int _bodyBytesRemaining = 0;
+
+  static const _NULL = 0;
+  static const _LF = 10;
+  static const _CR = 13;
+  static const _COLON = 58;
+  late _ParseByteFunction _parseByte;
 
   @override
   bool escapeHeaders = false;
@@ -65,15 +66,15 @@ class StompParser implements Parser {
   }
 
   void _collectFrame(int byte) {
-    if (byte == NULL) {
+    if (byte == _NULL) {
       // Ignore
       return;
     }
-    if (byte == CR) {
+    if (byte == _CR) {
       // Ignore CR
       return;
     }
-    if (byte == LF) {
+    if (byte == _LF) {
       // Incoming Ping
       onPingFrame?.call();
       return;
@@ -84,11 +85,11 @@ class StompParser implements Parser {
   }
 
   void _collectCommand(int byte) {
-    if (byte == CR) {
+    if (byte == _CR) {
       // Ignore CR
       return;
     }
-    if (byte == LF) {
+    if (byte == _LF) {
       _resultCommand = _consumeTokenAsString();
       _parseByte = _collectHeaders;
       return;
@@ -98,11 +99,11 @@ class StompParser implements Parser {
   }
 
   void _collectHeaders(int byte) {
-    if (byte == CR) {
+    if (byte == _CR) {
       // Ignore CR
       return;
     }
-    if (byte == LF) {
+    if (byte == _LF) {
       _setupCollectBody();
       return;
     }
@@ -112,7 +113,7 @@ class StompParser implements Parser {
   }
 
   void _collectHeaderKey(int byte) {
-    if (byte == COLON) {
+    if (byte == _COLON) {
       _currentHeaderKey = _consumeTokenAsString();
       _parseByte = _collectHeaderValue;
       return;
@@ -122,12 +123,12 @@ class StompParser implements Parser {
   }
 
   void _collectHeaderValue(int byte) {
-    if (byte == CR) {
+    if (byte == _CR) {
       // Ignore CR
       return;
     }
-    if (byte == LF) {
-      _resultHeaders![_currentHeaderKey!] = _consumeTokenAsString();
+    if (byte == _LF) {
+      _resultHeaders[_currentHeaderKey!] = _consumeTokenAsString();
       _currentHeaderKey = null;
       _parseByte = _collectHeaders;
       return;
@@ -146,7 +147,7 @@ class StompParser implements Parser {
   }
 
   void _collectTerminatedBody(int byte) {
-    if (byte == NULL) {
+    if (byte == _NULL) {
       _consumeBody();
       return;
     }
@@ -155,8 +156,8 @@ class StompParser implements Parser {
   }
 
   void _setupCollectBody() {
-    if (_resultHeaders!.containsKey('content-length')) {
-      final remaining = int.tryParse(_resultHeaders!['content-length']!);
+    if (_resultHeaders.containsKey('content-length')) {
+      final remaining = int.tryParse(_resultHeaders['content-length']!);
       if (remaining == null) {
         print(
             '[STOMP] Unable to parse content-length although it was present. Using fallback');
@@ -179,7 +180,7 @@ class StompParser implements Parser {
     try {
       onStompFrame(StompFrame(
         command: _resultCommand!,
-        headers: _resultHeaders!,
+        headers: _resultHeaders,
         body: _resultBody,
       ));
     } finally {
@@ -204,7 +205,7 @@ class StompParser implements Parser {
   /// https://stomp.github.io/stomp-specification-1.2.html#Value_Encoding
   void _unescapeResultHeaders() {
     final unescapedHeaders = <String, String>{};
-    _resultHeaders!.forEach((key, value) {
+    _resultHeaders.forEach((key, value) {
       unescapedHeaders[_unescapeString(key)] = _unescapeString(value);
     });
     _resultHeaders = unescapedHeaders;
@@ -253,13 +254,13 @@ class StompParser implements Parser {
           serializedHeaders.codeUnits.length,
           serializedHeaders.codeUnits.length + frame.binaryBody!.length,
           frame.binaryBody!);
-      binaryList[
-          serializedHeaders.codeUnits.length + frame.binaryBody!.length] = NULL;
+      binaryList[serializedHeaders.codeUnits.length +
+          frame.binaryBody!.length] = _NULL;
       return binaryList;
     } else {
       var serializedFrame = serializedHeaders;
       serializedFrame += frame.body ?? '';
-      serializedFrame += String.fromCharCode(NULL);
+      serializedFrame += String.fromCharCode(_NULL);
       return serializedFrame;
     }
   }
@@ -280,10 +281,10 @@ class StompParser implements Parser {
       headers = _escapeHeaders(headers);
     }
     headers.forEach((key, value) {
-      serializedFrame += String.fromCharCode(LF) + key + ':' + value;
+      serializedFrame += String.fromCharCode(_LF) + key + ':' + value;
     });
 
-    serializedFrame += String.fromCharCode(LF) + String.fromCharCode(LF);
+    serializedFrame += String.fromCharCode(_LF) + String.fromCharCode(_LF);
 
     return serializedFrame;
   }

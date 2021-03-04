@@ -242,7 +242,7 @@ void main() {
           '\r\nMESSAGE\r\ndestination:foo\r\nmessage-id:456\r\n\r\n\x00');
     });
 
-    test('can parse multiple messages seperatley', () {
+    test('can parse multiple messages separately', () {
       final msg = 'MESSAGE\ndestination:foo\nmessage-id:456\n\n\x00';
       final msg2 =
           'MESSAGE\ndestination:bar\nmessage-id:123\n\nThis is a body\x00';

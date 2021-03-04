@@ -16,7 +16,7 @@ class SockJSParser implements Parser {
 
   late StompParser _stompParser;
 
-  final Function onDone;
+  final void Function() onDone;
 
   @override
   void parseData(dynamic data) {
