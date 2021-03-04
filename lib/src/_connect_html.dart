@@ -9,7 +9,7 @@ Future<WebSocketChannel> connect(StompConfig config) async {
   var websocket = WebSocket(config.url)..binaryType = BinaryType.list.value;
   Future onOpenEvent = websocket.onOpen.first;
   if (config.connectionTimeout != null) {
-    onOpenEvent = onOpenEvent.timeout(config.connectionTimeout);
+    onOpenEvent = onOpenEvent.timeout(config.connectionTimeout!);
   }
   await onOpenEvent;
   return HtmlWebSocketChannel(websocket);

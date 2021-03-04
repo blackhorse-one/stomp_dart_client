@@ -10,7 +10,7 @@ Future<WebSocketChannel> connect(StompConfig config) async {
     var websocket =
         WebSocket.connect(config.url, headers: config.webSocketConnectHeaders);
     if (config.connectionTimeout != null) {
-      websocket = websocket.timeout(config.connectionTimeout);
+      websocket = websocket.timeout(config.connectionTimeout!);
     }
     final webSocket = await websocket;
     return IOWebSocketChannel(webSocket);

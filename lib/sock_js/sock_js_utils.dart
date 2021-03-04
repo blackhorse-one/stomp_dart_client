@@ -13,9 +13,7 @@ class SockJsUtils {
     var uri = Uri.parse(url);
 
     var pathSegments = <String>[];
-    if (uri.pathSegments != null) {
-      pathSegments.addAll(uri.pathSegments);
-    }
+    pathSegments.addAll(uri.pathSegments);
     pathSegments.add(_generateServerId());
     pathSegments.add(_generateSessionId());
     pathSegments.add('websocket');

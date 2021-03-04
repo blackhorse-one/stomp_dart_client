@@ -10,7 +10,7 @@ void main() {
     test('can parse basic message', () {
       final msg = 'MESSAGE\ndestination:foo\nmessage-id:456\n\n\x00';
 
-      var callback = expectAsync1((frame) {
+      var callback = expectAsync1((StompFrame frame) {
         expect(frame.command, 'MESSAGE');
         expect(frame.headers.length, 2);
         expect(frame.headers.containsKey('destination'), isTrue);
@@ -28,7 +28,7 @@ void main() {
     test('does not unescape headers (v1.0)', () {
       final msg = 'MESSAGE\ndesti\\nnation:f\\noo\nmessage-id:456\n\n\x00';
 
-      var callback = expectAsync1((frame) {
+      var callback = expectAsync1((StompFrame frame) {
         expect(frame.command, 'MESSAGE');
         expect(frame.headers.length, 2);
         expect(frame.headers.containsKey('desti\\nnation'), isTrue);
@@ -46,7 +46,7 @@ void main() {
     test('fails on unescaped header values (v1.0)', () {
       final msg = 'MESSAGE\ndesti\\nnation:f\noo\nmessage-id:456\n\n\x00';
 
-      var callback = expectAsync1((frame) {
+      var callback = expectAsync1((StompFrame frame) {
         expect(frame.command, 'MESSAGE');
         expect(frame.headers.length, 2);
         expect(frame.headers.containsKey('desti\\nnation'), isTrue);
@@ -64,7 +64,7 @@ void main() {
     test('does unescape header keys and values (^v1.1)', () {
       final msg = 'MESSAGE\ndesti\\nnation:f\\noo\nmessage-id:456\n\n\x00';
 
-      var callback = expectAsync1((frame) {
+      var callback = expectAsync1((StompFrame frame) {
         expect(frame.command, 'MESSAGE');
         expect(frame.headers.length, 2);
         expect(frame.headers.containsKey('desti\nnation'), isTrue);
@@ -85,7 +85,7 @@ void main() {
       final msg =
           'MESSAGE\ndestination\\cbar:foo\\cbar\nmessage-id:456\n\n\x00';
 
-      var callback = expectAsync1((frame) {
+      var callback = expectAsync1((StompFrame frame) {
         expect(frame.command, 'MESSAGE');
         expect(frame.headers.length, 2);
         expect(frame.headers.containsKey('destination:bar'), isTrue);
@@ -167,7 +167,7 @@ void main() {
     test('can parse frame with empty header', () {
       final msg = 'MESSAGE\n\nThis is a body\x00';
 
-      var callback = expectAsync1((frame) {
+      var callback = expectAsync1((StompFrame frame) {
         expect(frame.command, 'MESSAGE');
         expect(frame.headers.length, 0);
         expect(frame.body, 'This is a body');
@@ -183,7 +183,7 @@ void main() {
     test('can parse frame with empty header and body', () {
       final msg = 'MESSAGE\n\n\x00';
 
-      var callback = expectAsync1((frame) {
+      var callback = expectAsync1((StompFrame frame) {
         expect(frame.command, 'MESSAGE');
         expect(frame.headers.length, 0);
         expect(frame.body, isEmpty);
@@ -200,7 +200,7 @@ void main() {
       final msg =
           'MESSAGE\ncontent-length:10\n\nThis is a body longer than 10 bytes\x00';
 
-      var callback = expectAsync1((frame) {
+      var callback = expectAsync1((StompFrame frame) {
         expect(frame.command, 'MESSAGE');
         expect(frame.headers.length, 1);
         expect(frame.headers['content-length'], '10');
@@ -223,7 +223,7 @@ void main() {
     });
 
     test('can parse ping message', () {
-      dynamic onFrame = expectAsync1((frame) {}, count: 0);
+      dynamic onFrame = expectAsync1((dynamic frame) {}, count: 0);
       dynamic onPing = expectAsync0(() => null, count: 1);
 
       final parser = StompParser(onFrame, onPing);
@@ -232,7 +232,7 @@ void main() {
     });
 
     test('accepts ping/frames with carriage return', () {
-      dynamic onFrame = expectAsync1((frame) {}, count: 1);
+      dynamic onFrame = expectAsync1((dynamic frame) {}, count: 1);
       dynamic onPing = expectAsync0(() => null, count: 2);
 
       final parser = StompParser(onFrame, onPing);
@@ -248,7 +248,7 @@ void main() {
           'MESSAGE\ndestination:bar\nmessage-id:123\n\nThis is a body\x00';
 
       var n = 0;
-      dynamic onFrame = expectAsync1((frame) {
+      dynamic onFrame = expectAsync1((dynamic frame) {
         if (n == 0) {
           expect(frame.command, 'MESSAGE');
           expect(frame.headers.length, 2);
@@ -281,7 +281,7 @@ void main() {
           'MESSAGE\ndestination:bar\nmessage-id:123\n\nThis is a body\x00';
 
       var n = 0;
-      dynamic onFrame = expectAsync1((frame) {
+      dynamic onFrame = expectAsync1((dynamic frame) {
         if (n == 0) {
           expect(frame.command, 'MESSAGE');
           expect(frame.headers.length, 2);
@@ -328,14 +328,14 @@ void main() {
       final msg2 = 'MESSAGE\ncontent-length:18\n\n{"a": "Piaffe´s"}\x00';
 
       var n = 0;
-      var callback = expectAsync1((frame) {
+      var callback = expectAsync1((StompFrame frame) {
         if (n == 0) {
           expect(frame.command, 'MESSAGE');
           expect(frame.headers.length, 1);
           expect(frame.headers.containsKey('content-length'), isTrue);
           expect(frame.headers['content-length'], '23');
           expect(frame.body, '{"a": "´👌👻¡Â"}');
-          expect(utf8.encode(frame.body), [
+          expect(utf8.encode(frame.body!), [
             123,
             34,
             97,
@@ -361,7 +361,7 @@ void main() {
             125
           ]);
 
-          Map<String, dynamic> jsonMap = json.decode(frame.body);
+          Map<String, dynamic> jsonMap = json.decode(frame.body!);
           expect(jsonMap.length, 1);
           expect(jsonMap['a'], '´👌👻¡Â');
         } else {
@@ -371,7 +371,7 @@ void main() {
           expect(frame.headers['content-length'], '18');
           expect(frame.body, '{"a": "Piaffe´s"}');
 
-          expect(utf8.encode(frame.body), [
+          expect(utf8.encode(frame.body!), [
             123,
             34,
             97,
@@ -392,7 +392,7 @@ void main() {
             125
           ]);
 
-          Map<String, dynamic> jsonMap = json.decode(frame.body);
+          Map<String, dynamic> jsonMap = json.decode(frame.body!);
           expect(jsonMap.length, 1);
           expect(jsonMap['a'], 'Piaffe´s');
         }

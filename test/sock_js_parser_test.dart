@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:stomp_dart_client/sock_js/sock_js_parser.dart';
+import 'package:stomp_dart_client/stomp_frame.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -9,7 +10,7 @@ void main() {
       final stompMsg = 'MESSAGE\ndestination:foo\nmessage-id:456\n\n\x00';
       final sockjsMsg = 'm${json.encode(stompMsg)}';
 
-      var callback = expectAsync1((frame) {
+      var callback = expectAsync1((StompFrame frame) {
         expect(frame.command, 'MESSAGE');
         expect(frame.headers.length, 2);
         expect(frame.headers.containsKey('destination'), isTrue);
@@ -31,7 +32,7 @@ void main() {
       final stompMsg = 'MESSAGE\ndestination:foo\nmessage-id:456\n\n\x00';
       final sockjsMsg = 'a[${json.encode(stompMsg)}]';
 
-      var callback = expectAsync1((frame) {
+      var callback = expectAsync1((StompFrame frame) {
         expect(frame.command, 'MESSAGE');
         expect(frame.headers.length, 2);
         expect(frame.headers.containsKey('destination'), isTrue);
@@ -56,7 +57,7 @@ void main() {
           'a[${json.encode(stompMsg1)},${json.encode(stompMsg2)}]';
       var count = 0;
 
-      var callback = expectAsync1((frame) {
+      var callback = expectAsync1((StompFrame frame) {
         expect(frame.command, 'MESSAGE');
         expect(frame.headers.length, 2);
         expect(frame.headers.containsKey('destination'), isTrue);

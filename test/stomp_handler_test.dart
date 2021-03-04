@@ -7,10 +7,10 @@ import 'package:test/test.dart';
 
 void main() {
   group('StompHandler', () {
-    StompConfig config;
-    StompHandler handler;
+    late StompConfig config;
+    StompHandler? handler;
     StreamChannel streamChannel;
-    int port;
+    int? port;
 
     setUpAll(() async {
       // Basic STOMP Server
@@ -42,7 +42,7 @@ void main() {
                 }
               } else if (frame.command == 'UNSUBSCRIBE' ||
                   frame.command == 'SEND') {
-                if (frame.headers?.containsKey('receipt') ?? false) {
+                if (frame.headers.containsKey('receipt')) {
                   webSocketChannel.sink.add(
                       "RECEIPT\nreceipt-id:${frame.headers['receipt']}\n\n${frame.body}\x00");
 
@@ -78,36 +78,36 @@ void main() {
     });
 
     test('connects correctly', () async {
-      dynamic onConnect = expectAsync2((_, frame) {
+      dynamic onConnect = expectAsync2((dynamic _, dynamic frame) {
         expect(frame.command, 'CONNECTED');
         expect(frame.headers.length, 1);
         expect(frame.headers['version'], '1.2');
         expect(frame.body, isEmpty);
-        handler.dispose();
+        handler!.dispose();
       });
 
       handler = StompHandler(config: config.copyWith(onConnect: onConnect));
 
-      handler.start();
+      handler!.start();
     });
 
     test('disconnects correctly', () async {
       dynamic onWebSocketDone = expectAsync0(() {}, count: 1);
 
-      dynamic onDisconnect = expectAsync1((frame) {
-        expect(handler.connected, isFalse);
+      dynamic onDisconnect = expectAsync1((dynamic frame) {
+        expect(handler!.connected, isFalse);
         expect(frame.command, 'RECEIPT');
         expect(frame.headers.length, 1);
         expect(frame.headers['receipt-id'], 'disconnect-0');
       }, count: 1);
 
-      dynamic onConnect = expectAsync2((_, frame) {
+      dynamic onConnect = expectAsync2((dynamic _, dynamic frame) {
         Timer(Duration(milliseconds: 500), () {
-          handler.dispose();
+          handler!.dispose();
         });
       }, count: 1);
 
-      dynamic onError = expectAsync1((_) {}, count: 0);
+      dynamic onError = expectAsync1((dynamic _) {}, count: 0);
 
       handler = StompHandler(
           config: config.copyWith(
@@ -117,11 +117,11 @@ void main() {
               onStompError: onError,
               onWebSocketError: onError));
 
-      handler.start();
+      handler!.start();
     });
 
     test('subscribes correctly', () {
-      dynamic onSubscriptionFrame = expectAsync1((frame) {
+      dynamic onSubscriptionFrame = expectAsync1((dynamic frame) {
         expect(frame.command, 'MESSAGE');
         expect(frame.headers.length, 3);
         expect(frame.headers['subscription'], 'sub-0');
@@ -131,26 +131,26 @@ void main() {
 
       // We need this async waiter to make sure we actually wait until the
       // connection is closed to not affect other tests
-      dynamic onDisconnect = expectAsync1((frame) {}, count: 1);
+      dynamic onDisconnect = expectAsync1((dynamic frame) {}, count: 1);
 
       handler = StompHandler(
           config: config.copyWith(
               onConnect: (_, frame) {
-                handler.subscribe(
+                handler!.subscribe(
                     destination: '/foo',
                     callback: onSubscriptionFrame,
                     headers: {'id': 'sub-0'});
                 Timer(Duration(milliseconds: 500), () {
-                  handler.dispose();
+                  handler!.dispose();
                 });
               },
               onDisconnect: onDisconnect));
 
-      handler.start();
+      handler!.start();
     });
 
     test('unsubscribes correctly', () {
-      dynamic onSubscriptionFrame = expectAsync1((frame) {
+      dynamic onSubscriptionFrame = expectAsync1((dynamic frame) {
         expect(frame.command, 'MESSAGE');
         expect(frame.headers.length, 3);
         expect(frame.headers['subscription'], 'sub-0');
@@ -158,22 +158,23 @@ void main() {
         expect(frame.body, 'This is the message body');
       }, count: 1);
 
-      dynamic onReceiptFrame = expectAsync1((frame) {
+      dynamic onReceiptFrame = expectAsync1((dynamic frame) {
         expect(frame.command, 'RECEIPT');
         expect(frame.headers['receipt-id'], 'unsub-0');
       });
 
       // We need this async waiter to make sure we actually wait until the
       // connection is closed
-      dynamic onDisconnect = expectAsync1((frame) {}, count: 1);
+      dynamic onDisconnect = expectAsync1((dynamic frame) {}, count: 1);
 
       handler = StompHandler(
           config: config.copyWith(
               onConnect: (_, frame) {
-                var unsubscribe = handler.subscribe(
-                    destination: '/foo',
-                    callback: onSubscriptionFrame,
-                    headers: {'id': 'sub-0'});
+                dynamic Function({Map<String, String> unsubscribeHeaders})
+                    unsubscribe = handler!.subscribe(
+                        destination: '/foo',
+                        callback: onSubscriptionFrame,
+                        headers: {'id': 'sub-0'});
                 Timer(Duration(milliseconds: 500), () {
                   unsubscribe(unsubscribeHeaders: {'receipt': 'unsub-0'});
                   // We wait an additional second because the server will send
@@ -181,94 +182,94 @@ void main() {
                   // the subscription on the client side was actually canceled
                   // immediatly
                   Timer(Duration(milliseconds: 1000), () {
-                    handler.dispose();
+                    handler!.dispose();
                   });
                 });
               },
               onDisconnect: onDisconnect));
 
-      handler.watchForReceipt('unsub-0', onReceiptFrame);
+      handler!.watchForReceipt('unsub-0', onReceiptFrame);
 
-      handler.start();
+      handler!.start();
     });
 
     test('sends message correctly', () {
-      dynamic onReceiptFrame = expectAsync1((frame) {
+      dynamic onReceiptFrame = expectAsync1((dynamic frame) {
         expect(frame.command, 'RECEIPT');
         expect(frame.headers['receipt-id'], 'send-0');
         expect(frame.body, 'This is a body');
-        handler.dispose();
+        handler!.dispose();
       });
 
       // We need this async waiter to make sure we actually wait until the
       // connection is closed
-      dynamic onDisconnect = expectAsync1((frame) {}, count: 1);
+      dynamic onDisconnect = expectAsync1((dynamic frame) {}, count: 1);
 
       handler = StompHandler(
           config: config.copyWith(
               onConnect: (_, frame) {
-                handler.send(
+                handler!.send(
                     destination: '/foo/bar',
                     body: 'This is a body',
                     headers: {'receipt': 'send-0'});
               },
               onDisconnect: onDisconnect));
 
-      handler.watchForReceipt('send-0', onReceiptFrame);
+      handler!.watchForReceipt('send-0', onReceiptFrame);
 
-      handler.start();
+      handler!.start();
     });
 
     test('acks message correctly', () {
-      dynamic onReceiptFrame = expectAsync1((frame) {
+      dynamic onReceiptFrame = expectAsync1((dynamic frame) {
         expect(frame.command, 'RECEIPT');
         expect(frame.headers['receipt-id'], 'send-0');
         expect(frame.body, 'message-0');
-        handler.dispose();
+        handler!.dispose();
       });
 
       // We need this async waiter to make sure we actually wait until the
       // connection is closed
-      dynamic onDisconnect = expectAsync1((frame) {}, count: 1);
+      dynamic onDisconnect = expectAsync1((dynamic frame) {}, count: 1);
 
       handler = StompHandler(
           config: config.copyWith(
               onConnect: (_, frame) {
-                handler.ack(id: 'message-0', headers: {'receipt': 'send-0'});
+                handler!.ack(id: 'message-0', headers: {'receipt': 'send-0'});
               },
               onDisconnect: onDisconnect));
 
-      handler.watchForReceipt('send-0', onReceiptFrame);
+      handler!.watchForReceipt('send-0', onReceiptFrame);
 
-      handler.start();
+      handler!.start();
     });
 
     test('nacks message correctly', () {
-      dynamic onReceiptFrame = expectAsync1((frame) {
+      dynamic onReceiptFrame = expectAsync1((dynamic frame) {
         expect(frame.command, 'RECEIPT');
         expect(frame.headers['receipt-id'], 'send-0');
         expect(frame.body, 'message-0');
-        handler.dispose();
+        handler!.dispose();
       });
 
       // We need this async waiter to make sure we actually wait until the
       // connection is closed
-      dynamic onDisconnect = expectAsync1((frame) {}, count: 1);
+      dynamic onDisconnect = expectAsync1((dynamic frame) {}, count: 1);
 
       handler = StompHandler(
           config: config.copyWith(
               onConnect: (_, frame) {
-                handler.nack(id: 'message-0', headers: {'receipt': 'send-0'});
+                handler!.nack(id: 'message-0', headers: {'receipt': 'send-0'});
               },
               onDisconnect: onDisconnect));
 
-      handler.watchForReceipt('send-0', onReceiptFrame);
+      handler!.watchForReceipt('send-0', onReceiptFrame);
 
-      handler.start();
+      handler!.start();
     });
 
     test('correctly logs data not subtype of String', () {
-      dynamic onSubscriptionFrame = expectAsync1((frame) {
+      dynamic onSubscriptionFrame = expectAsync1((dynamic frame) {
         expect(frame.command, 'MESSAGE');
         expect(frame.headers.length, 3);
         expect(frame.headers['subscription'], 'sub-0');
@@ -276,26 +277,27 @@ void main() {
         expect(frame.body, 'This is the message body');
       });
 
-      dynamic onDebugMessage = expectAsync1((mgs) {}, count: 1, max: -1);
+      dynamic onDebugMessage =
+          expectAsync1((dynamic mgs) {}, count: 1, max: -1);
       // We need this async waiter to make sure we actually wait until the
       // connection is closed to not affect other tests
-      dynamic onDisconnect = expectAsync1((frame) {}, count: 1);
+      dynamic onDisconnect = expectAsync1((dynamic frame) {}, count: 1);
 
       handler = StompHandler(
           config: config.copyWith(
               onConnect: (_, frame) {
-                handler.subscribe(
+                handler!.subscribe(
                     destination: '/bar',
                     callback: onSubscriptionFrame,
                     headers: {'id': 'sub-0'});
                 Timer(Duration(milliseconds: 500), () {
-                  handler.dispose();
+                  handler!.dispose();
                 });
               },
               onDebugMessage: onDebugMessage,
               onDisconnect: onDisconnect));
 
-      handler.start();
+      handler!.start();
     });
   });
 }
