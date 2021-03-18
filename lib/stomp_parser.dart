@@ -229,10 +229,10 @@ class StompParser implements Parser {
         .replaceAll(RegExp(r'\r'), '\\r');
   }
 
-  Map<String, String> _escapeHeaders(Map<String?, String> headers) {
+  Map<String, String> _escapeHeaders(Map<String, String> headers) {
     final escapedHeaders = <String, String>{};
     headers.forEach((key, value) {
-      escapedHeaders[_escapeString(key!)] = _escapeString(value);
+      escapedHeaders[_escapeString(key)] = _escapeString(value);
     });
     return escapedHeaders;
   }
