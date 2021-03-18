@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:stomp_dart_client/stomp.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
 import 'package:stomp_dart_client/stomp_handler.dart';
@@ -83,7 +82,7 @@ void main() {
     });
 
     test('connects correctly', () async {
-      final onConnect = expectAsync2((StompClient? _, StompFrame frame) {
+      final onConnect = expectAsync1((StompFrame frame) {
         expect(frame.command, 'CONNECTED');
         expect(frame.headers.length, 1);
         expect(frame.headers['version'], '1.2');
@@ -108,8 +107,8 @@ void main() {
         count: 1,
       );
 
-      final onConnect = expectAsync2(
-        (StompClient? _, StompFrame frame) {
+      final onConnect = expectAsync1(
+        (StompFrame frame) {
           Timer(Duration(milliseconds: 500), () {
             handler!.dispose();
           });
@@ -145,7 +144,7 @@ void main() {
 
       handler = StompHandler(
         config: config.copyWith(
-          onConnect: (_, frame) {
+          onConnect: (frame) {
             handler!.subscribe(
               destination: '/foo',
               callback: onSubscriptionFrame,
@@ -183,7 +182,7 @@ void main() {
 
       handler = StompHandler(
         config: config.copyWith(
-          onConnect: (StompClient? _, StompFrame frame) {
+          onConnect: (StompFrame frame) {
             final unsubscribe = handler!.subscribe(
               destination: '/foo',
               callback: onSubscriptionFrame,
@@ -225,7 +224,7 @@ void main() {
 
       handler = StompHandler(
         config: config.copyWith(
-          onConnect: (StompClient? _, StompFrame frame) {
+          onConnect: (StompFrame frame) {
             handler!.send(
               destination: '/foo/bar',
               body: 'This is a body',
@@ -253,7 +252,7 @@ void main() {
 
       handler = StompHandler(
         config: config.copyWith(
-          onConnect: (StompClient? _, StompFrame frame) {
+          onConnect: (StompFrame frame) {
             handler!.ack(id: 'message-0', headers: {'receipt': 'send-0'});
           },
           onDisconnect: onDisconnect,
@@ -277,7 +276,7 @@ void main() {
 
       handler = StompHandler(
         config: config.copyWith(
-          onConnect: (StompClient? _, StompFrame frame) {
+          onConnect: (StompFrame frame) {
             handler!.nack(id: 'message-0', headers: {'receipt': 'send-0'});
           },
           onDisconnect: onDisconnect,
@@ -303,7 +302,7 @@ void main() {
 
       handler = StompHandler(
         config: config.copyWith(
-          onConnect: (StompClient? _, StompFrame frame) {
+          onConnect: (StompFrame frame) {
             handler!.subscribe(
               destination: '/bar',
               callback: onSubscriptionFrame,

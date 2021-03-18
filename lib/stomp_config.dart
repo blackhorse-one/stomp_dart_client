@@ -1,12 +1,10 @@
 import 'dart:async';
 
 import 'package:stomp_dart_client/sock_js/sock_js_utils.dart';
-import 'package:stomp_dart_client/stomp.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
 
 typedef StompFrameCallback = void Function(StompFrame);
 typedef StompBeforeConnectCallback = Future<void> Function();
-typedef StompConnectCallback = void Function(StompClient?, StompFrame);
 typedef StompDebugCallback = void Function(String);
 typedef StompWebSocketErrorCallback = void Function(dynamic);
 typedef StompWebSocketDoneCallback = void Function();
@@ -46,7 +44,7 @@ class StompConfig {
   final StompBeforeConnectCallback beforeConnect;
 
   /// Callback for when STOMP has successfully connected
-  final StompConnectCallback onConnect;
+  final StompFrameCallback onConnect;
 
   /// Callback for when STOMP has disconnected
   final StompFrameCallback onDisconnect;
@@ -124,7 +122,7 @@ class StompConfig {
     Map<String, String>? stompConnectHeaders,
     Map<String, dynamic>? webSocketConnectHeaders,
     StompBeforeConnectCallback? beforeConnect,
-    StompConnectCallback? onConnect,
+    StompFrameCallback? onConnect,
     StompFrameCallback? onStompError,
     StompFrameCallback? onDisconnect,
     StompFrameCallback? onUnhandledFrame,

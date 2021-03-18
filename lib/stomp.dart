@@ -42,14 +42,14 @@ class StompClient {
 
     _handler = StompHandler(
       config: config.copyWith(
-        onConnect: (_, frame) {
+        onConnect: (frame) {
           if (!_isActive) {
             config.onDebugMessage(
                 '[STOMP] Client connected while being deactivated. Will disconnect.');
             _handler?.dispose();
             return;
           }
-          config.onConnect(this, frame);
+          config.onConnect(frame);
         },
         onWebSocketDone: () {
           config.onWebSocketDone();

@@ -47,8 +47,8 @@ void main() {
       final onWebSocketDone = expectAsync0(() {}, count: 2);
 
       var n = 0;
-      final onConnect = expectAsync2(
-        (StompClient? _, StompFrame frame) {
+      final onConnect = expectAsync1(
+        (StompFrame frame) {
           if (n == 1) {
             client.deactivate();
           }
@@ -80,8 +80,8 @@ void main() {
         count: 4,
       );
 
-      final onConnect = expectAsync2(
-        (StompClient? _, StompFrame frame) {},
+      final onConnect = expectAsync1(
+        (StompFrame frame) {},
         count: 0,
       );
 
@@ -147,8 +147,8 @@ void main() {
       );
 
       final onError = expectAsync1((dynamic _) {}, count: 0);
-      final onConnect = expectAsync2(
-        (StompClient? _, StompFrame frame) {
+      final onConnect = expectAsync1(
+        (StompFrame frame) {
           Timer(Duration(milliseconds: 500), () => client.deactivate());
         },
         count: 1,
@@ -209,8 +209,8 @@ void main() {
         count: 1,
       );
 
-      final onConnect = expectAsync2(
-        (StompClient? _, StompFrame frame) {
+      final onConnect = expectAsync1(
+        (StompFrame frame) {
           expect(config.webSocketConnectHeaders?['TEST'], 'DUMMY');
           expect(config.stompConnectHeaders?['TEST'], 'DUMMY');
           Timer(Duration(milliseconds: 500), () => client.deactivate());

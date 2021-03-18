@@ -236,7 +236,7 @@ class StompHandler {
       _setupHeartbeat(frame);
     }
 
-    config.onConnect(null, frame);
+    config.onConnect(frame);
   }
 
   void _onMessageFrame(StompFrame frame) {
