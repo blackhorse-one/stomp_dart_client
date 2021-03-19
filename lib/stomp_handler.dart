@@ -32,10 +32,10 @@ class StompHandler {
     }
   }
 
-  WebSocketChannel? channel;
   final StompConfig config;
 
   late Parser _parser;
+  WebSocketChannel? _channel;
   bool _connected = false;
   int _currentReceiptIndex = 0;
   int _currentSubscriptionIndex = 0;
@@ -51,8 +51,8 @@ class StompHandler {
 
   void start() async {
     try {
-      channel = await platform.connect(config);
-      channel!.stream.listen(_onData, onError: _onError, onDone: _onDone);
+      _channel = await platform.connect(config);
+      _channel!.stream.listen(_onData, onError: _onError, onDone: _onDone);
       _connectToStomp();
     } on WebSocketChannelException catch (err) {
       if (config.reconnectDelay.inMilliseconds == 0) {
@@ -182,7 +182,7 @@ class StompHandler {
     config.onDebugMessage('>>> ' + serializedFrame.toString());
 
     try {
-      channel!.sink.add(serializedFrame);
+      _channel!.sink.add(serializedFrame);
     } catch (_) {
       throw StompBadStateException(
         'The StompHandler has no active connection '
@@ -282,13 +282,11 @@ class StompHandler {
       final ttl = max(config.heartbeatOutgoing.inMilliseconds, serverIncoming);
       _heartbeatSender?.cancel();
       _heartbeatSender = Timer.periodic(Duration(milliseconds: ttl), (_) {
-        if (channel != null) {
-          config.onDebugMessage('>>> PING');
-          if (config.useSockJS) {
-            channel!.sink.add('["\\n"]');
-          } else {
-            channel!.sink.add('\n');
-          }
+        config.onDebugMessage('>>> PING');
+        if (config.useSockJS) {
+          _channel?.sink.add('["\\n"]');
+        } else {
+          _channel?.sink.add('\n');
         }
       });
     }
@@ -311,6 +309,6 @@ class StompHandler {
     _connected = false;
     _heartbeatSender?.cancel();
     _heartbeatReceiver?.cancel();
-    channel?.sink.close();
+    _channel?.sink.close();
   }
 }
