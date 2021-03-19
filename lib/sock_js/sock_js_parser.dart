@@ -1,21 +1,22 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:meta/meta.dart';
+
 import 'package:stomp_dart_client/parser.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
 import 'package:stomp_dart_client/stomp_parser.dart';
 
 class SockJSParser implements Parser {
-  StompParser _stompParser;
-
-  final Function onDone;
-
-  SockJSParser(
-      {@required Function(StompFrame) onStompFrame,
-      Function onPingFrame,
-      @required this.onDone}) {
+  SockJSParser({
+    required Function(StompFrame) onStompFrame,
+    required this.onDone,
+    StompPingFrameCallback? onPingFrame,
+  }) {
     _stompParser = StompParser(onStompFrame, onPingFrame);
   }
+
+  late StompParser _stompParser;
+
+  final void Function() onDone;
 
   @override
   void parseData(dynamic data) {
@@ -32,7 +33,7 @@ class SockJSParser implements Parser {
   }
 
   void _collectData(Uint8List byteList) {
-    if (byteList == null || byteList.isEmpty) {
+    if (byteList.isEmpty) {
       return;
     }
 
@@ -72,9 +73,7 @@ class SockJSParser implements Parser {
         _stompParser.parseData(payload);
         break;
       case 'c': //Close frame
-        if (onDone != null) {
-          onDone();
-        }
+        onDone();
         break;
     }
   }

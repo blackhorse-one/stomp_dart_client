@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:meta/meta.dart';
 import 'package:stomp_dart_client/parser.dart';
 import 'package:stomp_dart_client/sock_js/sock_js_parser.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
+import 'package:stomp_dart_client/stomp_exception.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
 import 'package:stomp_dart_client/stomp_parser.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -14,52 +14,55 @@ import 'src/_connect_api.dart'
     if (dart.library.html) 'src/_connect_html.dart'
     if (dart.library.io) 'src/_connect_io.dart' as platform;
 
+typedef StompUnsubscribe = void Function({
+  Map<String, String>? unsubscribeHeaders,
+});
+
 class StompHandler {
-  WebSocketChannel channel;
-  final StompConfig config;
-
-  Parser _parser;
-  bool _connected = false;
-  int _currentReceiptIndex = 0;
-  int _currentSubscriptionIndex = 0;
-
-  final Map<String, Function> _receiptWatchers = {};
-  final Map<String, Function> _subscriptionWatcher = {};
-
-  DateTime _lastServerActivity;
-
-  Timer _heartbeatSender;
-  Timer _heartbeatReceiver;
-
-  StompHandler({@required this.config}) {
+  StompHandler({required this.config}) {
     if (config.useSockJS) {
       // use SockJS parser
       _parser = SockJSParser(
-          onStompFrame: _onFrame, onPingFrame: _onPing, onDone: _onDone);
+        onStompFrame: _onFrame,
+        onPingFrame: _onPing,
+        onDone: _onDone,
+      );
     } else {
       _parser = StompParser(_onFrame, _onPing);
     }
-    _lastServerActivity = DateTime.now();
-    _currentReceiptIndex = 0;
-    _currentSubscriptionIndex = 0;
   }
+
+  final StompConfig config;
+
+  late Parser _parser;
+  WebSocketChannel? _channel;
+  bool _connected = false;
+  int _currentReceiptIndex = 0;
+  int _currentSubscriptionIndex = 0;
+  DateTime _lastServerActivity = DateTime.now();
+
+  final _receiptWatchers = <String, StompFrameCallback>{};
+  final _subscriptionWatcher = <String, StompFrameCallback>{};
+
+  Timer? _heartbeatSender;
+  Timer? _heartbeatReceiver;
 
   bool get connected => _connected;
 
   void start() async {
     try {
-      channel = await platform.connect(config);
-      channel.stream.listen(_onData, onError: _onError, onDone: _onDone);
+      _channel = await platform.connect(config);
+      _channel!.stream.listen(_onData, onError: _onError, onDone: _onDone);
       _connectToStomp();
     } on WebSocketChannelException catch (err) {
-      if (config.reconnectDelay == 0) {
+      if (config.reconnectDelay.inMilliseconds == 0) {
         _onError(err);
       } else {
         config.onDebugMessage('Connection error...reconnecting');
         _onDone();
       }
     } on TimeoutException catch (err) {
-      if (config.reconnectDelay == 0) {
+      if (config.reconnectDelay.inMilliseconds == 0) {
         _onError(err);
       } else {
         config.onDebugMessage('Connection timed out...reconnecting');
@@ -79,73 +82,82 @@ class StompHandler {
     }
   }
 
-  Function({Map<String, String> unsubscribeHeaders}) subscribe(
-      {@required String destination,
-      @required Function(StompFrame) callback,
-      Map<String, String> headers}) {
-    headers = headers ?? {};
+  StompUnsubscribe subscribe({
+    required String destination,
+    required StompFrameCallback callback,
+    Map<String, String>? headers,
+  }) {
+    final subscriptionHeaders = {
+      ...?headers,
+      'destination': destination,
+    };
 
-    if (!headers.containsKey('id')) {
-      headers['id'] = 'sub-${_currentSubscriptionIndex++}';
+    if (!subscriptionHeaders.containsKey('id')) {
+      subscriptionHeaders['id'] = 'sub-${_currentSubscriptionIndex++}';
     }
-    headers['destination'] = destination;
-    _subscriptionWatcher[headers['id']] = callback;
 
-    _transmit(command: 'SUBSCRIBE', headers: headers);
+    _subscriptionWatcher[subscriptionHeaders['id']!] = callback;
+    _transmit(command: 'SUBSCRIBE', headers: subscriptionHeaders);
 
-    return ({Map<String, String> unsubscribeHeaders}) {
-      unsubscribeHeaders = unsubscribeHeaders ?? {};
-
-      if (!unsubscribeHeaders.containsKey('id')) {
-        unsubscribeHeaders['id'] = headers['id'];
+    return ({Map<String, String>? unsubscribeHeaders}) {
+      final headers = {...?unsubscribeHeaders};
+      if (!headers.containsKey('id')) {
+        headers['id'] = subscriptionHeaders['id']!;
       }
-      _subscriptionWatcher.remove(unsubscribeHeaders['id']);
+      _subscriptionWatcher.remove(headers['id']);
 
-      _transmit(command: 'UNSUBSCRIBE', headers: unsubscribeHeaders);
+      _transmit(command: 'UNSUBSCRIBE', headers: headers);
     };
   }
 
-  void send(
-      {@required String destination,
-      String body,
-      Uint8List binaryBody,
-      Map<String, String> headers}) {
-    headers = headers ?? {};
-    headers['destination'] = destination;
+  void send({
+    required String destination,
+    Map<String, String>? headers,
+    String? body,
+    Uint8List? binaryBody,
+  }) {
     _transmit(
-        command: 'SEND', body: body, binaryBody: binaryBody, headers: headers);
+      command: 'SEND',
+      body: body,
+      binaryBody: binaryBody,
+      headers: {
+        ...?headers,
+        'destination': destination,
+      },
+    );
   }
 
-  void ack({@required String id, Map<String, String> headers}) {
-    headers = headers ?? {};
-    headers['id'] = id;
-    _transmit(command: 'ACK', headers: headers);
+  void ack({required String id, Map<String, String>? headers}) {
+    _transmit(command: 'ACK', headers: {...?headers, 'id': id});
   }
 
-  void nack({@required String id, Map<String, String> headers}) {
-    headers = headers ?? {};
-    headers['id'] = id;
-    _transmit(command: 'NACK', headers: headers);
+  void nack({required String id, Map<String, String>? headers}) {
+    _transmit(command: 'NACK', headers: {...?headers, 'id': id});
   }
 
-  void watchForReceipt(String receiptId, Function(StompFrame) callback) {
+  void watchForReceipt(String receiptId, StompFrameCallback callback) {
     _receiptWatchers[receiptId] = callback;
   }
 
   void _connectToStomp() {
-    var connectHeaders = config.stompConnectHeaders ?? {};
-    connectHeaders['accept-version'] = ['1.0', '1.1', '1.2'].join(',');
-    connectHeaders['heart-beat'] =
-        [config.heartbeatOutgoing, config.heartbeatIncoming].join(',');
+    final connectHeaders = {
+      ...?config.stompConnectHeaders,
+      'accept-version': ['1.0', '1.1', '1.2'].join(','),
+      'heart-beat': [
+        config.heartbeatOutgoing,
+        config.heartbeatIncoming,
+      ].join(','),
+    };
 
     _transmit(command: 'CONNECT', headers: connectHeaders);
   }
 
   void _disconnectFromStomp() {
-    final disconnectHeaders = <String, String>{};
-    disconnectHeaders['receipt'] = 'disconnect-${_currentReceiptIndex++}';
+    final disconnectHeaders = {
+      'receipt': 'disconnect-${_currentReceiptIndex++}',
+    };
 
-    watchForReceipt(disconnectHeaders['receipt'], (StompFrame frame) {
+    watchForReceipt(disconnectHeaders['receipt']!, (frame) {
       _cleanUp();
       config.onDisconnect(frame);
     });
@@ -153,22 +165,33 @@ class StompHandler {
     _transmit(command: 'DISCONNECT', headers: disconnectHeaders);
   }
 
-  void _transmit(
-      {String command,
-      Map<String, String> headers,
-      String body,
-      Uint8List binaryBody}) {
+  void _transmit({
+    required String command,
+    required Map<String, String> headers,
+    String? body,
+    Uint8List? binaryBody,
+  }) {
     final frame = StompFrame(
-        command: command, headers: headers, body: body, binaryBody: binaryBody);
+      command: command,
+      headers: headers,
+      body: body,
+      binaryBody: binaryBody,
+    );
 
     dynamic serializedFrame = _parser.serializeFrame(frame);
-
     config.onDebugMessage('>>> ' + serializedFrame.toString());
 
-    channel.sink.add(serializedFrame);
+    try {
+      _channel!.sink.add(serializedFrame);
+    } catch (_) {
+      throw StompBadStateException(
+        'The StompHandler has no active connection '
+        'or the connection was unexpectedly closed.',
+      );
+    }
   }
 
-  void _onError(error) {
+  void _onError(dynamic error) {
     config.onWebSocketError(error);
   }
 
@@ -220,14 +243,14 @@ class StompHandler {
       _setupHeartbeat(frame);
     }
 
-    config.onConnect(null, frame);
+    config.onConnect(frame);
   }
 
   void _onMessageFrame(StompFrame frame) {
     final subscriptionId = frame.headers['subscription'];
 
     if (_subscriptionWatcher.containsKey(subscriptionId)) {
-      _subscriptionWatcher[subscriptionId](frame);
+      _subscriptionWatcher[subscriptionId]!(frame);
     } else {
       config.onUnhandledMessage(frame);
     }
@@ -236,7 +259,7 @@ class StompHandler {
   void _onReceiptFrame(StompFrame frame) {
     final receiptId = frame.headers['receipt-id'];
     if (_receiptWatchers.containsKey(receiptId)) {
-      _receiptWatchers[receiptId](frame);
+      _receiptWatchers[receiptId]!(frame);
       _receiptWatchers.remove(receiptId);
     } else {
       config.onUnhandledReceipt(frame);
@@ -252,24 +275,24 @@ class StompHandler {
   }
 
   void _setupHeartbeat(StompFrame frame) {
-    final serverHeartbeats = frame.headers['heart-beat'].split(',');
+    final serverHeartbeats = frame.headers['heart-beat']!.split(',');
     final serverOutgoing = int.parse(serverHeartbeats[0]);
     final serverIncoming = int.parse(serverHeartbeats[1]);
-    if (config.heartbeatOutgoing > 0 && serverIncoming > 0) {
-      final ttl = max(config.heartbeatOutgoing, serverIncoming);
+    if (config.heartbeatOutgoing.inMilliseconds > 0 && serverIncoming > 0) {
+      final ttl = max(config.heartbeatOutgoing.inMilliseconds, serverIncoming);
       _heartbeatSender?.cancel();
       _heartbeatSender = Timer.periodic(Duration(milliseconds: ttl), (_) {
         config.onDebugMessage('>>> PING');
         if (config.useSockJS) {
-          channel.sink.add('["\\n"]');
+          _channel?.sink.add('["\\n"]');
         } else {
-          channel.sink.add('\n');
+          _channel?.sink.add('\n');
         }
       });
     }
 
-    if (config.heartbeatIncoming > 0 && serverOutgoing > 0) {
-      final ttl = max(config.heartbeatIncoming, serverOutgoing);
+    if (config.heartbeatIncoming.inMilliseconds > 0 && serverOutgoing > 0) {
+      final ttl = max(config.heartbeatIncoming.inMilliseconds, serverOutgoing);
       _heartbeatReceiver?.cancel();
       _heartbeatReceiver = Timer.periodic(Duration(milliseconds: ttl), (_) {
         final deltaMs = DateTime.now().millisecondsSinceEpoch -
@@ -286,6 +309,6 @@ class StompHandler {
     _connected = false;
     _heartbeatSender?.cancel();
     _heartbeatReceiver?.cancel();
-    channel?.sink?.close();
+    _channel?.sink.close();
   }
 }

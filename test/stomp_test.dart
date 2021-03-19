@@ -2,34 +2,33 @@ import 'dart:async';
 
 import 'package:stomp_dart_client/stomp.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
+import 'package:stomp_dart_client/stomp_exception.dart';
+import 'package:stomp_dart_client/stomp_frame.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('StompClient', () {
-    setUp(() {});
-
-    tearDown(() async {});
     test('should not be connected on creation', () {
-      final client = StompClient(config: null);
+      final client = StompClient(config: StompConfig(url: ''));
       expect(client.connected, false);
     });
 
     test('schedules reconnect on unexpected disconnect', () async {
       // Setup a server which lets connect and then drops the connection
-      var streamChannel = spawnHybridCode(r'''
+      final streamChannel = spawnHybridCode(
+        r'''
         import 'dart:io';
-        import 'dart:async';
         import 'package:web_socket_channel/io.dart';
         import 'package:stomp_dart_client/stomp_parser.dart';
         import 'package:stream_channel/stream_channel.dart';
         
-        hybridMain(StreamChannel channel) async {
-          HttpServer server = await HttpServer.bind("localhost", 0);
+        Future<void> hybridMain(StreamChannel channel) async {
+         final server = await HttpServer.bind('localhost', 0);
           server.transform(WebSocketTransformer()).listen((webSocket) {
             var webSocketChannel = IOWebSocketChannel(webSocket);
             var parser = StompParser((frame) {
               if (frame.command == 'CONNECT') {
-                webSocketChannel.sink.add("CONNECTED\nversion:1.2\n\n\x00");
+                webSocketChannel.sink.add('CONNECTED\nversion:1.2\n\n\x00');
                 webSocketChannel.sink.close();
               } 
             });
@@ -40,53 +39,67 @@ void main() {
 
           channel.sink.add(server.port);
         }
-      ''', stayAlive: true);
+      ''',
+        stayAlive: true,
+      );
 
       int port = await streamChannel.stream.first;
+      late StompClient client;
+      final onWebSocketDone = expectAsync0(() {}, count: 2);
 
-      StompClient client;
-      dynamic onWebSocketDone = expectAsync0(() {}, count: 2);
       var n = 0;
-      dynamic onConnect = expectAsync2((_, frame) {
-        if (n == 1) {
-          client.deactivate();
-        }
-        n++;
-      }, count: 2);
+      final onConnect = expectAsync1(
+        (StompFrame frame) {
+          if (n == 1) {
+            client.deactivate();
+          }
+          n++;
+        },
+        count: 2,
+      );
 
       client = StompClient(
-          config: StompConfig(
-              url: 'ws://localhost:$port',
-              reconnectDelay: 5000,
-              onConnect: onConnect,
-              onWebSocketDone: onWebSocketDone));
-
-      client.activate();
+        config: StompConfig(
+          url: 'ws://localhost:$port',
+          reconnectDelay: Duration(seconds: 5),
+          onConnect: onConnect,
+          onWebSocketDone: onWebSocketDone,
+        ),
+      )..activate();
     });
 
     test('attempts to reconnect indefinitely when server is unavailable',
         () async {
-      StompClient client;
+      late StompClient client;
+
       var n = 0;
-      dynamic onWebSocketDone = expectAsync0(() {
-        if (n == 3) client.deactivate();
-        n++;
-      }, count: 4);
-      dynamic onConnect = expectAsync2((_, frame) {}, count: 0);
+      final onWebSocketDone = expectAsync0(
+        () {
+          if (n == 3) client.deactivate();
+          n++;
+        },
+        count: 4,
+      );
+
+      final onConnect = expectAsync1(
+        (StompFrame frame) {},
+        count: 0,
+      );
 
       client = StompClient(
-          config: StompConfig(
-              url: 'ws://localhost:1234',
-              onConnect: onConnect,
-              reconnectDelay: 1000,
-              onWebSocketDone: onWebSocketDone,
-              connectionTimeout: Duration(milliseconds: 2000)));
-
-      client.activate();
+        config: StompConfig(
+          url: 'ws://localhost:1234',
+          onConnect: onConnect,
+          reconnectDelay: Duration(seconds: 1),
+          onWebSocketDone: onWebSocketDone,
+          connectionTimeout: Duration(seconds: 2),
+        ),
+      )..activate();
     });
 
     test('disconnects cleanly from stomp and websocket', () async {
-      var streamChannel = spawnHybridCode(r'''
+      var streamChannel = spawnHybridCode(
+        r'''
         import 'dart:io';
         import 'dart:async';
         import 'package:web_socket_channel/io.dart';
@@ -116,36 +129,127 @@ void main() {
 
           channel.sink.add(server.port);
         }
-      ''', stayAlive: true);
+      ''',
+        stayAlive: true,
+      );
 
       int port = await streamChannel.stream.first;
 
-      StompClient client;
-      dynamic onWebSocketDone = expectAsync0(() {}, count: 1);
-      dynamic onDisconnect = expectAsync1((frame) {
-        expect(client.connected, isFalse);
-        expect(frame.command, 'RECEIPT');
-        expect(frame.headers.length, 1);
-        expect(frame.headers['receipt-id'], 'disconnect-0');
-      }, count: 1);
-      dynamic onConnect = expectAsync2((_, frame) {
-        Timer(Duration(milliseconds: 500), () {
-          client.deactivate();
-        });
-      }, count: 1);
-      dynamic onError = expectAsync1((_) {}, count: 0);
+      late StompClient client;
+      final onWebSocketDone = expectAsync0(() {}, count: 1);
+      final onDisconnect = expectAsync1(
+        (StompFrame frame) {
+          expect(client.connected, isFalse);
+          expect(frame.command, 'RECEIPT');
+          expect(frame.headers.length, 1);
+          expect(frame.headers['receipt-id'], 'disconnect-0');
+        },
+        count: 1,
+      );
+
+      final onError = expectAsync1((dynamic _) {}, count: 0);
+      final onConnect = expectAsync1(
+        (StompFrame frame) {
+          Timer(Duration(milliseconds: 500), () => client.deactivate());
+        },
+        count: 1,
+      );
 
       client = StompClient(
-          config: StompConfig(
-              url: 'ws://localhost:$port',
-              reconnectDelay: 5000,
-              onConnect: onConnect,
-              onWebSocketDone: onWebSocketDone,
-              onWebSocketError: onError,
-              onStompError: onError,
-              onDisconnect: onDisconnect));
+        config: StompConfig(
+          url: 'ws://localhost:$port',
+          reconnectDelay: Duration(seconds: 5),
+          onConnect: onConnect,
+          onWebSocketDone: onWebSocketDone,
+          onWebSocketError: onError,
+          onStompError: onError,
+          onDisconnect: onDisconnect,
+        ),
+      )..activate();
+    });
 
-      client.activate();
+    test('can modify headers before connecting', () async {
+      // Setup a server which lets connect and then drops the connection
+      final streamChannel = spawnHybridCode(
+        r'''
+        import 'dart:io';
+        import 'package:web_socket_channel/io.dart';
+        import 'package:stomp_dart_client/stomp_parser.dart';
+        import 'package:stream_channel/stream_channel.dart';
+
+        Future<void> hybridMain(StreamChannel channel) async {
+         final server = await HttpServer.bind('localhost', 0);
+          server.transform(WebSocketTransformer()).listen((webSocket) {
+            var webSocketChannel = IOWebSocketChannel(webSocket);
+            var parser = StompParser((frame) {
+              if (frame.command == 'CONNECT') {
+                webSocketChannel.sink.add('CONNECTED\nversion:1.2\n\n\x00');
+                webSocketChannel.sink.close();
+              }
+            });
+            webSocketChannel.stream.listen((request) {
+              parser.parseData(request);
+            });
+          });
+
+          channel.sink.add(server.port);
+        }
+      ''',
+        stayAlive: true,
+      );
+
+      int port = await streamChannel.stream.first;
+      late StompClient client;
+      late StompConfig config;
+
+      final beforeConnect = expectAsync0<Future<void>>(
+        () async {
+          config.webSocketConnectHeaders?['TEST'] = 'DUMMY';
+          config.stompConnectHeaders?['TEST'] = 'DUMMY';
+        },
+        count: 1,
+      );
+
+      final onConnect = expectAsync1(
+        (StompFrame frame) {
+          expect(config.webSocketConnectHeaders?['TEST'], 'DUMMY');
+          expect(config.stompConnectHeaders?['TEST'], 'DUMMY');
+          Timer(Duration(milliseconds: 500), () => client.deactivate());
+        },
+      );
+
+      config = StompConfig(
+        url: 'ws://localhost:$port',
+        beforeConnect: beforeConnect,
+        onConnect: onConnect,
+        stompConnectHeaders: {},
+        webSocketConnectHeaders: {},
+        reconnectDelay: Duration(seconds: 0),
+        onWebSocketDone: expectAsync0(() {}, count: 1),
+        connectionTimeout: Duration(seconds: 2),
+      );
+
+      client = StompClient(config: config)..activate();
+    });
+
+    test('throws when trying to transmit data before activate was called', () {
+      final client = StompClient(config: StompConfig(url: ''));
+      expect(
+        () => client.subscribe(destination: '', callback: (_) {}),
+        throwsA(TypeMatcher<StompBadStateException>()),
+      );
+      expect(
+        () => client.send(destination: ''),
+        throwsA(TypeMatcher<StompBadStateException>()),
+      );
+      expect(
+        () => client.ack(id: ''),
+        throwsA(TypeMatcher<StompBadStateException>()),
+      );
+      expect(
+        () => client.nack(id: ''),
+        throwsA(TypeMatcher<StompBadStateException>()),
+      );
     });
   });
 }

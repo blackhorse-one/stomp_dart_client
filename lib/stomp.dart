@@ -1,30 +1,23 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:meta/meta.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
-import 'package:stomp_dart_client/stomp_frame.dart';
+import 'package:stomp_dart_client/stomp_exception.dart';
 import 'package:stomp_dart_client/stomp_handler.dart';
 
-class BadStateException implements Exception {
-  final String cause;
-  BadStateException(this.cause);
-}
-
 class StompClient {
+  StompClient({required this.config});
+
   final StompConfig config;
 
-  StompHandler _handler;
+  bool get connected => _handler?.connected ?? false;
+
+  StompHandler? _handler;
+  Timer? _reconnectTimer;
   bool _isActive = false;
-  Timer _reconnectTimer;
-
-  StompClient({@required this.config});
-
-  bool get connected => (_handler != null) && _handler.connected;
 
   void activate() {
     _isActive = true;
-
     _connect();
   }
 
@@ -49,60 +42,99 @@ class StompClient {
     }
 
     _handler = StompHandler(
-        config: config.copyWith(onConnect: (_, frame) {
-      if (!_isActive) {
-        config.onDebugMessage(
-            '[STOMP] Client connected while being deactivated. Will disconnect');
-        _handler?.dispose();
-        return;
-      }
-      config.onConnect(this, frame);
-    }, onWebSocketDone: () {
-      config.onWebSocketDone();
-
-      if (_isActive) {
-        _scheduleReconnect();
-      }
-    }));
-    _handler.start();
+      config: config.copyWith(
+        onConnect: (frame) {
+          if (!_isActive) {
+            config.onDebugMessage(
+                '[STOMP] Client connected while being deactivated. Will disconnect.');
+            _handler?.dispose();
+            return;
+          }
+          config.onConnect(frame);
+        },
+        onWebSocketDone: () {
+          config.onWebSocketDone();
+          if (_isActive) {
+            _scheduleReconnect();
+          }
+        },
+      ),
+    )..start();
   }
 
-  Function({Map<String, String> unsubscribeHeaders}) subscribe(
-      {@required String destination,
-      @required Function(StompFrame) callback,
-      Map<String, String> headers}) {
-    return _handler.subscribe(
-        destination: destination, callback: callback, headers: headers);
+  StompUnsubscribe subscribe({
+    required String destination,
+    required StompFrameCallback callback,
+    Map<String, String>? headers,
+  }) {
+    final handler = _handler;
+    if (handler == null) {
+      throw StompBadStateException(
+        'The StompHandler was null. '
+        'Did you forget calling activate() on the client?',
+      );
+    }
+
+    return handler.subscribe(
+      destination: destination,
+      callback: callback,
+      headers: headers,
+    );
   }
 
-  void send(
-      {@required String destination,
-      String body,
-      Uint8List binaryBody,
-      Map<String, String> headers}) {
-    _handler.send(
-        destination: destination,
-        body: body,
-        binaryBody: binaryBody,
-        headers: headers);
+  void send({
+    required String destination,
+    Map<String, String>? headers,
+    String? body,
+    Uint8List? binaryBody,
+  }) {
+    final handler = _handler;
+    if (handler == null) {
+      throw StompBadStateException(
+        'The StompHandler was null. '
+        'Did you forget calling activate() on the client?',
+      );
+    }
+
+    handler.send(
+      destination: destination,
+      headers: headers,
+      body: body,
+      binaryBody: binaryBody,
+    );
   }
 
-  void ack({@required String id, Map<String, String> headers}) {
-    _handler.ack(id: id, headers: headers);
+  void ack({required String id, Map<String, String>? headers}) {
+    final handler = _handler;
+    if (handler == null) {
+      throw StompBadStateException(
+        'The StompHandler was null. '
+        'Did you forget calling activate() on the client?',
+      );
+    }
+
+    handler.ack(id: id, headers: headers);
   }
 
-  void nack({@required String id, Map<String, String> headers}) {
-    _handler.nack(id: id, headers: headers);
+  void nack({required String id, Map<String, String>? headers}) {
+    final handler = _handler;
+    if (handler == null) {
+      throw StompBadStateException(
+        'The StompHandler was null. '
+        'Did you forget calling activate() on the client?',
+      );
+    }
+
+    handler.nack(id: id, headers: headers);
   }
 
   void _scheduleReconnect() {
     _reconnectTimer?.cancel();
-
-    if (config.reconnectDelay > 0) {
-      _reconnectTimer =
-          Timer(Duration(milliseconds: config.reconnectDelay), () {
-        _connect();
-      });
+    if (config.reconnectDelay.inMilliseconds > 0) {
+      _reconnectTimer = Timer(
+        config.reconnectDelay,
+        () => _connect(),
+      );
     }
   }
 }

@@ -2,7 +2,10 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:stomp_dart_client/parser.dart';
+import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
+
+typedef _ParseByteFunction = void Function(int);
 
 ///
 /// This Parser is heavily based on the excellent recursive descent parser found here
@@ -10,30 +13,29 @@ import 'package:stomp_dart_client/stomp_frame.dart';
 /// Credit: https://github.com/kum-deepak
 ///
 class StompParser implements Parser {
-  String _resultCommand;
-  Map<String, String> _resultHeaders;
-  String _resultBody;
-
-  List<int> _currentToken;
-  String _currentHeaderKey;
-  int _bodyBytesRemaining;
-
-  final Function(StompFrame) onStompFrame;
-  final Function onPingFrame;
-
-  final NULL = 0;
-  final LF = 10;
-  final CR = 13;
-  final COLON = 58;
-
-  Function(int) _parseByte;
-
-  @override
-  bool escapeHeaders = false;
-
   StompParser(this.onStompFrame, [this.onPingFrame]) {
     _initState();
   }
+
+  final StompFrameCallback onStompFrame;
+  final StompPingFrameCallback? onPingFrame;
+
+  var _resultHeaders = <String, String>{};
+  String? _resultCommand;
+  String? _resultBody;
+
+  var _currentToken = <int>[];
+  String? _currentHeaderKey;
+  int _bodyBytesRemaining = 0;
+
+  static const _NULL = 0;
+  static const _LF = 10;
+  static const _CR = 13;
+  static const _COLON = 58;
+  late _ParseByteFunction _parseByte;
+
+  @override
+  bool escapeHeaders = false;
 
   @override
   void parseData(dynamic data) {
@@ -52,31 +54,42 @@ class StompParser implements Parser {
     }
   }
 
+  void _initState() {
+    _resultCommand = null;
+    _resultHeaders = {};
+    _resultBody = null;
+
+    _currentToken = [];
+    _currentHeaderKey = null;
+
+    _parseByte = _collectFrame;
+  }
+
   void _collectFrame(int byte) {
-    if (byte == NULL) {
+    if (byte == _NULL) {
       // Ignore
       return;
     }
-    if (byte == CR) {
+    if (byte == _CR) {
       // Ignore CR
       return;
     }
-    if (byte == LF) {
+    if (byte == _LF) {
       // Incoming Ping
-      onPingFrame != null ? onPingFrame() : null;
+      onPingFrame?.call();
       return;
     }
 
     _parseByte = _collectCommand;
-    _reinjectByte(byte);
+    _reInjectByte(byte);
   }
 
   void _collectCommand(int byte) {
-    if (byte == CR) {
+    if (byte == _CR) {
       // Ignore CR
       return;
     }
-    if (byte == LF) {
+    if (byte == _LF) {
       _resultCommand = _consumeTokenAsString();
       _parseByte = _collectHeaders;
       return;
@@ -86,21 +99,21 @@ class StompParser implements Parser {
   }
 
   void _collectHeaders(int byte) {
-    if (byte == CR) {
+    if (byte == _CR) {
       // Ignore CR
       return;
     }
-    if (byte == LF) {
+    if (byte == _LF) {
       _setupCollectBody();
       return;
     }
 
     _parseByte = _collectHeaderKey;
-    _reinjectByte(byte);
+    _reInjectByte(byte);
   }
 
   void _collectHeaderKey(int byte) {
-    if (byte == COLON) {
+    if (byte == _COLON) {
       _currentHeaderKey = _consumeTokenAsString();
       _parseByte = _collectHeaderValue;
       return;
@@ -110,12 +123,12 @@ class StompParser implements Parser {
   }
 
   void _collectHeaderValue(int byte) {
-    if (byte == CR) {
+    if (byte == _CR) {
       // Ignore CR
       return;
     }
-    if (byte == LF) {
-      _resultHeaders[_currentHeaderKey] = _consumeTokenAsString();
+    if (byte == _LF) {
+      _resultHeaders[_currentHeaderKey!] = _consumeTokenAsString();
       _currentHeaderKey = null;
       _parseByte = _collectHeaders;
       return;
@@ -134,7 +147,7 @@ class StompParser implements Parser {
   }
 
   void _collectTerminatedBody(int byte) {
-    if (byte == NULL) {
+    if (byte == _NULL) {
       _consumeBody();
       return;
     }
@@ -144,12 +157,13 @@ class StompParser implements Parser {
 
   void _setupCollectBody() {
     if (_resultHeaders.containsKey('content-length')) {
-      _bodyBytesRemaining = int.tryParse(_resultHeaders['content-length']);
-      if (_bodyBytesRemaining == null) {
+      final remaining = int.tryParse(_resultHeaders['content-length']!);
+      if (remaining == null) {
         print(
             '[STOMP] Unable to parse content-length although it was present. Using fallback');
         _parseByte = _collectTerminatedBody;
       } else {
+        _bodyBytesRemaining = remaining;
         _parseByte = _collectFixedSizeBody;
       }
     } else {
@@ -159,14 +173,16 @@ class StompParser implements Parser {
 
   void _consumeBody() {
     _resultBody = _consumeTokenAsString();
-
     if (escapeHeaders) {
       _unescapeResultHeaders();
     }
 
     try {
       onStompFrame(StompFrame(
-          command: _resultCommand, headers: _resultHeaders, body: _resultBody));
+        command: _resultCommand!,
+        headers: _resultHeaders,
+        body: _resultBody,
+      ));
     } finally {
       _initState();
     }
@@ -182,7 +198,7 @@ class StompParser implements Parser {
     _currentToken.add(byte);
   }
 
-  void _reinjectByte(int byte) {
+  void _reInjectByte(int byte) {
     _parseByte(byte);
   }
 
@@ -215,7 +231,7 @@ class StompParser implements Parser {
 
   Map<String, String> _escapeHeaders(Map<String, String> headers) {
     final escapedHeaders = <String, String>{};
-    headers?.forEach((key, value) {
+    headers.forEach((key, value) {
       escapedHeaders[_escapeString(key)] = _escapeString(value);
     });
     return escapedHeaders;
@@ -231,32 +247,32 @@ class StompParser implements Parser {
 
     if (frame.binaryBody != null) {
       final binaryList = Uint8List(
-          serializedHeaders.codeUnits.length + 1 + frame.binaryBody.length);
+          serializedHeaders.codeUnits.length + 1 + frame.binaryBody!.length);
       binaryList.setRange(
           0, serializedHeaders.codeUnits.length, serializedHeaders.codeUnits);
       binaryList.setRange(
           serializedHeaders.codeUnits.length,
-          serializedHeaders.codeUnits.length + frame.binaryBody.length,
-          frame.binaryBody);
-      binaryList[serializedHeaders.codeUnits.length + frame.binaryBody.length] =
-          NULL;
+          serializedHeaders.codeUnits.length + frame.binaryBody!.length,
+          frame.binaryBody!);
+      binaryList[serializedHeaders.codeUnits.length +
+          frame.binaryBody!.length] = _NULL;
       return binaryList;
     } else {
       var serializedFrame = serializedHeaders;
       serializedFrame += frame.body ?? '';
-      serializedFrame += String.fromCharCode(NULL);
+      serializedFrame += String.fromCharCode(_NULL);
       return serializedFrame;
     }
   }
 
-  String _serializeCmdAndHeaders(StompFrame frame) {
+  String? _serializeCmdAndHeaders(StompFrame frame) {
     var serializedFrame = frame.command;
-    var headers = frame.headers ?? {};
+    var headers = frame.headers;
     var bodyLength = 0;
     if (frame.binaryBody != null) {
-      bodyLength = frame.binaryBody.length;
+      bodyLength = frame.binaryBody!.length;
     } else if (frame.body != null) {
-      bodyLength = utf8.encode(frame.body).length;
+      bodyLength = utf8.encode(frame.body!).length;
     }
     if (bodyLength > 0) {
       headers['content-length'] = bodyLength.toString();
@@ -265,22 +281,11 @@ class StompParser implements Parser {
       headers = _escapeHeaders(headers);
     }
     headers.forEach((key, value) {
-      serializedFrame += String.fromCharCode(LF) + key + ':' + value;
+      serializedFrame += String.fromCharCode(_LF) + key + ':' + value;
     });
 
-    serializedFrame += String.fromCharCode(LF) + String.fromCharCode(LF);
+    serializedFrame += String.fromCharCode(_LF) + String.fromCharCode(_LF);
 
     return serializedFrame;
-  }
-
-  void _initState() {
-    _resultCommand = null;
-    _resultHeaders = {};
-    _resultBody = null;
-
-    _currentToken = [];
-    _currentHeaderKey = null;
-
-    _parseByte = _collectFrame;
   }
 }

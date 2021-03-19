@@ -5,7 +5,6 @@ void main() {
   group('SockJsUtils', () {
     test('generate websocket url with http url', () {
       final url = 'http://localhost:5000/test';
-
       final webSocketUrl = SockJsUtils().generateTransportUrl(url);
 
       expect(webSocketUrl, isNotNull);
@@ -15,7 +14,6 @@ void main() {
 
     test('generate websocket url with https url', () {
       final url = 'https://localhost:5000/test';
-
       final webSocketUrl = SockJsUtils().generateTransportUrl(url);
 
       expect(webSocketUrl, isNotNull);
@@ -25,7 +23,6 @@ void main() {
 
     test('generate websocket url with no empty fragment', () {
       final url = 'https://localhost:5000/test';
-
       final webSocketUrl = SockJsUtils().generateTransportUrl(url);
 
       expect(webSocketUrl, isNotNull);
@@ -36,7 +33,10 @@ void main() {
     test('generate websocket url with bad url', () {
       final url = 'wss://localhost:5000/test';
 
-      expect(() => SockJsUtils().generateTransportUrl(url), throwsArgumentError);
+      expect(
+        () => SockJsUtils().generateTransportUrl(url),
+        throwsArgumentError,
+      );
     });
   });
 }
