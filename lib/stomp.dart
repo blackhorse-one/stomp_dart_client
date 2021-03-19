@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:stomp_dart_client/stomp_config.dart';
+import 'package:stomp_dart_client/stomp_exception.dart';
 import 'package:stomp_dart_client/stomp_handler.dart';
 
 class StompClient {
@@ -66,15 +67,19 @@ class StompClient {
     required StompFrameCallback callback,
     Map<String, String>? headers,
   }) {
-    if (_handler != null) {
-      return _handler!.subscribe(
-        destination: destination,
-        callback: callback,
-        headers: headers,
+    final handler = _handler;
+    if (handler == null) {
+      throw StompBadStateException(
+        'The StompHandler was null. '
+        'Did you forget calling activate() on the client?',
       );
     }
 
-    return ({Map<String, String>? unsubscribeHeaders}) {};
+    return handler.subscribe(
+      destination: destination,
+      callback: callback,
+      headers: headers,
+    );
   }
 
   void send({
@@ -83,26 +88,44 @@ class StompClient {
     String? body,
     Uint8List? binaryBody,
   }) {
-    if (_handler != null) {
-      _handler!.send(
-        destination: destination,
-        headers: headers,
-        body: body,
-        binaryBody: binaryBody,
+    final handler = _handler;
+    if (handler == null) {
+      throw StompBadStateException(
+        'The StompHandler was null. '
+        'Did you forget calling activate() on the client?',
       );
     }
+
+    handler.send(
+      destination: destination,
+      headers: headers,
+      body: body,
+      binaryBody: binaryBody,
+    );
   }
 
   void ack({required String id, Map<String, String>? headers}) {
-    if (_handler != null) {
-      _handler!.ack(id: id, headers: headers);
+    final handler = _handler;
+    if (handler == null) {
+      throw StompBadStateException(
+        'The StompHandler was null. '
+        'Did you forget calling activate() on the client?',
+      );
     }
+
+    handler.ack(id: id, headers: headers);
   }
 
   void nack({required String id, Map<String, String>? headers}) {
-    if (_handler != null) {
-      _handler!.nack(id: id, headers: headers);
+    final handler = _handler;
+    if (handler == null) {
+      throw StompBadStateException(
+        'The StompHandler was null. '
+        'Did you forget calling activate() on the client?',
+      );
     }
+
+    handler.nack(id: id, headers: headers);
   }
 
   void _scheduleReconnect() {

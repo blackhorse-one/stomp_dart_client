@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:stomp_dart_client/stomp_config.dart';
+import 'package:stomp_dart_client/stomp_exception.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
 import 'package:stomp_dart_client/stomp_handler.dart';
 import 'package:stream_channel/stream_channel.dart';
@@ -316,6 +317,26 @@ void main() {
           onDisconnect: onDisconnect,
         ),
       )..start();
+    });
+
+    test('throws when trying to transmit data before start was called', () {
+      final handler = StompHandler(config: StompConfig(url: ''));
+      expect(
+        () => handler.subscribe(destination: '', callback: (_) {}),
+        throwsA(TypeMatcher<StompBadStateException>()),
+      );
+      expect(
+        () => handler.send(destination: ''),
+        throwsA(TypeMatcher<StompBadStateException>()),
+      );
+      expect(
+        () => handler.ack(id: ''),
+        throwsA(TypeMatcher<StompBadStateException>()),
+      );
+      expect(
+        () => handler.nack(id: ''),
+        throwsA(TypeMatcher<StompBadStateException>()),
+      );
     });
   });
 }

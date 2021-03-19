@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:stomp_dart_client/parser.dart';
 import 'package:stomp_dart_client/sock_js/sock_js_parser.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
+import 'package:stomp_dart_client/stomp_exception.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
 import 'package:stomp_dart_client/stomp_parser.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -177,10 +178,16 @@ class StompHandler {
       binaryBody: binaryBody,
     );
 
-    if (channel != null) {
-      dynamic serializedFrame = _parser.serializeFrame(frame);
-      config.onDebugMessage('>>> ' + serializedFrame.toString());
+    dynamic serializedFrame = _parser.serializeFrame(frame);
+    config.onDebugMessage('>>> ' + serializedFrame.toString());
+
+    try {
       channel!.sink.add(serializedFrame);
+    } catch (_) {
+      throw StompBadStateException(
+        'The StompHandler has no active connection '
+        'or the connection was unexpectedly closed.',
+      );
     }
   }
 
