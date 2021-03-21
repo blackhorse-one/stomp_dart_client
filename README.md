@@ -17,8 +17,8 @@ StompClient client = StompClient(
 ```
 The connect callback should be used to make sure that we are actually connected before we subscribe or send messages
 ```dart
-void onConnectCallback(StompClient client, StompFrame connectFrame) {
-    // use the client object passed.
+void onConnectCallback(StompFrame connectFrame) {
+    // client is connected and ready
 }
 ```
 
@@ -70,14 +70,14 @@ This table shows all available options in `StompConfig`
 | Option                                       | Description                                                                                                |
 |----------------------------------------------|------------------------------------------------------------------------------------------------------------|
 | url: String                                  | The url of the server you want connect to (required)                                                       |
-| reconnectDelay: int                          | The time in milliseconds between reconnect attempts. Set to 0 if you don't want to reconnect automatically |
-| heartbeatOutgoing: int                       | The time in milliseconds between outgoing heartbeat messages. Set to 0 to not send any heartbeats          |
-| heartbeatIncoming: int                       | The time in milliseconds between incoming heartbeat messages. Set to 0 to not receive any heartbeats       |
+| reconnectDelay: Duration                     | Time duration between reconnect attempts. Set to 0 ms if you don't want to reconnect automatically         |
+| heartbeatOutgoing: Duration                  | Time duration between outgoing heartbeat messages. Set to 0 ms to not send any heartbeats                  |
+| heartbeatIncoming: Duration                  | Time duration between incoming heartbeat messages. Set to 0 ms to not receive any heartbeats               |
 | connectionTimeout: Duration                  | Time duration it waits until a connection attempt is aborted                                               |
-| stompConnectHeaders: Map<String, String>     | The header values which will be used on the STOMP connect frame                                            |
-| webSocketConnectHeaders: Map<String, dynamic>| The header values which will be used when connecting to the underyling WebSocket                           |
+| stompConnectHeaders: Map<String, String>     | Optional header values which will be used on the STOMP connect frame                                       |
+| webSocketConnectHeaders: Map<String, dynamic>| Optional header values which will be used when connecting to the underyling WebSocket                      |
 | beforeConnect: Future<void> Function()       | A async function which will be awaited before a connection is established.                                 |
-| onConnect: Function(StompClient, StompFrame) | Function to be called when the client successfully connected to the server.                                |
+| onConnect: Function(StompFrame)              | Function to be called when the client successfully connected to the server.                                |
 | onDisconnect: Function(StompFrame)           | Function to be called when the client disconnects expectedly                                               |
 | onStompError: Function(StompFrame)           | Function to be called when the stomp server sends an error frame                                           |
 | onUnhandledFrame: Function(StompFrame)       | Function to be called when the server sends a unrecognized frame                                           |
@@ -105,15 +105,15 @@ StompClient client = StompClient(
 
 #### Running unit tests
 ```dart
-pub run test -p "chrome,vm" test/
+dart run test -p "chrome,vm" test/
 ```
 
 #### Generating coverage data
 ```dart
-pub global activate coverage
-pub global run coverage:collect_coverage --port=8111 --out=coverage.json --wait-paused --resume-isolates & dart --disable-service-auth-codes --enable-vm-service=8111 --pause-isolates-on-exit test/test_all.dart
+dart pub global activate coverage
+dart pub global run coverage:collect_coverage --port=8111 --out=coverage.json --wait-paused --resume-isolates & dart --disable-service-auth-codes --enable-vm-service=8111 --pause-isolates-on-exit test/test_all.dart
 ```
 And to convert to lcov
 ```dart
-pub global run coverage:format_coverage --lcov --in=coverage.json --out=lcov.info --packages=.packages --report-on=lib
+dart pub global run coverage:format_coverage --lcov --in=coverage.json --out=lcov.info --packages=.packages --report-on=lib
 ```

@@ -1,3 +1,11 @@
+## 0.4.0
+ - Null-safety migration
+ - **Breaking**: `onConnect` callback no longer returns the client as first parameter
+ - **Breaking**: `send`, `subscribe`, `ack`, `nack` and `unsubscribe` will now
+   throw a `StompBadStateException` when either the client is not correctly set
+   up or the cient is not connected.
+ - `onWebSocketError` callback will now be called on every error when trying to connect
+
 ## 0.3.8
  - Fix for SockJS in web environment
 

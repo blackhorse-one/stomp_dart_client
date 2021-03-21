@@ -54,22 +54,20 @@ class StompHandler {
       _channel = await platform.connect(config);
       _channel!.stream.listen(_onData, onError: _onError, onDone: _onDone);
       _connectToStomp();
-    } on WebSocketChannelException catch (err) {
-      if (config.reconnectDelay.inMilliseconds == 0) {
-        _onError(err);
-      } else {
-        config.onDebugMessage('Connection error...reconnecting');
-        _onDone();
-      }
-    } on TimeoutException catch (err) {
-      if (config.reconnectDelay.inMilliseconds == 0) {
-        _onError(err);
-      } else {
-        config.onDebugMessage('Connection timed out...reconnecting');
-        _onDone();
-      }
     } catch (err) {
-      _onDone();
+      _onError(err);
+      if (config.reconnectDelay.inMilliseconds == 0) {
+        _cleanUp();
+      } else {
+        if (err is TimeoutException) {
+          config.onDebugMessage('Connection timed out...reconnecting');
+        } else if (err is WebSocketChannelException) {
+          config.onDebugMessage('Connection error...reconnecting');
+        } else {
+          config.onDebugMessage('Unknown connection error...reconnecting');
+        }
+        _onDone();
+      }
     }
   }
 
