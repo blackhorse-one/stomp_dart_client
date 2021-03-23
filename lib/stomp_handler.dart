@@ -142,8 +142,8 @@ class StompHandler {
       ...?config.stompConnectHeaders,
       'accept-version': ['1.0', '1.1', '1.2'].join(','),
       'heart-beat': [
-        config.heartbeatOutgoing,
-        config.heartbeatIncoming,
+        config.heartbeatOutgoing.inMilliseconds,
+        config.heartbeatIncoming.inMilliseconds,
       ].join(','),
     };
 

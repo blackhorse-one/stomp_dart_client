@@ -1,3 +1,6 @@
+## 0.4.1
+ - Fixed heartbeat formatting
+
 ## 0.4.0
  - Null-safety migration
  - **Breaking**: `onConnect` callback no longer returns the client as first parameter

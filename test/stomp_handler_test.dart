@@ -31,7 +31,7 @@ void main() {
             var webSocketChannel = IOWebSocketChannel(webSocket);
             var parser = StompParser((frame) {
               if (frame.command == 'CONNECT') {
-                webSocketChannel.sink.add("CONNECTED\nversion:1.2\n\n\x00");
+                webSocketChannel.sink.add("CONNECTED\nversion:1.2\nheart-beat:${frame.headers['heart-beat']}\n\n\x00");
               } else if (frame.command == 'DISCONNECT') {
                 webSocketChannel.sink
                     .add("RECEIPT\nreceipt-id:${frame.headers['receipt']}\n\n\x00");
@@ -85,8 +85,9 @@ void main() {
     test('connects correctly', () async {
       final onConnect = expectAsync1((StompFrame frame) {
         expect(frame.command, 'CONNECTED');
-        expect(frame.headers.length, 1);
+        expect(frame.headers.length, 2);
         expect(frame.headers['version'], '1.2');
+        expect(frame.headers['heart-beat'], '5000,5000');
         expect(frame.body, isEmpty);
         handler!.dispose();
       });
