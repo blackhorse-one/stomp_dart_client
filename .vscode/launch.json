@@ -15,6 +15,16 @@
             "program": "test/",
             "request": "launch",
             "type": "dart"
+        },
+        {
+            "name": "Dart Chrome",
+            "program": "example/main.dart",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "-d",
+                "chrome"
+              ]
         }
     ]
 }

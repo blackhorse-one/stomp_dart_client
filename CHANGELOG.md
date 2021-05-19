@@ -1,3 +1,7 @@
+## 0.4.2
+ - Fixed `onWebSocketError` callback for Web
+ - Reworked HTML connect API.
+
 ## 0.4.1
  - Fixed heartbeat formatting
 
