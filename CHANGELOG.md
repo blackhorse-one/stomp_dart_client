@@ -1,3 +1,6 @@
+## 0.4.3
+ - Fixed `StompUnsubscribe` throwing `StompBadStateException` in some cases
+
 ## 0.4.2
  - Fixed `onWebSocketError` callback for Web
  - Reworked HTML connect API.

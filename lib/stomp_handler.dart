@@ -98,6 +98,7 @@ class StompHandler {
     _transmit(command: 'SUBSCRIBE', headers: subscriptionHeaders);
 
     return ({Map<String, String>? unsubscribeHeaders}) {
+      if (!connected) return;
       final headers = {...?unsubscribeHeaders};
       if (!headers.containsKey('id')) {
         headers['id'] = subscriptionHeaders['id']!;

@@ -11,7 +11,7 @@ void main() {
   group('StompHandler', () {
     late StompConfig config;
     StompHandler? handler;
-    StreamChannel streamChannel;
+    late StreamChannel streamChannel;
     int? port;
 
     setUpAll(() async {
@@ -78,8 +78,12 @@ void main() {
       );
     });
 
-    tearDown(() async {
+    tearDown(() {
       handler?.dispose();
+    });
+
+    tearDownAll(() async {
+      await streamChannel.sink.close();
     });
 
     test('connects correctly', () async {
