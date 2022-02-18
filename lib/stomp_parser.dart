@@ -23,11 +23,14 @@ class StompParser implements Parser {
   var _resultHeaders = <String, String>{};
   String? _resultCommand;
   String? _resultBody;
+  Uint8List? _binaryBody;
 
   var _currentToken = <int>[];
   String? _currentHeaderKey;
   int _bodyBytesRemaining = 0;
 
+  static const _OCTET_STREAM_TYPE = 'application/octet-stream';
+  static const _CONTENT_TYPE_KEY = 'content-type';
   static const _NULL = 0;
   static const _LF = 10;
   static const _CR = 13;
@@ -58,6 +61,7 @@ class StompParser implements Parser {
     _resultCommand = null;
     _resultHeaders = {};
     _resultBody = null;
+    _binaryBody = null;
 
     _currentToken = [];
     _currentHeaderKey = null;
@@ -172,17 +176,24 @@ class StompParser implements Parser {
   }
 
   void _consumeBody() {
-    _resultBody = _consumeTokenAsString();
+    final type = _resultHeaders[_CONTENT_TYPE_KEY];
+
+    if (type == _OCTET_STREAM_TYPE) {
+      _binaryBody = Uint8List.fromList(_currentToken);
+    } else {
+      _resultBody = _consumeTokenAsString();
+    }
+
     if (escapeHeaders) {
       _unescapeResultHeaders();
     }
 
     try {
       onStompFrame(StompFrame(
-        command: _resultCommand!,
-        headers: _resultHeaders,
-        body: _resultBody,
-      ));
+          command: _resultCommand!,
+          headers: _resultHeaders,
+          body: _resultBody,
+          binaryBody: _binaryBody));
     } finally {
       _initState();
     }

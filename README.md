@@ -1,11 +1,11 @@
 # Stomp Dart
-This library provides an implementation for a STOMP client connecting to a remote server. 
+This library provides an implementation for a STOMP client connecting to a remote server.
 It should work for both pure dart and flutter.
 
 ## Usage
 
 #### Initialize
-The client gets created the specified config, 
+The client gets created the specified config,
 please see the Config section to see all available options
 ```dart
 StompClient client = StompClient(
@@ -100,6 +100,12 @@ StompClient client = StompClient(
 );
 ```
 
+## Evaluation of headers
+
+The STOMP client checks the `content-type` while parsing a received message. If the
+header contains the value `application/octet-stream` the message body will be treated
+as binary data. The resulting `StompFrame` will have a `binaryBody`. The `body` of the
+frame will be empty in this case.
 
 ## Development
 

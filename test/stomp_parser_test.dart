@@ -273,7 +273,9 @@ void main() {
         count: 2,
       );
 
-      StompParser(onFrame)..parseData(msg)..parseData(msg2);
+      StompParser(onFrame)
+        ..parseData(msg)
+        ..parseData(msg2);
     });
 
     test('can parse multiple messages at once', () {
@@ -405,7 +407,122 @@ void main() {
         count: 2,
       );
 
-      StompParser(callback)..parseData(msg)..parseData(msg2);
+      StompParser(callback)
+        ..parseData(msg)
+        ..parseData(msg2);
+    });
+
+    group('when content-type is application/octet-stream', () {
+      const command = 'MESSAGE';
+      const subscription = 'sub1';
+      const messageId = 'c00ca000-0000-00a0-e0fc-ce00a0000000-0000';
+      const destination = '/user/queue/binary';
+      const octetStreamType = 'application/octet-stream';
+      const textMessage = 'This is the message.';
+      const textNull = '\\x00';
+
+      final octetStreamData = '$command\n'
+          'subscription:$subscription\n'
+          'message-id:$messageId\n'
+          'content-length:${textMessage.length}\n'
+          'destination:$destination\n'
+          'content-type:$octetStreamType\n\n'
+          '$textMessage$textNull';
+
+      final textData = '$command\n'
+          'subscription:$subscription\n'
+          'message-id:$messageId\n'
+          'content-length:${textMessage.length}\n'
+          'destination:$destination\n'
+          'content-type:text\n\n'
+          '$textMessage$textNull';
+
+      StompFrame? parse(Uint8List data) {
+        StompFrame? result;
+        StompParser((frame) => result = frame).parseData(data);
+
+        if (result == null) {
+          fail('No StompFrame result!');
+        }
+
+        return result;
+      }
+
+      StompFrame parseMessage(String input) {
+        final utfData = utf8.encode(input);
+        final data = Uint8List.fromList(utfData);
+        return parse(data)!;
+      }
+
+      test('should provide a binary body', () async {
+        final result = parseMessage(octetStreamData);
+
+        expect(result.command, command);
+        expect(result.body, isNull);
+
+        final resultHeaders = result.headers;
+        expect(resultHeaders.length, 5);
+        expect(resultHeaders['message-id'], messageId);
+        expect(resultHeaders['subscription'], subscription);
+        expect(resultHeaders['destination'], destination);
+        expect(resultHeaders['content-type'], octetStreamType);
+        expect(resultHeaders['content-length'], textMessage.length.toString());
+
+        final binaryBody = result.binaryBody;
+        expect(binaryBody, [
+          84,
+          104,
+          105,
+          115,
+          32,
+          105,
+          115,
+          32,
+          116,
+          104,
+          101,
+          32,
+          109,
+          101,
+          115,
+          115,
+          97,
+          103,
+          101,
+          46,
+        ]);
+        expect(utf8.decode(binaryBody!.toList()), textMessage);
+      });
+
+      group('for consecutive messages', () {
+        StompFrame parseBinaryMessage() {
+          return parseMessage(octetStreamData);
+        }
+
+        StompFrame parseTextMessage() {
+          return parseMessage(textData);
+        }
+
+        test('should erase binaryBody after handling a binary message', () {
+          final result = parseBinaryMessage();
+          expect(result.body, isNull);
+          expect(result.binaryBody, isNotNull);
+
+          final result2 = parseTextMessage();
+          expect(result2.body, isNotNull);
+          expect(result2.binaryBody, isNull);
+        });
+
+        test('should erase body after handling a text message', () {
+          final result = parseTextMessage();
+          expect(result.body, isNotNull);
+          expect(result.binaryBody, isNull);
+
+          final result2 = parseBinaryMessage();
+          expect(result2.body, isNull);
+          expect(result2.binaryBody, isNotNull);
+        });
+      });
     });
   });
 }
