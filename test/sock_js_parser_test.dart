@@ -7,15 +7,19 @@ import 'package:test/test.dart';
 void main() {
   group('SockJSParser', () {
     test('can parse basic message', () {
-      final stompMsg = 'MESSAGE\ndestination:foo\nmessage-id:456\n\n\x00';
+      final stompMsg = 'MESSAGE\n'
+          'destination:foo\n'
+          'message-id:456\n'
+          'content-type:text/plain\n\n\x00';
       final sockJsMsg = 'm${json.encode(stompMsg)}';
 
       final callback = expectAsync1(
         (StompFrame frame) {
           expect(frame.command, 'MESSAGE');
-          expect(frame.headers.length, 2);
+          expect(frame.headers.length, 3);
           expect(frame.headers.containsKey('destination'), isTrue);
           expect(frame.headers.containsKey('message-id'), isTrue);
+          expect(frame.headers.containsKey('content-type'), isTrue);
           expect(frame.headers['destination'], 'foo');
           expect(frame.headers['message-id'], '456');
           expect(frame.body, isEmpty);
@@ -32,15 +36,19 @@ void main() {
     });
 
     test('can parse array with 1 message', () {
-      final stompMsg = 'MESSAGE\ndestination:foo\nmessage-id:456\n\n\x00';
+      final stompMsg = 'MESSAGE\n'
+          'destination:foo\n'
+          'message-id:456\n'
+          'content-type:text/plain\n\n\x00';
       final sockJsMsg = 'a[${json.encode(stompMsg)}]';
 
       final callback = expectAsync1(
         (StompFrame frame) {
           expect(frame.command, 'MESSAGE');
-          expect(frame.headers.length, 2);
+          expect(frame.headers.length, 3);
           expect(frame.headers.containsKey('destination'), isTrue);
           expect(frame.headers.containsKey('message-id'), isTrue);
+          expect(frame.headers.containsKey('content-type'), isTrue);
           expect(frame.headers['destination'], 'foo');
           expect(frame.headers['message-id'], '456');
           expect(frame.body, isEmpty);
@@ -57,8 +65,14 @@ void main() {
     });
 
     test('can parse array with 2 messages', () {
-      final stompMsg1 = 'MESSAGE\ndestination:foo\nmessage-id:456\n\n\x00';
-      final stompMsg2 = 'MESSAGE\ndestination:foo\nmessage-id:457\n\n\x00';
+      final stompMsg1 = 'MESSAGE\n'
+          'destination:foo\n'
+          'message-id:456\n'
+          'content-type:text/plain\n\n\x00';
+      final stompMsg2 = 'MESSAGE\n'
+          'destination:foo\n'
+          'message-id:457\n'
+          'content-type:text/plain\n\n\x00';
       final sockJsMsg =
           'a[${json.encode(stompMsg1)},${json.encode(stompMsg2)}]';
       var count = 0;
@@ -66,9 +80,10 @@ void main() {
       final callback = expectAsync1(
         (StompFrame frame) {
           expect(frame.command, 'MESSAGE');
-          expect(frame.headers.length, 2);
+          expect(frame.headers.length, 3);
           expect(frame.headers.containsKey('destination'), isTrue);
           expect(frame.headers.containsKey('message-id'), isTrue);
+          expect(frame.headers.containsKey('content-type'), isTrue);
           expect(frame.headers['destination'], 'foo');
           expect(frame.headers['message-id'], count == 0 ? '456' : '457');
           expect(frame.body, isEmpty);

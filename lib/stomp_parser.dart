@@ -178,7 +178,7 @@ class StompParser implements Parser {
   void _consumeBody() {
     final type = _resultHeaders[_CONTENT_TYPE_KEY];
 
-    if (type == _OCTET_STREAM_TYPE) {
+    if (type == _OCTET_STREAM_TYPE || type == null) {
       _binaryBody = Uint8List.fromList(_currentToken);
     } else {
       _resultBody = _consumeTokenAsString();

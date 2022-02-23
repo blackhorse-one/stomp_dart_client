@@ -105,7 +105,8 @@ StompClient client = StompClient(
 The STOMP client checks the `content-type` while parsing a received message. If the
 header contains the value `application/octet-stream` the message body will be treated
 as binary data. The resulting `StompFrame` will have a `binaryBody`. The `body` of the
-frame will be empty in this case.
+frame will be empty in this case. The same is true if the `content-type` header is
+missing.
 
 ## Development
 
