@@ -24,7 +24,7 @@ void main() {
         import 'package:web_socket_channel/io.dart';
         import 'package:stomp_dart_client/stomp_parser.dart';
         import 'package:stream_channel/stream_channel.dart';
-        
+
         Future<void> hybridMain(StreamChannel channel) async {
           final server = await HttpServer.bind("localhost", 0);
           server.transform(WebSocketTransformer()).listen((webSocket) {
@@ -38,27 +38,27 @@ void main() {
               } else if (frame.command == 'SUBSCRIBE') {
                 if (frame.headers['destination'] == '/foo') {
                   webSocketChannel.sink.add(
-                      "MESSAGE\nsubscription:${frame.headers['id']}\nmessage-id:123\ndestination:/foo\n\nThis is the message body\x00");
+                      "MESSAGE\nsubscription:${frame.headers['id']}\nmessage-id:123\ndestination:/foo\ncontent-type:text/plain\n\nThis is the message body\x00");
                 } else if (frame.headers['destination'] == '/bar') {
                   webSocketChannel.sink.add(utf8.encode(
-                      "MESSAGE\nsubscription:${frame.headers['id']}\nmessage-id:123\ndestination:/bar\n\nThis is the message body\x00"));     
+                      "MESSAGE\nsubscription:${frame.headers['id']}\nmessage-id:123\ndestination:/bar\ncontent-type:text/plain\n\nThis is the message body\x00"));
                 }
               } else if (frame.command == 'UNSUBSCRIBE' ||
                   frame.command == 'SEND') {
                 if (frame.headers.containsKey('receipt')) {
                   webSocketChannel.sink.add(
-                      "RECEIPT\nreceipt-id:${frame.headers['receipt']}\n\n${frame.body}\x00");
+                      "RECEIPT\nreceipt-id:${frame.headers['receipt']}\n\n\x00");
 
                   if (frame.command == 'UNSUBSCRIBE') {
                     Timer(Duration(milliseconds: 500), () {
                       webSocketChannel.sink.add(
-                          "MESSAGE\nsubscription:${frame.headers['id']}\nmessage-id:123\ndestination:/foo\n\nThis is the message body\x00");
+                          "MESSAGE\nsubscription:${frame.headers['id']}\nmessage-id:123\ndestination:/foo\ncontent-type:text/plain\n\nThis is the message body\x00");
                     });
                   }
                 }
               } else if (frame.command == 'ACK' || frame.command == 'NACK') {
                   webSocketChannel.sink.add(
-                      "RECEIPT\nreceipt-id:${frame.headers['receipt']}\n\n${frame.headers['id']}\x00");
+                      "RECEIPT\nreceipt-id:${frame.headers['receipt']}\n\n\x00");
               }
             });
             webSocketChannel.stream.listen((request) {
@@ -92,7 +92,8 @@ void main() {
         expect(frame.headers.length, 2);
         expect(frame.headers['version'], '1.2');
         expect(frame.headers['heart-beat'], '5000,5000');
-        expect(frame.body, isEmpty);
+        expect(frame.body, isNull);
+        expect(frame.binaryBody, isEmpty);
         handler!.dispose();
       });
 
@@ -138,7 +139,7 @@ void main() {
     test('subscribes correctly', () {
       final onSubscriptionFrame = expectAsync1((StompFrame frame) {
         expect(frame.command, 'MESSAGE');
-        expect(frame.headers.length, 3);
+        expect(frame.headers.length, 4);
         expect(frame.headers['subscription'], 'sub-0');
         expect(frame.headers['destination'], '/foo');
         expect(frame.body, 'This is the message body');
@@ -169,7 +170,7 @@ void main() {
       final onSubscriptionFrame = expectAsync1(
         (StompFrame frame) {
           expect(frame.command, 'MESSAGE');
-          expect(frame.headers.length, 3);
+          expect(frame.headers.length, 4);
           expect(frame.headers['subscription'], 'sub-0');
           expect(frame.headers['destination'], '/foo');
           expect(frame.body, 'This is the message body');
@@ -220,7 +221,7 @@ void main() {
       final onReceiptFrame = expectAsync1((StompFrame frame) {
         expect(frame.command, 'RECEIPT');
         expect(frame.headers['receipt-id'], 'send-0');
-        expect(frame.body, 'This is a body');
+        expect(frame.body, isNull);
         handler!.dispose();
       });
 
@@ -234,7 +235,7 @@ void main() {
             handler!.send(
               destination: '/foo/bar',
               body: 'This is a body',
-              headers: {'receipt': 'send-0'},
+              headers: {'receipt': 'send-0', 'content-type': 'text'},
             );
           },
           onDisconnect: onDisconnect,
@@ -248,7 +249,7 @@ void main() {
       final onReceiptFrame = expectAsync1((StompFrame frame) {
         expect(frame.command, 'RECEIPT');
         expect(frame.headers['receipt-id'], 'send-0');
-        expect(frame.body, 'message-0');
+        expect(frame.body, isNull);
         handler!.dispose();
       });
 
@@ -272,7 +273,7 @@ void main() {
       final onReceiptFrame = expectAsync1((StompFrame frame) {
         expect(frame.command, 'RECEIPT');
         expect(frame.headers['receipt-id'], 'send-0');
-        expect(frame.body, 'message-0');
+        expect(frame.body, isNull);
         handler!.dispose();
       });
 
@@ -295,7 +296,7 @@ void main() {
     test('correctly logs data not subtype of String', () {
       final onSubscriptionFrame = expectAsync1((StompFrame frame) {
         expect(frame.command, 'MESSAGE');
-        expect(frame.headers.length, 3);
+        expect(frame.headers.length, 4);
         expect(frame.headers['subscription'], 'sub-0');
         expect(frame.headers['destination'], '/bar');
         expect(frame.body, 'This is the message body');

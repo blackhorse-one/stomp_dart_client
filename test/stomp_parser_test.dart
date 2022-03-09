@@ -8,14 +8,18 @@ import 'package:test/test.dart';
 void main() {
   group('StompParser', () {
     test('can parse basic message', () {
-      final msg = 'MESSAGE\ndestination:foo\nmessage-id:456\n\n\x00';
+      final msg = 'MESSAGE\n'
+          'destination:foo\n'
+          'message-id:456\n'
+          'content-type:text/plain\n\n\x00';
 
       var callback = expectAsync1(
         (StompFrame frame) {
           expect(frame.command, 'MESSAGE');
-          expect(frame.headers.length, 2);
+          expect(frame.headers.length, 3);
           expect(frame.headers.containsKey('destination'), isTrue);
           expect(frame.headers.containsKey('message-id'), isTrue);
+          expect(frame.headers.containsKey('content-type'), isTrue);
           expect(frame.headers['destination'], 'foo');
           expect(frame.headers['message-id'], '456');
           expect(frame.body, isEmpty);
@@ -27,14 +31,18 @@ void main() {
     });
 
     test('does not unescape headers (v1.0)', () {
-      final msg = 'MESSAGE\ndesti\\nnation:f\\noo\nmessage-id:456\n\n\x00';
+      final msg = 'MESSAGE\n'
+          'desti\\nnation:f\\noo\n'
+          'message-id:456\n'
+          'content-type:text/plain\n\n\x00';
 
       var callback = expectAsync1(
         (StompFrame frame) {
           expect(frame.command, 'MESSAGE');
-          expect(frame.headers.length, 2);
+          expect(frame.headers.length, 3);
           expect(frame.headers.containsKey('desti\\nnation'), isTrue);
           expect(frame.headers.containsKey('message-id'), isTrue);
+          expect(frame.headers.containsKey('content-type'), isTrue);
           expect(frame.headers['desti\\nnation'], 'f\\noo');
           expect(frame.headers['message-id'], '456');
           expect(frame.body, isEmpty);
@@ -46,14 +54,18 @@ void main() {
     });
 
     test('fails on unescaped header values (v1.0)', () {
-      final msg = 'MESSAGE\ndesti\\nnation:f\noo\nmessage-id:456\n\n\x00';
+      final msg = 'MESSAGE\n'
+          'desti\\nnation:f\noo\n'
+          'message-id:456\n'
+          'content-type:text/plain\n\n\x00';
 
       var callback = expectAsync1(
         (StompFrame frame) {
           expect(frame.command, 'MESSAGE');
-          expect(frame.headers.length, 2);
+          expect(frame.headers.length, 3);
           expect(frame.headers.containsKey('desti\\nnation'), isTrue);
           expect(frame.headers.containsKey('oo\nmessage-id'), isTrue);
+          expect(frame.headers.containsKey('content-type'), isTrue);
           expect(frame.headers['desti\\nnation'], 'f');
           expect(frame.headers['oo\nmessage-id'], '456');
           expect(frame.body, isEmpty);
@@ -65,14 +77,18 @@ void main() {
     });
 
     test('does unescape header keys and values (^v1.1)', () {
-      final msg = 'MESSAGE\ndesti\\nnation:f\\noo\nmessage-id:456\n\n\x00';
+      final msg = 'MESSAGE\n'
+          'desti\\nnation:f\\noo\n'
+          'message-id:456\n'
+          'content-type:text/plain\n\n\x00';
 
       var callback = expectAsync1(
         (StompFrame frame) {
           expect(frame.command, 'MESSAGE');
-          expect(frame.headers.length, 2);
+          expect(frame.headers.length, 3);
           expect(frame.headers.containsKey('desti\nnation'), isTrue);
           expect(frame.headers.containsKey('message-id'), isTrue);
+          expect(frame.headers.containsKey('content-type'), isTrue);
           expect(frame.headers['desti\nnation'], 'f\noo');
           expect(frame.headers['message-id'], '456');
           expect(frame.body, isEmpty);
@@ -86,15 +102,18 @@ void main() {
     });
 
     test('supports escaped colons in headers (^v1.1)', () {
-      final msg = 'MESSAGE\ndestination\\cbar:foo\\cbar\n'
-          'message-id:456\n\n\x00';
+      final msg = 'MESSAGE\n'
+          'destination\\cbar:foo\\cbar\n'
+          'message-id:456\n'
+          'content-type:text/plain\n\n\x00';
 
       var callback = expectAsync1(
         (StompFrame frame) {
           expect(frame.command, 'MESSAGE');
-          expect(frame.headers.length, 2);
+          expect(frame.headers.length, 3);
           expect(frame.headers.containsKey('destination:bar'), isTrue);
           expect(frame.headers.containsKey('message-id'), isTrue);
+          expect(frame.headers.containsKey('content-type'), isTrue);
           expect(frame.headers['destination:bar'], 'foo:bar');
           expect(frame.headers['message-id'], '456');
           expect(frame.body, isEmpty);
@@ -108,9 +127,11 @@ void main() {
     });
 
     test('correctly serializes a stomp frame unescaped', () {
-      final stringFrame =
-          'SEND\ndestination:/path/to/foo\ncontent-type:text/plain'
-          '\ncontent-length:14\n\nThis is a body\x00';
+      final stringFrame = 'SEND\n'
+          'destination:/path/to/foo\n'
+          'content-type:text/plain\n'
+          'content-length:14\n\n'
+          'This is a body\x00';
 
       final frame = StompFrame(
         command: 'SEND',
@@ -169,13 +190,15 @@ void main() {
     });
 
     test('can parse frame with empty header', () {
-      final msg = 'MESSAGE\n\nThis is a body\x00';
+      final text = 'This is a body';
+      final msg = 'MESSAGE\n\n$text\x00';
 
       var callback = expectAsync1(
         (StompFrame frame) {
           expect(frame.command, 'MESSAGE');
           expect(frame.headers.length, 0);
-          expect(frame.body, 'This is a body');
+          expect(frame.binaryBody, Utf8Encoder().convert(text));
+          expect(frame.body, isNull);
         },
         count: 1,
       );
@@ -192,7 +215,8 @@ void main() {
         (StompFrame frame) {
           expect(frame.command, 'MESSAGE');
           expect(frame.headers.length, 0);
-          expect(frame.body, isEmpty);
+          expect(frame.binaryBody, isEmpty);
+          expect(frame.body, isNull);
         },
         count: 1,
       );
@@ -203,13 +227,15 @@ void main() {
     });
 
     test('respects content-length when parsing', () {
-      final msg = 'MESSAGE\ncontent-length:10\n\n'
+      final msg = 'MESSAGE\n'
+          'content-length:10\n'
+          'content-type:text/plain\n\n'
           'This is a body longer than 10 bytes\x00';
 
       var callback = expectAsync1(
         (StompFrame frame) {
           expect(frame.command, 'MESSAGE');
-          expect(frame.headers.length, 1);
+          expect(frame.headers.length, 2);
           expect(frame.headers['content-length'], '10');
           expect(frame.body, 'This is a ');
         },
@@ -244,8 +270,14 @@ void main() {
     });
 
     test('can parse multiple messages separately', () {
-      final msg = 'MESSAGE\ndestination:foo\nmessage-id:456\n\n\x00';
-      final msg2 = 'MESSAGE\ndestination:bar\nmessage-id:123\n\n'
+      final msg = 'MESSAGE\n'
+          'destination:foo\n'
+          'message-id:456\n'
+          'content-type:text/plain\n\n\x00';
+      final msg2 = 'MESSAGE\n'
+          'destination:bar\n'
+          'message-id:123\n'
+          'content-type:text/plain\n\n'
           'This is a body\x00';
 
       var n = 0;
@@ -253,17 +285,19 @@ void main() {
         (StompFrame frame) {
           if (n == 0) {
             expect(frame.command, 'MESSAGE');
-            expect(frame.headers.length, 2);
+            expect(frame.headers.length, 3);
             expect(frame.headers.containsKey('destination'), isTrue);
             expect(frame.headers.containsKey('message-id'), isTrue);
+            expect(frame.headers.containsKey('content-type'), isTrue);
             expect(frame.headers['destination'], 'foo');
             expect(frame.headers['message-id'], '456');
             expect(frame.body, isEmpty);
           } else {
             expect(frame.command, 'MESSAGE');
-            expect(frame.headers.length, 2);
+            expect(frame.headers.length, 3);
             expect(frame.headers.containsKey('destination'), isTrue);
             expect(frame.headers.containsKey('message-id'), isTrue);
+            expect(frame.headers.containsKey('content-type'), isTrue);
             expect(frame.headers['destination'], 'bar');
             expect(frame.headers['message-id'], '123');
             expect(frame.body, 'This is a body');
@@ -273,30 +307,40 @@ void main() {
         count: 2,
       );
 
-      StompParser(onFrame)..parseData(msg)..parseData(msg2);
+      StompParser(onFrame)
+        ..parseData(msg)
+        ..parseData(msg2);
     });
 
     test('can parse multiple messages at once', () {
-      final msg = 'MESSAGE\ndestination:foo\nmessage-id:456\n\n\x00';
-      final msg2 =
-          'MESSAGE\ndestination:bar\nmessage-id:123\n\nThis is a body\x00';
+      final msg = 'MESSAGE\n'
+          'destination:foo\n'
+          'message-id:456\n'
+          'content-type:text/plain\n\n\x00';
+      final msg2 = 'MESSAGE\n'
+          'destination:bar\n'
+          'message-id:123\n'
+          'content-type:text/plain\n\n'
+          'This is a body\x00';
 
       var n = 0;
       final onFrame = expectAsync1(
         (StompFrame frame) {
           if (n == 0) {
             expect(frame.command, 'MESSAGE');
-            expect(frame.headers.length, 2);
+            expect(frame.headers.length, 3);
             expect(frame.headers.containsKey('destination'), isTrue);
             expect(frame.headers.containsKey('message-id'), isTrue);
+            expect(frame.headers.containsKey('content-type'), isTrue);
             expect(frame.headers['destination'], 'foo');
             expect(frame.headers['message-id'], '456');
             expect(frame.body, isEmpty);
           } else {
             expect(frame.command, 'MESSAGE');
-            expect(frame.headers.length, 2);
+            expect(frame.headers.length, 3);
             expect(frame.headers.containsKey('destination'), isTrue);
             expect(frame.headers.containsKey('message-id'), isTrue);
+            expect(frame.headers.containsKey('content-type'), isTrue);
             expect(frame.headers['destination'], 'bar');
             expect(frame.headers['message-id'], '123');
             expect(frame.body, 'This is a body');
@@ -327,16 +371,23 @@ void main() {
     });
 
     test('can deserialize unicode special characters', () {
-      final msg = 'MESSAGE\ncontent-length:23\n\n{"a": "´👌👻¡Â"}\x00';
-      final msg2 = 'MESSAGE\ncontent-length:18\n\n{"a": "Piaffe´s"}\x00';
+      final msg = 'MESSAGE\n'
+          'content-length:23\n'
+          'content-type:text/plain\n\n'
+          '{"a": "´👌👻¡Â"}\x00';
+      final msg2 = 'MESSAGE\n'
+          'content-length:18\n'
+          'content-type:text/plain\n\n'
+          '{"a": "Piaffe´s"}\x00';
 
       var n = 0;
       var callback = expectAsync1(
         (StompFrame frame) {
           if (n == 0) {
             expect(frame.command, 'MESSAGE');
-            expect(frame.headers.length, 1);
+            expect(frame.headers.length, 2);
             expect(frame.headers.containsKey('content-length'), isTrue);
+            expect(frame.headers.containsKey('content-type'), isTrue);
             expect(frame.headers['content-length'], '23');
             expect(frame.body, '{"a": "´👌👻¡Â"}');
             expect(utf8.encode(frame.body!), [
@@ -370,8 +421,9 @@ void main() {
             expect(jsonMap['a'], '´👌👻¡Â');
           } else {
             expect(frame.command, 'MESSAGE');
-            expect(frame.headers.length, 1);
+            expect(frame.headers.length, 2);
             expect(frame.headers.containsKey('content-length'), isTrue);
+            expect(frame.headers.containsKey('content-type'), isTrue);
             expect(frame.headers['content-length'], '18');
             expect(frame.body, '{"a": "Piaffe´s"}');
 
@@ -405,7 +457,140 @@ void main() {
         count: 2,
       );
 
-      StompParser(callback)..parseData(msg)..parseData(msg2);
+      StompParser(callback)
+        ..parseData(msg)
+        ..parseData(msg2);
+    });
+
+    group('when content-type is missing', () {
+      test('should provide a StompFrame with binaryBody', () {
+        const text = 'hello';
+        const message = 'MESSAGE\n'
+            'content-length:5\n\n'
+            '$text\x00';
+
+        final onData = expectAsync1((StompFrame frame) {
+          expect(frame.headers.length, 1);
+          expect(frame.headers.containsKey('content-length'), isTrue);
+          expect(frame.body, isNull);
+          expect(frame.binaryBody, Utf8Encoder().convert(text));
+        }, count: 1);
+
+        StompParser(onData).parseData(message);
+      });
+    });
+
+    group('when content-type is application/octet-stream', () {
+      const command = 'MESSAGE';
+      const subscription = 'sub1';
+      const messageId = 'c00ca000-0000-00a0-e0fc-ce00a0000000-0000';
+      const destination = '/user/queue/binary';
+      const octetStreamType = 'application/octet-stream';
+      const textMessage = 'This is the message.';
+      const textNull = '\\x00';
+
+      final octetStreamData = '$command\n'
+          'subscription:$subscription\n'
+          'message-id:$messageId\n'
+          'content-length:${textMessage.length}\n'
+          'destination:$destination\n'
+          'content-type:$octetStreamType\n\n'
+          '$textMessage$textNull';
+
+      final textData = '$command\n'
+          'subscription:$subscription\n'
+          'message-id:$messageId\n'
+          'content-length:${textMessage.length}\n'
+          'destination:$destination\n'
+          'content-type:text/plain\n\n'
+          '$textMessage$textNull';
+
+      StompFrame? parse(Uint8List data) {
+        StompFrame? result;
+        StompParser((frame) => result = frame).parseData(data);
+
+        if (result == null) {
+          fail('No StompFrame result!');
+        }
+
+        return result;
+      }
+
+      StompFrame parseMessage(String input) {
+        final utfData = utf8.encode(input);
+        final data = Uint8List.fromList(utfData);
+        return parse(data)!;
+      }
+
+      test('should provide a binary body', () async {
+        final result = parseMessage(octetStreamData);
+
+        expect(result.command, command);
+        expect(result.body, isNull);
+
+        final resultHeaders = result.headers;
+        expect(resultHeaders.length, 5);
+        expect(resultHeaders['message-id'], messageId);
+        expect(resultHeaders['subscription'], subscription);
+        expect(resultHeaders['destination'], destination);
+        expect(resultHeaders['content-type'], octetStreamType);
+        expect(resultHeaders['content-length'], textMessage.length.toString());
+
+        final binaryBody = result.binaryBody;
+        expect(binaryBody, [
+          84,
+          104,
+          105,
+          115,
+          32,
+          105,
+          115,
+          32,
+          116,
+          104,
+          101,
+          32,
+          109,
+          101,
+          115,
+          115,
+          97,
+          103,
+          101,
+          46,
+        ]);
+        expect(utf8.decode(binaryBody!.toList()), textMessage);
+      });
+
+      group('for consecutive messages', () {
+        StompFrame parseBinaryMessage() {
+          return parseMessage(octetStreamData);
+        }
+
+        StompFrame parseTextMessage() {
+          return parseMessage(textData);
+        }
+
+        test('should erase binaryBody after handling a binary message', () {
+          final result = parseBinaryMessage();
+          expect(result.body, isNull);
+          expect(result.binaryBody, isNotNull);
+
+          final result2 = parseTextMessage();
+          expect(result2.body, isNotNull);
+          expect(result2.binaryBody, isNull);
+        });
+
+        test('should erase body after handling a text message', () {
+          final result = parseTextMessage();
+          expect(result.body, isNotNull);
+          expect(result.binaryBody, isNull);
+
+          final result2 = parseBinaryMessage();
+          expect(result2.body, isNull);
+          expect(result2.binaryBody, isNotNull);
+        });
+      });
     });
   });
 }
