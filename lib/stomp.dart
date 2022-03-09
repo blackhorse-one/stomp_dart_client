@@ -61,8 +61,7 @@ class StompClient {
           }
         },
       ),
-    )
-      ..start();
+    )..start();
   }
 
   StompUnsubscribe subscribe({
@@ -74,7 +73,7 @@ class StompClient {
     if (handler == null) {
       throw StompBadStateException(
         'The StompHandler was null. '
-            'Did you forget calling activate() on the client?',
+        'Did you forget calling activate() on the client?',
       );
     }
 
@@ -95,7 +94,7 @@ class StompClient {
     if (handler == null) {
       throw StompBadStateException(
         'The StompHandler was null. '
-            'Did you forget calling activate() on the client?',
+        'Did you forget calling activate() on the client?',
       );
     }
 
@@ -112,7 +111,7 @@ class StompClient {
     if (handler == null) {
       throw StompBadStateException(
         'The StompHandler was null. '
-            'Did you forget calling activate() on the client?',
+        'Did you forget calling activate() on the client?',
       );
     }
 
@@ -124,7 +123,7 @@ class StompClient {
     if (handler == null) {
       throw StompBadStateException(
         'The StompHandler was null. '
-            'Did you forget calling activate() on the client?',
+        'Did you forget calling activate() on the client?',
       );
     }
 
@@ -136,7 +135,7 @@ class StompClient {
     if (config.reconnectDelay.inMilliseconds > 0) {
       _reconnectTimer = Timer(
         config.reconnectDelay,
-            () => _connect(),
+        () => _connect(),
       );
     }
   }

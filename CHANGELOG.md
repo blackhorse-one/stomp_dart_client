@@ -1,3 +1,6 @@
+## 0.4.4
+  - Added `binaryBody` to `StompFrame` when `content-type` header is missing or equals `application/octet-stream` (Thanks @dlfk99)
+
 ## 0.4.3
  - Fixed `StompUnsubscribe` throwing `StompBadStateException` in some cases
 
