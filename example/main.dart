@@ -14,7 +14,7 @@ void onConnect(StompFrame frame) {
     },
   );
 
-  Timer.periodic(Duration(seconds: 10), (_) {
+  Timer.periodic(const Duration(seconds: 10), (_) {
     stompClient.send(
       destination: '/app/test/endpoints',
       body: json.encode({'a': 123}),
@@ -28,7 +28,7 @@ final stompClient = StompClient(
     onConnect: onConnect,
     beforeConnect: () async {
       print('waiting to connect...');
-      await Future.delayed(Duration(milliseconds: 200));
+      await Future.delayed(const Duration(milliseconds: 200));
       print('connecting...');
     },
     onWebSocketError: (dynamic error) => print(error.toString()),
