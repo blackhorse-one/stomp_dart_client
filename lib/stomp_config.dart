@@ -29,7 +29,7 @@ class StompConfig {
   /// Set to a duration with 0 milliseconds to not receive any heartbeats
   final Duration heartbeatIncoming;
 
-  /// Connection timeout. If specified the connection will will be dropped after
+  /// Connection timeout. If specified the connection will be dropped after
   /// the timeout and depending on the [reconnectDelay] it will try again
   final Duration connectionTimeout;
 

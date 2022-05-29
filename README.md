@@ -76,8 +76,8 @@ This table shows all available options in `StompConfig`
 | connectionTimeout: Duration                  | Time duration it waits until a connection attempt is aborted                                                   |
 | stompConnectHeaders: Map<String, String>     | Optional header values which will be used on the STOMP connect frame                                           |
 | webSocketConnectHeaders: Map<String, dynamic>| Optional header values which will be used when connecting to the underyling WebSocket (not supported in Web)   |
-| beforeConnect: Future<void> Function()       | A async function which will be awaited before a connection is established.                                     |
-| onConnect: Function(StompFrame)              | Function to be called when the client successfully connected to the server.                                    |
+| beforeConnect: Future<void> Function()       | An async function which will be awaited before a connection is established                                     |
+| onConnect: Function(StompFrame)              | Function to be called when the client successfully connects to the server                                      |
 | onDisconnect: Function(StompFrame)           | Function to be called when the client disconnects expectedly                                                   |
 | onStompError: Function(StompFrame)           | Function to be called when the stomp server sends an error frame                                               |
 | onUnhandledFrame: Function(StompFrame)       | Function to be called when the server sends a unrecognized frame                                               |
