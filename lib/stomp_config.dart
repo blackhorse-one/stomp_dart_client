@@ -156,8 +156,7 @@ class StompConfig {
     );
   }
 
-  // ignore: avoid_returning_null_for_void
-  static void _noOp([_, __]) => null;
+  static void _noOp([_, __]) {}
 
   static Future<void> _noOpFuture() => Future.value();
 }
