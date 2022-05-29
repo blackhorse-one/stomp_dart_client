@@ -178,7 +178,7 @@ class StompHandler {
     );
 
     dynamic serializedFrame = _parser.serializeFrame(frame);
-    config.onDebugMessage('>>> ' + serializedFrame.toString());
+    config.onDebugMessage('>>> $serializedFrame');
 
     try {
       _channel!.sink.add(serializedFrame);
@@ -201,7 +201,7 @@ class StompHandler {
 
   void _onData(dynamic data) {
     _lastServerActivity = DateTime.now();
-    config.onDebugMessage('<<< ' + data.toString());
+    config.onDebugMessage('<<< $data');
     _parser.parseData(data);
   }
 

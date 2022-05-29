@@ -91,6 +91,7 @@ class StompConfig {
     this.useSockJS = false,
   });
 
+  // ignore: non_constant_identifier_names
   StompConfig.SockJS({
     required String url,
     this.reconnectDelay = const Duration(seconds: 5),
@@ -155,6 +156,7 @@ class StompConfig {
     );
   }
 
+  // ignore: avoid_returning_null_for_void
   static void _noOp([_, __]) => null;
 
   static Future<void> _noOpFuture() => Future.value();
