@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -49,7 +51,7 @@ class StompParser implements Parser {
       byteList = Uint8List.fromList(data);
     } else {
       throw UnsupportedError(
-          'Input data type unsupported ' + data.runtimeType.toString());
+          'Input data type unsupported ${data.runtimeType}');
     }
 
     for (var i = 0; i < byteList.length; i++) {
@@ -292,7 +294,7 @@ class StompParser implements Parser {
       headers = _escapeHeaders(headers);
     }
     headers.forEach((key, value) {
-      serializedFrame += String.fromCharCode(_LF) + key + ':' + value;
+      serializedFrame += '${String.fromCharCode(_LF)}$key:$value';
     });
 
     serializedFrame += String.fromCharCode(_LF) + String.fromCharCode(_LF);

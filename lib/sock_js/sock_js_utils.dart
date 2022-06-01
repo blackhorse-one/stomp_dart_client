@@ -29,9 +29,9 @@ class SockJsUtils {
 
     var transportUrl = uri.toString();
     if (transportUrl.startsWith('https')) {
-      transportUrl = 'wss' + transportUrl.substring(5);
+      transportUrl = 'wss${transportUrl.substring(5)}';
     } else if (transportUrl.startsWith('http')) {
-      transportUrl = 'ws' + transportUrl.substring(4);
+      transportUrl = 'ws${transportUrl.substring(4)}';
     } else {
       throw ArgumentError('The url has to start with http/https');
     }
