@@ -89,11 +89,11 @@ This table shows all available options in `StompConfig`
 
 
 ## Use Stomp with SockJS
-Use StompConfig.SockJS constructor instead of default StompConfig constructor.
+Use StompConfig.sockJS constructor instead of default StompConfig constructor.
 
 ```dart
 StompClient client = StompClient(
-    config: StompConfig.SockJS(
+    config: StompConfig.sockJS(
         url: 'https://yourserver',
         onConnect: onConnectCallback
     )

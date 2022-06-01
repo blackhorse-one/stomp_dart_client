@@ -91,6 +91,28 @@ class StompConfig {
     this.useSockJS = false,
   });
 
+  StompConfig.sockJS({
+    required String url,
+    this.reconnectDelay = const Duration(seconds: 5),
+    this.heartbeatIncoming = const Duration(seconds: 5),
+    this.heartbeatOutgoing = const Duration(seconds: 5),
+    this.connectionTimeout = Duration.zero,
+    this.stompConnectHeaders,
+    this.webSocketConnectHeaders,
+    this.beforeConnect = _noOpFuture,
+    this.onConnect = _noOp,
+    this.onStompError = _noOp,
+    this.onDisconnect = _noOp,
+    this.onUnhandledFrame = _noOp,
+    this.onUnhandledMessage = _noOp,
+    this.onUnhandledReceipt = _noOp,
+    this.onWebSocketError = _noOp,
+    this.onWebSocketDone = _noOp,
+    this.onDebugMessage = _noOp,
+  })  : useSockJS = true,
+        url = SockJsUtils().generateTransportUrl(url);
+
+  @Deprecated('Use `sockJS` instead')
   // ignore: non_constant_identifier_names
   StompConfig.SockJS({
     required String url,

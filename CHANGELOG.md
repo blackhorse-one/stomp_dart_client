@@ -1,3 +1,6 @@
+## 0.4.5
+  - Added `StompConfig.sockJS` and deprecated `SockJS`
+
 ## 0.4.4
   - Added `binaryBody` to `StompFrame` when `content-type` header is missing or equals `application/octet-stream` (Thanks @dlfk99)
 
