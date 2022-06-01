@@ -29,7 +29,7 @@ class StompConfig {
   /// Set to a duration with 0 milliseconds to not receive any heartbeats
   final Duration heartbeatIncoming;
 
-  /// Connection timeout. If specified the connection will will be dropped after
+  /// Connection timeout. If specified the connection will be dropped after
   /// the timeout and depending on the [reconnectDelay] it will try again
   final Duration connectionTimeout;
 
@@ -75,7 +75,7 @@ class StompConfig {
     this.reconnectDelay = const Duration(seconds: 5),
     this.heartbeatIncoming = const Duration(seconds: 5),
     this.heartbeatOutgoing = const Duration(seconds: 5),
-    this.connectionTimeout = const Duration(),
+    this.connectionTimeout = Duration.zero,
     this.stompConnectHeaders,
     this.webSocketConnectHeaders,
     this.beforeConnect = _noOpFuture,
@@ -96,7 +96,7 @@ class StompConfig {
     this.reconnectDelay = const Duration(seconds: 5),
     this.heartbeatIncoming = const Duration(seconds: 5),
     this.heartbeatOutgoing = const Duration(seconds: 5),
-    this.connectionTimeout = const Duration(),
+    this.connectionTimeout = Duration.zero,
     this.stompConnectHeaders,
     this.webSocketConnectHeaders,
     this.beforeConnect = _noOpFuture,
