@@ -49,7 +49,7 @@ class StompHandler {
 
   bool get connected => _connected;
 
-  void start() async {
+  Future<void> start() async {
     try {
       _channel = await platform.connect(config);
       _channel!.stream.listen(_onData, onError: _onError, onDone: _onDone);

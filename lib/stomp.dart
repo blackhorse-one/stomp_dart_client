@@ -30,7 +30,7 @@ class StompClient {
     _handler = null;
   }
 
-  void _connect() async {
+  Future<void> _connect() async {
     if (connected) {
       config.onDebugMessage('[STOMP] Already connected. Nothing to do!');
       return;
