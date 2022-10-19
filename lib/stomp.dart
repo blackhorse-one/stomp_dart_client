@@ -61,7 +61,9 @@ class StompClient {
           }
         },
       ),
-    )..start();
+    );
+
+    await _handler!.start();
   }
 
   StompUnsubscribe subscribe({
