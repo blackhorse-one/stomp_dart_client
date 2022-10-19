@@ -18,9 +18,9 @@ class StompClient {
   Timer? _reconnectTimer;
   bool _isActive = false;
 
-  void activate() {
+  Future<void> activate() async {
     _isActive = true;
-    _connect();
+    await _connect();
   }
 
   void deactivate() {
