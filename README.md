@@ -75,7 +75,7 @@ This table shows all available options in `StompConfig`
 | heartbeatIncoming: Duration                  | Time duration between incoming heartbeat messages. Set to 0 ms to not receive any heartbeats. The default value is 5 seconds       |
 | connectionTimeout: Duration                  | Time duration it waits until a connection attempt is aborted. Set to 0 ms to not set a timeout. The default value is 0 ms          |
 | stompConnectHeaders: Map<String, String>     | Optional header values which will be used on the STOMP connect frame                                                               |
-| webSocketConnectHeaders: Map<String, dynamic>| Optional header values which will be used when connecting to the underlying WebSocket (not supported in Web)                       |
+| webSocketConnectHeaders: Map<String, dynamic>| Optional header values which will be used when connecting to the underlying WebSocket [(not supported in Web)](#token-authentication-browser-based-clients)                       |
 | beforeConnect: Future<void> Function()       | An async function which will be awaited before a connection is established                                                         |
 | onConnect: Function(StompFrame)              | Function to be called when the client successfully connects to the server                                                          |
 | onDisconnect: Function(StompFrame)           | Function to be called when the client disconnects expectedly                                                                       |
