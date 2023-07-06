@@ -307,7 +307,9 @@ void main() {
         count: 2,
       );
 
-      StompParser(onFrame)..parseData(msg)..parseData(msg2);
+      StompParser(onFrame)
+        ..parseData(msg)
+        ..parseData(msg2);
     });
 
     test('can parse multiple messages at once', () {
@@ -455,7 +457,9 @@ void main() {
         count: 2,
       );
 
-      StompParser(callback)..parseData(msg)..parseData(msg2);
+      StompParser(callback)
+        ..parseData(msg)
+        ..parseData(msg2);
     });
 
     group('when content-type is missing', () {

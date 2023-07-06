@@ -108,6 +108,14 @@ as binary data. The resulting `StompFrame` will have a `binaryBody`. The `body` 
 frame will be empty in this case. The same is true if the `content-type` header is
 missing.
 
+## Token Authentication (browser-based clients)
+
+Browser clients can only use standard authentication headers (that is, basic HTTP authentication) or cookies and [cannot provide custom headers](https://github.com/whatwg/websockets/issues/16#issuecomment-332065542) (such as "Authorization" to use a Bearer token). Thus `webSocketConnectHeaders` will do nothing in a browser environment.
+Alternatives are:
+- Use the STOMP client to pass authentication headers at connect time. (recommended)
+    - Use `stompConnectHeaders` to pass your headers in the `CONNECT` frame. Parse those headers on the server (i.e. by using a `ChannelInterceptor` in Spring)
+- Pass your authentication token/credentials as query parameter.
+
 ## Development
 
 #### Running unit tests

@@ -11,7 +11,6 @@ import 'package:test/test.dart';
 void main() {
   group('StompClient', () {
     late StompConfig config;
-    StompHandler? handler;
     late StreamChannel streamChannel;
 
     setUpAll(() async {
@@ -76,10 +75,6 @@ void main() {
       config = StompConfig(
         url: 'ws://localhost:$port',
       );
-    });
-
-    tearDown(() async {
-      handler?.dispose();
     });
 
     tearDownAll(() async {
