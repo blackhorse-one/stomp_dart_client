@@ -18,9 +18,9 @@ class StompClient {
   Timer? _reconnectTimer;
   bool _isActive = false;
 
-  void activate() {
+  Future<void> activate() async {
     _isActive = true;
-    _connect();
+    await _connect();
   }
 
   void deactivate() {
@@ -30,7 +30,7 @@ class StompClient {
     _handler = null;
   }
 
-  void _connect() async {
+  Future<void> _connect() async {
     if (connected) {
       config.onDebugMessage('[STOMP] Already connected. Nothing to do!');
       return;
@@ -61,7 +61,9 @@ class StompClient {
           }
         },
       ),
-    )..start();
+    );
+
+    await _handler!.start();
   }
 
   StompUnsubscribe subscribe({
