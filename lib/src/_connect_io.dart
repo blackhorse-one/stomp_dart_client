@@ -8,7 +8,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 Future<WebSocketChannel> connect(StompConfig config) async {
   try {
     var webSocket = WebSocket.connect(
-      config.url,
+      config.connectUrl,
       headers: config.webSocketConnectHeaders,
     );
     if (config.connectionTimeout.inMilliseconds > 0) {
