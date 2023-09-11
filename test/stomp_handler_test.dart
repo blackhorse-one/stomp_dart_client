@@ -97,8 +97,7 @@ void main() {
         handler!.dispose();
       });
 
-      handler = StompHandler(config: config.copyWith(onConnect: onConnect))
-        ..start();
+      handler = StompHandler(config: config.copyWith(onConnect: onConnect))..start();
     });
 
     test('disconnects correctly', () async {
@@ -134,6 +133,36 @@ void main() {
           onWebSocketError: onError,
         ),
       )..start();
+    });
+
+    test('aborts connection if disconnected while connecting', () async {
+      final onWebSocketDone = expectAsync0(() {}, count: 0);
+
+      final onDisconnect = expectAsync1(
+        (StompFrame frame) {},
+        count: 0,
+      );
+
+      final onConnect = expectAsync1(
+        (StompFrame frame) {},
+        count: 0,
+      );
+
+      final onError = expectAsync1((dynamic _) {}, count: 0);
+
+      handler = StompHandler(
+        config: config.copyWith(
+          onConnect: onConnect,
+          onDisconnect: onDisconnect,
+          onWebSocketDone: onWebSocketDone,
+          onStompError: onError,
+          onWebSocketError: onError,
+        ),
+      )..start();
+
+      Future.microtask(() => handler?.dispose());
+
+      await Future.delayed(Duration(milliseconds: 200));
     });
 
     test('subscribes correctly', () {

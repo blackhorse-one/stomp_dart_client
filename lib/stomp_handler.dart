@@ -37,6 +37,7 @@ class StompHandler {
   late Parser _parser;
   WebSocketChannel? _channel;
   bool _connected = false;
+  bool _isActive = false;
   int _currentReceiptIndex = 0;
   int _currentSubscriptionIndex = 0;
   DateTime _lastServerActivity = DateTime.now();
@@ -50,10 +51,17 @@ class StompHandler {
   bool get connected => _connected;
 
   void start() async {
+    _isActive = true;
     try {
       _channel = await platform.connect(config);
-      _channel!.stream.listen(_onData, onError: _onError, onDone: _onDone);
-      _connectToStomp();
+      // It can happen that dispose was called while the future above hasn't completed yet
+      // To prevent lingering connections we need to make sure that we disconnect cleanly
+      if (!_isActive) {
+        _cleanUp();
+      } else {
+        _channel!.stream.listen(_onData, onError: _onError, onDone: _onDone);
+        _connectToStomp();
+      }
     } catch (err) {
       _onError(err);
       if (config.reconnectDelay.inMilliseconds == 0) {
@@ -237,8 +245,7 @@ class StompHandler {
       _parser.escapeHeaders = false;
     }
 
-    if (frame.headers['version'] != '1.0' &&
-        frame.headers.containsKey('heart-beat')) {
+    if (frame.headers['version'] != '1.0' && frame.headers.containsKey('heart-beat')) {
       _setupHeartbeat(frame);
     }
 
@@ -294,8 +301,7 @@ class StompHandler {
       final ttl = max(config.heartbeatIncoming.inMilliseconds, serverOutgoing);
       _heartbeatReceiver?.cancel();
       _heartbeatReceiver = Timer.periodic(Duration(milliseconds: ttl), (_) {
-        final deltaMs = DateTime.now().millisecondsSinceEpoch -
-            _lastServerActivity.millisecondsSinceEpoch;
+        final deltaMs = DateTime.now().millisecondsSinceEpoch - _lastServerActivity.millisecondsSinceEpoch;
         // The connection might be dead. Clean up.
         if (deltaMs > (ttl * 2)) {
           _cleanUp();
@@ -306,6 +312,7 @@ class StompHandler {
 
   void _cleanUp() {
     _connected = false;
+    _isActive = false;
     _heartbeatSender?.cancel();
     _heartbeatReceiver?.cancel();
     _channel?.sink.close();
