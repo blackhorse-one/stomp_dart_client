@@ -1,3 +1,9 @@
+## 1.0.0
+  - Stable release
+  - Removed `StompConfig.SockJS` constructor in favor of `StompConfig.sockJS`
+  - Regenerate Session and Server ID for SockJS on every connection (#93)
+  - Fixed lingering WebSocket connection on rapid disconnect after connect
+
 ## 0.4.5
   - Added `StompConfig.sockJS` and deprecated `SockJS`
 

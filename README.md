@@ -90,6 +90,8 @@ This table shows all available options in `StompConfig`
 
 ## Use Stomp with SockJS
 Use StompConfig.sockJS constructor instead of default StompConfig constructor.
+Note: This library does not use SockJS as its underlying connection protocol.
+It uses normal WebSockets, but supports SockJS URLs and data packets (https://sockjs.github.io/sockjs-protocol/sockjs-protocol-0.3.3.html#section-36 & https://sockjs.github.io/sockjs-protocol/sockjs-protocol-0.3.3.html#section-42)
 
 ```dart
 StompClient client = StompClient(
