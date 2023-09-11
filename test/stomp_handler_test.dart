@@ -97,7 +97,8 @@ void main() {
         handler!.dispose();
       });
 
-      handler = StompHandler(config: config.copyWith(onConnect: onConnect))..start();
+      handler = StompHandler(config: config.copyWith(onConnect: onConnect))
+        ..start();
     });
 
     test('disconnects correctly', () async {

@@ -245,7 +245,8 @@ class StompHandler {
       _parser.escapeHeaders = false;
     }
 
-    if (frame.headers['version'] != '1.0' && frame.headers.containsKey('heart-beat')) {
+    if (frame.headers['version'] != '1.0' &&
+        frame.headers.containsKey('heart-beat')) {
       _setupHeartbeat(frame);
     }
 
@@ -301,7 +302,8 @@ class StompHandler {
       final ttl = max(config.heartbeatIncoming.inMilliseconds, serverOutgoing);
       _heartbeatReceiver?.cancel();
       _heartbeatReceiver = Timer.periodic(Duration(milliseconds: ttl), (_) {
-        final deltaMs = DateTime.now().millisecondsSinceEpoch - _lastServerActivity.millisecondsSinceEpoch;
+        final deltaMs = DateTime.now().millisecondsSinceEpoch -
+            _lastServerActivity.millisecondsSinceEpoch;
         // The connection might be dead. Clean up.
         if (deltaMs > (ttl * 2)) {
           _cleanUp();
