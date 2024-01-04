@@ -1,3 +1,6 @@
+## 1.0.1
+  - Fixed dependency of `web_socket_channel` until this [issue](https://github.com/dart-lang/web_socket_channel/issues/307) is resolved/clarified
+
 ## 1.0.0
   - Stable release
   - Removed `StompConfig.SockJS` constructor in favor of `StompConfig.sockJS`
