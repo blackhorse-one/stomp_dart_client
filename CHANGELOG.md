@@ -1,3 +1,6 @@
+## 1.0.2
+  - Relaxed dependency of `web_socket_channel` again
+
 ## 1.0.1
   - Fixed dependency of `web_socket_channel` until this [issue](https://github.com/dart-lang/web_socket_channel/issues/307) is resolved/clarified
 
