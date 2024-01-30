@@ -53,7 +53,7 @@ class StompHandler {
   void start() async {
     _isActive = true;
     try {
-      _channel = await platform.connect(config);
+      _channel = await platform.connect(config..resetSession());
       // It can happen that dispose was called while the future above hasn't completed yet
       // To prevent lingering connections we need to make sure that we disconnect cleanly
       if (!_isActive) {
