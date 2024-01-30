@@ -160,6 +160,9 @@ class StompConfig {
     );
   }
 
+  /// Resets the transport URL
+  void resetSession() => _connectUrl = null;
+
   static void _noOp([_, __]) {}
 
   static Future<void> _noOpFuture() => Future.value();
