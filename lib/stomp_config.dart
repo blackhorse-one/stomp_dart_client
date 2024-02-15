@@ -70,10 +70,13 @@ class StompConfig {
   /// Callback for debug messages
   final StompDebugCallback onDebugMessage;
 
+  /// The transport url of the WebSocket to connect to
   String get connectUrl =>
-      useSockJS ? SockJsUtils().generateTransportUrl(url) : url;
+      _connectUrl ??= useSockJS ? SockJsUtils().generateTransportUrl(url) : url;
 
-  const StompConfig({
+  String? _connectUrl;
+
+  StompConfig({
     required this.url,
     this.reconnectDelay = const Duration(seconds: 5),
     this.heartbeatIncoming = const Duration(seconds: 5),
@@ -156,6 +159,9 @@ class StompConfig {
       onDebugMessage: onDebugMessage ?? this.onDebugMessage,
     );
   }
+
+  /// Resets the transport URL
+  void resetSession() => _connectUrl = null;
 
   static void _noOp([_, __]) {}
 
