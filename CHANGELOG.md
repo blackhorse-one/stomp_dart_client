@@ -1,3 +1,6 @@
+## 1.0.3
+  - Make connectUrl lazy and initialized only once per session [#95](https://github.com/blackhorse-one/stomp_dart_client/issues/95) (Thanks @MacDeveloper1)
+
 ## 1.0.2
   - Relaxed dependency of `web_socket_channel` again
 
