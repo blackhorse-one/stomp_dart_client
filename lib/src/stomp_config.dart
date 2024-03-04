@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:stomp_dart_client/sock_js/sock_js_utils.dart';
-import 'package:stomp_dart_client/stomp_frame.dart';
+import 'sock_js/sock_js_utils.dart';
+import 'stomp_frame.dart';
 
 typedef StompFrameCallback = void Function(StompFrame);
 typedef StompBeforeConnectCallback = Future<void> Function();

@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:html';
 
-import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:web_socket_channel/html.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+
+import 'stomp_config.dart';
 
 Future<WebSocketChannel> connect(StompConfig config) {
   final completer = Completer<HtmlWebSocketChannel>();

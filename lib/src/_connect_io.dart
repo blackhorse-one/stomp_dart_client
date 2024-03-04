@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+
+import 'stomp_config.dart';
 
 Future<WebSocketChannel> connect(StompConfig config) async {
   try {
