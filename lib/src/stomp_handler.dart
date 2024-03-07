@@ -11,9 +11,9 @@ import 'stomp_exception.dart';
 import 'stomp_frame.dart';
 import 'stomp_parser.dart';
 
-import '_connect_api.dart'
-    if (dart.library.html) '_connect_html.dart'
-    if (dart.library.io) '_connect_io.dart' as platform;
+import 'connect_api.dart'
+    if (dart.library.html) 'connect_html.dart'
+    if (dart.library.io) 'connect_io.dart' as platform;
 
 typedef StompUnsubscribe = void Function({
   Map<String, String>? unsubscribeHeaders,
