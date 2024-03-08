@@ -19,7 +19,7 @@ void main() {
         import 'dart:async';
         import 'dart:convert';
         import 'package:web_socket_channel/io.dart';
-        import 'package:stomp_dart_client/stomp_parser.dart';
+        import 'package:stomp_dart_client/stomp_dart_client.dart';
         import 'package:stream_channel/stream_channel.dart';
 
         Future<void> hybridMain(StreamChannel channel) async {
