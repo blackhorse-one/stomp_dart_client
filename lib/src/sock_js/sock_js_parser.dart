@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:stomp_dart_client/parser.dart';
-import 'package:stomp_dart_client/stomp_frame.dart';
-import 'package:stomp_dart_client/stomp_parser.dart';
+import '../parser.dart';
+import '../stomp_frame.dart';
+import '../stomp_parser.dart';
 
 class SockJSParser implements Parser {
   SockJSParser({

@@ -3,10 +3,11 @@ import 'dart:async';
 import 'package:test/test.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-import 'package:stomp_dart_client/stomp_config.dart';
-import 'package:stomp_dart_client/src/_connect_api.dart'
-    if (dart.library.html) '../lib/src/_connect_html.dart'
-    if (dart.library.io) '../lib/src/_connect_io.dart' as platform;
+import 'package:stomp_dart_client/stomp_dart_client.dart';
+import 'package:stomp_dart_client/src/connect_api.dart'
+    if (dart.library.html) 'package:stomp_dart_client/src/connect_html.dart'
+    if (dart.library.io) 'package:stomp_dart_client/src/connect_io.dart'
+    as platform;
 
 void main() {
   group('StompConfig', () {

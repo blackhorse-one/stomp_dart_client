@@ -2,17 +2,18 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:stomp_dart_client/parser.dart';
-import 'package:stomp_dart_client/sock_js/sock_js_parser.dart';
-import 'package:stomp_dart_client/stomp_config.dart';
-import 'package:stomp_dart_client/stomp_exception.dart';
-import 'package:stomp_dart_client/stomp_frame.dart';
-import 'package:stomp_dart_client/stomp_parser.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-import 'src/_connect_api.dart'
-    if (dart.library.html) 'src/_connect_html.dart'
-    if (dart.library.io) 'src/_connect_io.dart' as platform;
+import 'parser.dart';
+import 'sock_js/sock_js_parser.dart';
+import 'stomp_config.dart';
+import 'stomp_exception.dart';
+import 'stomp_frame.dart';
+import 'stomp_parser.dart';
+
+import 'connect_api.dart'
+    if (dart.library.html) 'connect_html.dart'
+    if (dart.library.io) 'connect_io.dart' as platform;
 
 typedef StompUnsubscribe = void Function({
   Map<String, String>? unsubscribeHeaders,

@@ -1,10 +1,6 @@
 import 'dart:async';
 
-import 'package:stomp_dart_client/stomp.dart';
-import 'package:stomp_dart_client/stomp_config.dart';
-import 'package:stomp_dart_client/stomp_exception.dart';
-import 'package:stomp_dart_client/stomp_frame.dart';
-import 'package:stomp_dart_client/stomp_handler.dart';
+import 'package:stomp_dart_client/stomp_dart_client.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test/test.dart';
 
@@ -21,9 +17,9 @@ void main() {
         import 'dart:async';
         import 'dart:convert';
         import 'package:web_socket_channel/io.dart';
-        import 'package:stomp_dart_client/stomp_parser.dart';
+        import 'package:stomp_dart_client/stomp_dart_client.dart';
         import 'package:stream_channel/stream_channel.dart';
-        
+
         Future<void> hybridMain(StreamChannel channel) async {
           final server = await HttpServer.bind("localhost", 0);
           server.transform(WebSocketTransformer()).listen((webSocket) {
@@ -40,7 +36,7 @@ void main() {
                       "MESSAGE\nsubscription:${frame.headers['id']}\nmessage-id:123\ndestination:/foo\n\nThis is the message body\x00");
                 } else if (frame.headers['destination'] == '/bar') {
                   webSocketChannel.sink.add(utf8.encode(
-                      "MESSAGE\nsubscription:${frame.headers['id']}\nmessage-id:123\ndestination:/bar\n\nThis is the message body\x00"));     
+                      "MESSAGE\nsubscription:${frame.headers['id']}\nmessage-id:123\ndestination:/bar\n\nThis is the message body\x00"));
                 }
               } else if (frame.command == 'UNSUBSCRIBE' ||
                   frame.command == 'SEND') {
@@ -94,9 +90,9 @@ void main() {
         import 'dart:async';
         import 'dart:convert';
         import 'package:web_socket_channel/io.dart';
-        import 'package:stomp_dart_client/stomp_parser.dart';
+        import 'package:stomp_dart_client/stomp_dart_client.dart';
         import 'package:stream_channel/stream_channel.dart';
-        
+
         Future<void> hybridMain(StreamChannel channel) async {
           final server = await HttpServer.bind("localhost", 0);
           server.transform(WebSocketTransformer()).listen((webSocket) {

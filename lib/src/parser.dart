@@ -1,4 +1,4 @@
-import 'package:stomp_dart_client/stomp_frame.dart';
+import 'stomp_frame.dart';
 
 abstract class Parser {
   late bool escapeHeaders;

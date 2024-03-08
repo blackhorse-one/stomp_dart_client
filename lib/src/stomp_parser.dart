@@ -3,9 +3,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:stomp_dart_client/parser.dart';
-import 'package:stomp_dart_client/stomp_config.dart';
-import 'package:stomp_dart_client/stomp_frame.dart';
+import 'stomp_config.dart';
+import 'stomp_frame.dart';
+import 'parser.dart';
 
 typedef _ParseByteFunction = void Function(int);
 

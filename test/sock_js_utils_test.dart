@@ -1,4 +1,4 @@
-import 'package:stomp_dart_client/sock_js/sock_js_utils.dart';
+import 'package:stomp_dart_client/stomp_dart_client.dart';
 import 'package:test/test.dart';
 
 void main() {

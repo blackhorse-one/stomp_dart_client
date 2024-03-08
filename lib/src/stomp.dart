@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:stomp_dart_client/stomp_config.dart';
-import 'package:stomp_dart_client/stomp_exception.dart';
-import 'package:stomp_dart_client/stomp_handler.dart';
+import 'stomp_config.dart';
+import 'stomp_exception.dart';
+import 'stomp_handler.dart';
 
 class StompClient {
   StompClient({required this.config});
