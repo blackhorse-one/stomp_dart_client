@@ -1,3 +1,6 @@
+## 2.0.0
+  - **Breaking**: Changed exports to be all reexported in a single file to import. This is to satisfy the dart/flutter [conventions](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#structure). Thanks @Peetee06
+
 ## 1.0.3
   - Make connectUrl lazy and initialized only once per session [#95](https://github.com/blackhorse-one/stomp_dart_client/issues/95) (Thanks @MacDeveloper1)
 
