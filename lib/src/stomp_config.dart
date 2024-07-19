@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'sock_js/sock_js_utils.dart';
 import 'stomp_frame.dart';
@@ -8,6 +9,7 @@ typedef StompBeforeConnectCallback = Future<void> Function();
 typedef StompDebugCallback = void Function(String);
 typedef StompWebSocketErrorCallback = void Function(dynamic);
 typedef StompWebSocketDoneCallback = void Function();
+typedef StompHttpClientFactory = HttpClient Function();
 
 class StompConfig {
   /// The url of the WebSocket to connect to
@@ -70,6 +72,9 @@ class StompConfig {
   /// Callback for debug messages
   final StompDebugCallback onDebugMessage;
 
+  /// Factory for custom HttpClient for mobile platforms
+  final StompHttpClientFactory? customHttpClientFactory;
+
   /// The transport url of the WebSocket to connect to
   String get connectUrl =>
       _connectUrl ??= useSockJS ? SockJsUtils().generateTransportUrl(url) : url;
@@ -95,6 +100,7 @@ class StompConfig {
     this.onWebSocketDone = _noOp,
     this.onDebugMessage = _noOp,
     this.useSockJS = false,
+    this.customHttpClientFactory,
   });
 
   StompConfig.sockJS({
@@ -115,6 +121,7 @@ class StompConfig {
     this.onWebSocketError = _noOp,
     this.onWebSocketDone = _noOp,
     this.onDebugMessage = _noOp,
+    this.customHttpClientFactory,
   }) : useSockJS = true;
 
   StompConfig copyWith({
@@ -136,6 +143,7 @@ class StompConfig {
     StompWebSocketErrorCallback? onWebSocketError,
     StompWebSocketDoneCallback? onWebSocketDone,
     StompDebugCallback? onDebugMessage,
+    StompHttpClientFactory? customHttpClientFactory,
   }) {
     return StompConfig(
       url: url ?? this.url,
@@ -157,6 +165,8 @@ class StompConfig {
       onWebSocketError: onWebSocketError ?? this.onWebSocketError,
       onWebSocketDone: onWebSocketDone ?? this.onWebSocketDone,
       onDebugMessage: onDebugMessage ?? this.onDebugMessage,
+      customHttpClientFactory:
+          customHttpClientFactory ?? this.customHttpClientFactory,
     );
   }
 
