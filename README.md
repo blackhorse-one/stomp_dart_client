@@ -125,7 +125,7 @@ StompConfig(
         customHttpClientFactory: () {
           return HttpClient()
             ..findProxy = (url) {
-              return 'PROXY ${configInteractor.getConfig().proxy}';
+              return 'PROXY {PROXY_IP}:{PROXY_PORT}';
             }
             ..badCertificateCallback = (_, __, ___) => true;
         },
