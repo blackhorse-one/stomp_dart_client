@@ -118,6 +118,20 @@ Alternatives are:
     - Use `stompConnectHeaders` to pass your headers in the `CONNECT` frame. Parse those headers on the server (i.e. by using a `ChannelInterceptor` in Spring)
 - Pass your authentication token/credentials as query parameter.
 
+## Using custom HttpClient implementation(mobile only):
+To use a proxy and read whole traffic via 3rd party tools(ex: Charles/Fiddler), you must provide a custom client with Proxy enabled via config:
+```
+StompConfig(
+        customHttpClientFactory: () {
+          return HttpClient()
+            ..findProxy = (url) {
+              return 'PROXY ${configInteractor.getConfig().proxy}';
+            }
+            ..badCertificateCallback = (_, __, ___) => true;
+        },
+)
+```
+
 ## Development
 
 #### Running unit tests
