@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:stomp_dart_client/src/constants.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'parser.dart';
@@ -136,11 +137,28 @@ class StompHandler {
   }
 
   void ack({required String id, Map<String, String>? headers}) {
-    _transmit(command: 'ACK', headers: {...?headers, 'id': id});
+    // Determine the appropriate header key for message ID; default to 'id' if not specified
+    final String headerKeyForMessageId =
+        headers?['headerKeyForMessageId'] ?? 'id';
+
+    final ackHeaders = {
+      ...?headers,
+      headerKeyForMessageId: id,
+    };
+    _transmit(command: 'ACK', headers: ackHeaders);
   }
 
   void nack({required String id, Map<String, String>? headers}) {
-    _transmit(command: 'NACK', headers: {...?headers, 'id': id});
+    // Determine the appropriate header key for message ID; default to 'id' if not specified
+    final String headerKeyForMessageId =
+        headers?['headerKeyForMessageId'] ?? 'id';
+
+    final nackHeaders = {
+      ...?headers,
+      headerKeyForMessageId: id,
+    };
+
+    _transmit(command: 'NACK', headers: nackHeaders);
   }
 
   void watchForReceipt(String receiptId, StompFrameCallback callback) {
@@ -150,7 +168,9 @@ class StompHandler {
   void _connectToStomp() {
     final connectHeaders = {
       ...?config.stompConnectHeaders,
-      'accept-version': ['1.0', '1.1', '1.2'].join(','),
+      'accept-version': config.allowedStompVersion != null
+          ? config.allowedStompVersion!.join(',')
+          : defaultStompVersions.join(','),
       'heart-beat': [
         config.heartbeatOutgoing.inMilliseconds,
         config.heartbeatIncoming.inMilliseconds,

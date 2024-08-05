@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:stomp_dart_client/src/constants.dart';
+
 import 'sock_js/sock_js_utils.dart';
 import 'stomp_frame.dart';
 
@@ -76,8 +78,12 @@ class StompConfig {
 
   String? _connectUrl;
 
+  /// Allowed STOMP versions, default value is ['1.0', '1.1', '1.2']
+  final List<String>? allowedStompVersion;
+
   StompConfig({
     required this.url,
+    this.allowedStompVersion = defaultStompVersions,
     this.reconnectDelay = const Duration(seconds: 5),
     this.heartbeatIncoming = const Duration(seconds: 5),
     this.heartbeatOutgoing = const Duration(seconds: 5),
@@ -115,6 +121,7 @@ class StompConfig {
     this.onWebSocketError = _noOp,
     this.onWebSocketDone = _noOp,
     this.onDebugMessage = _noOp,
+    this.allowedStompVersion = defaultStompVersions,
   }) : useSockJS = true;
 
   StompConfig copyWith({
@@ -136,6 +143,7 @@ class StompConfig {
     StompWebSocketErrorCallback? onWebSocketError,
     StompWebSocketDoneCallback? onWebSocketDone,
     StompDebugCallback? onDebugMessage,
+    List<String>? allowedStompVersion,
   }) {
     return StompConfig(
       url: url ?? this.url,
@@ -157,6 +165,7 @@ class StompConfig {
       onWebSocketError: onWebSocketError ?? this.onWebSocketError,
       onWebSocketDone: onWebSocketDone ?? this.onWebSocketDone,
       onDebugMessage: onDebugMessage ?? this.onDebugMessage,
+      allowedStompVersion: allowedStompVersion ?? this.allowedStompVersion,
     );
   }
 
