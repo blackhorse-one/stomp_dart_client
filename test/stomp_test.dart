@@ -272,8 +272,8 @@ void main() {
       late StompClient client;
       late StompUnsubscribe stompUnsubscribe;
 
-      final onError = expectAsync1((dynamic _) {
-        print(_);
+      final onError = expectAsync1((dynamic res) {
+        print(res);
       }, count: 0);
       final onConnect = expectAsync1(
         (StompFrame frame) {

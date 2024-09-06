@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'dart:html';
+
+import 'package:web/web.dart' as web;
 
 import 'package:web_socket_channel/html.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -8,7 +9,7 @@ import 'stomp_config.dart';
 
 Future<WebSocketChannel> connect(StompConfig config) {
   final completer = Completer<HtmlWebSocketChannel>();
-  final webSocket = WebSocket(config.connectUrl)
+  final webSocket = web.WebSocket(config.connectUrl)
     ..binaryType = BinaryType.list.value;
   webSocket.onOpen.first.then((value) {
     completer.complete(HtmlWebSocketChannel(webSocket));

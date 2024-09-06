@@ -1,3 +1,7 @@
+## 2.1.0
+  - Updated version of `web_socket_channel` dependency to 3.0.1
+  - Moved from `dart:html` to `package:web` for [web interop](https://dart.dev/interop/js-interop/package-web#migrating-from-dart-html)
+
 ## 2.0.0
   - **Breaking**: Changed exports to be all reexported in a single file to import. This is to satisfy the dart/flutter [conventions](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#structure). Thanks @Peetee06
 
