@@ -11,7 +11,8 @@ Future<WebSocketChannel> connect(StompConfig config) async {
     var webSocket = WebSocket.connect(
       config.connectUrl,
       headers: config.webSocketConnectHeaders,
-    );
+    ).then((webSocket) => webSocket..pingInterval = config.heartbeatOutgoing);
+
     if (config.connectionTimeout.inMilliseconds > 0) {
       webSocket = webSocket.timeout(config.connectionTimeout);
     }
