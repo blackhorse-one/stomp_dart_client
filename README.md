@@ -73,6 +73,7 @@ This table shows all available options in `StompConfig`
 | reconnectDelay: Duration                     | Time duration between reconnect attempts. Set to 0 ms if you don't want to reconnect automatically. The default value is 5 seconds |
 | heartbeatOutgoing: Duration                  | Time duration between outgoing heartbeat messages. Set to 0 ms to not send any heartbeats. The default value is 5 seconds          |
 | heartbeatIncoming: Duration                  | Time duration between incoming heartbeat messages. Set to 0 ms to not receive any heartbeats. The default value is 5 seconds       |
+| pingInterval: Duration                       | Time duration between ping messages being sent on the underlying WebSocket. (Not supported in Web)                                 |
 | connectionTimeout: Duration                  | Time duration it waits until a connection attempt is aborted. Set to 0 ms to not set a timeout. The default value is 0 ms          |
 | stompConnectHeaders: Map<String, String>     | Optional header values which will be used on the STOMP connect frame                                                               |
 | webSocketConnectHeaders: Map<String, dynamic>| Optional header values which will be used when connecting to the underlying WebSocket [(not supported in Web)](#token-authentication-browser-based-clients)                       |

@@ -29,6 +29,9 @@ class StompConfig {
   /// Set to a duration with 0 milliseconds to not receive any heartbeats
   final Duration heartbeatIncoming;
 
+  /// Time between sent pings on the underlying WebSocket (unsupported in HTML)
+  final Duration? pingInterval;
+
   /// Connection timeout. If specified the connection will be dropped after
   /// the timeout and depending on the [reconnectDelay] it will try again
   final Duration connectionTimeout;
@@ -84,6 +87,7 @@ class StompConfig {
     this.connectionTimeout = Duration.zero,
     this.stompConnectHeaders,
     this.webSocketConnectHeaders,
+    this.pingInterval,
     this.beforeConnect = _noOpFuture,
     this.onConnect = _noOp,
     this.onStompError = _noOp,
@@ -105,6 +109,7 @@ class StompConfig {
     this.connectionTimeout = Duration.zero,
     this.stompConnectHeaders,
     this.webSocketConnectHeaders,
+    this.pingInterval,
     this.beforeConnect = _noOpFuture,
     this.onConnect = _noOp,
     this.onStompError = _noOp,
