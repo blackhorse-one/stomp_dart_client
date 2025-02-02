@@ -21,4 +21,4 @@ jobs:
         run: dart analyze
 
       - name: Run tests
-        run: dart test -p "chrome,vm"
+        run: dart test -p "chrome,vm" --compiler chrome:dart2wasm,chrome:dart2js

@@ -5,7 +5,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'package:stomp_dart_client/stomp_dart_client.dart';
 import 'package:stomp_dart_client/src/connect_api.dart'
-    if (dart.library.html) 'package:stomp_dart_client/src/connect_html.dart'
+    if (dart.library.js_interop) 'package:stomp_dart_client/src/connect_html.dart'
     if (dart.library.io) 'package:stomp_dart_client/src/connect_io.dart'
     as platform;
 
