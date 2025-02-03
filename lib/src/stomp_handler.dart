@@ -12,7 +12,7 @@ import 'stomp_frame.dart';
 import 'stomp_parser.dart';
 
 import 'connect_api.dart'
-    if (dart.library.html) 'connect_html.dart'
+    if (dart.library.js_interop) 'connect_html.dart'
     if (dart.library.io) 'connect_io.dart' as platform;
 
 typedef StompUnsubscribe = void Function({
