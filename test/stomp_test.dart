@@ -67,7 +67,10 @@ void main() {
         stayAlive: true,
       );
 
-      final port = await streamChannel.stream.first;
+      dynamic port = await streamChannel.stream.first;
+      if (port is double) {
+        port = port.toInt();
+      }
       config = StompConfig(
         url: 'ws://localhost:$port',
       );
@@ -120,6 +123,9 @@ void main() {
       );
 
       dynamic customPort = await customChannel.stream.first;
+      if (customPort is double) {
+        customPort = customPort.toInt();
+      }
       late StompClient client;
       final onWebSocketDone = expectAsync0(() {}, count: 2);
 

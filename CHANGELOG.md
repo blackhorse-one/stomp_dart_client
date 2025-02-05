@@ -1,3 +1,9 @@
+## 2.1.2
+  - Fixed oversight in move to `package:web` which made the package not work with wasm.
+
+## 2.1.1
+  - Added `pingInterval` to `StompConfig` to control the ping interval of IO WebSockets. Thanks @AndruhovSasha
+
 ## 2.1.0
   - Updated version of `web_socket_channel` dependency to 3.0.1
   - Moved from `dart:html` to `package:web` for [web interop](https://dart.dev/interop/js-interop/package-web#migrating-from-dart-html)

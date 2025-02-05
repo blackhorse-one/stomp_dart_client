@@ -9,7 +9,6 @@ void main() {
     late StompConfig config;
     StompHandler? handler;
     late StreamChannel streamChannel;
-    int? port;
 
     setUpAll(() async {
       // Basic STOMP Server
@@ -69,7 +68,10 @@ void main() {
         stayAlive: true,
       );
 
-      port = await streamChannel.stream.first;
+      dynamic port = await streamChannel.stream.first;
+      if (port is double) {
+        port = port.toInt();
+      }
       config = StompConfig(
         url: 'ws://localhost:$port',
       );
