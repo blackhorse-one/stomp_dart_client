@@ -12,6 +12,7 @@ Future<WebSocketChannel> connect(StompConfig config) async {
       config.connectUrl,
       headers: config.webSocketConnectHeaders,
     );
+
     if (config.connectionTimeout.inMilliseconds > 0) {
       webSocketFuture = webSocketFuture.timeout(config.connectionTimeout);
     }

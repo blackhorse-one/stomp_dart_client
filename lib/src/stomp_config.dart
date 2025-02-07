@@ -74,8 +74,7 @@ class StompConfig {
   final StompDebugCallback onDebugMessage;
 
   /// The transport url of the WebSocket to connect to
-  String get connectUrl =>
-      _connectUrl ??= useSockJS ? SockJsUtils().generateTransportUrl(url) : url;
+  String get connectUrl => _connectUrl ??= useSockJS ? SockJsUtils().generateTransportUrl(url) : url;
 
   String? _connectUrl;
 
@@ -128,6 +127,7 @@ class StompConfig {
     Duration? heartbeatIncoming,
     Duration? heartbeatOutgoing,
     Duration? connectionTimeout,
+    Duration? pingInterval,
     bool? useSockJS,
     Map<String, String>? stompConnectHeaders,
     Map<String, dynamic>? webSocketConnectHeaders,
@@ -148,9 +148,9 @@ class StompConfig {
       heartbeatIncoming: heartbeatIncoming ?? this.heartbeatIncoming,
       heartbeatOutgoing: heartbeatOutgoing ?? this.heartbeatOutgoing,
       connectionTimeout: connectionTimeout ?? this.connectionTimeout,
+      pingInterval: pingInterval ?? this.pingInterval,
       useSockJS: useSockJS ?? this.useSockJS,
-      webSocketConnectHeaders:
-          webSocketConnectHeaders ?? this.webSocketConnectHeaders,
+      webSocketConnectHeaders: webSocketConnectHeaders ?? this.webSocketConnectHeaders,
       stompConnectHeaders: stompConnectHeaders ?? this.stompConnectHeaders,
       beforeConnect: beforeConnect ?? this.beforeConnect,
       onConnect: onConnect ?? this.onConnect,
