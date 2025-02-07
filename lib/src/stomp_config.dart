@@ -74,7 +74,8 @@ class StompConfig {
   final StompDebugCallback onDebugMessage;
 
   /// The transport url of the WebSocket to connect to
-  String get connectUrl => _connectUrl ??= useSockJS ? SockJsUtils().generateTransportUrl(url) : url;
+  String get connectUrl =>
+      _connectUrl ??= useSockJS ? SockJsUtils().generateTransportUrl(url) : url;
 
   String? _connectUrl;
 
@@ -83,10 +84,10 @@ class StompConfig {
     this.reconnectDelay = const Duration(seconds: 5),
     this.heartbeatIncoming = const Duration(seconds: 5),
     this.heartbeatOutgoing = const Duration(seconds: 5),
+    this.pingInterval,
     this.connectionTimeout = Duration.zero,
     this.stompConnectHeaders,
     this.webSocketConnectHeaders,
-    this.pingInterval,
     this.beforeConnect = _noOpFuture,
     this.onConnect = _noOp,
     this.onStompError = _noOp,
@@ -126,8 +127,8 @@ class StompConfig {
     Duration? reconnectDelay,
     Duration? heartbeatIncoming,
     Duration? heartbeatOutgoing,
-    Duration? connectionTimeout,
     Duration? pingInterval,
+    Duration? connectionTimeout,
     bool? useSockJS,
     Map<String, String>? stompConnectHeaders,
     Map<String, dynamic>? webSocketConnectHeaders,
@@ -147,10 +148,11 @@ class StompConfig {
       reconnectDelay: reconnectDelay ?? this.reconnectDelay,
       heartbeatIncoming: heartbeatIncoming ?? this.heartbeatIncoming,
       heartbeatOutgoing: heartbeatOutgoing ?? this.heartbeatOutgoing,
-      connectionTimeout: connectionTimeout ?? this.connectionTimeout,
       pingInterval: pingInterval ?? this.pingInterval,
+      connectionTimeout: connectionTimeout ?? this.connectionTimeout,
       useSockJS: useSockJS ?? this.useSockJS,
-      webSocketConnectHeaders: webSocketConnectHeaders ?? this.webSocketConnectHeaders,
+      webSocketConnectHeaders:
+          webSocketConnectHeaders ?? this.webSocketConnectHeaders,
       stompConnectHeaders: stompConnectHeaders ?? this.stompConnectHeaders,
       beforeConnect: beforeConnect ?? this.beforeConnect,
       onConnect: onConnect ?? this.onConnect,

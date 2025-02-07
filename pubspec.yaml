@@ -1,6 +1,6 @@
 name: stomp_dart_client
 homepage: https://github.com/blackhorse-one/stomp_dart
-version: 2.1.2
+version: 2.1.3
 description: Dart STOMP client for easy messaging interoperability. Build with flutter in mind, but should work for every dart application.
 environment:
   sdk: ">=2.12.0 <4.0.0"
